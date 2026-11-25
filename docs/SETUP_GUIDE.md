@@ -9,7 +9,7 @@ SQL Quest is a single HTML file. It needs no server and no login. A real SQL eng
 | `index.html` | The whole portal: 100 SQL questions, 40 DBMS MCQs, OA simulator, playground, badges, leaderboard page |
 | `leaderboard/leaderboard_apps_script.gs` | Backend for the class leaderboard (Google Sheet + Apps Script, free) |
 | `docs/question_index.csv` | List of all 100 questions with world, difficulty, roles and JD tags, for planning sessions |
-| `sql-quest-source.zip` | Source (question bank, data generator, build script) for editing questions. **Kept privately by the mentor and not in this public repo**, because it contains every answer in plain text |
+| `data/`, `src/`, `tools/` | Content files, page code and the build/test scripts (see `docs/UPDATING.md`) |
 
 ---
 
@@ -24,11 +24,7 @@ SQL Quest is a single HTML file. It needs no server and no login. A real SQL eng
    - Who has access: **Anyone**
 5. Click **Deploy** and approve the permissions (Google shows an "unverified app" screen; click *Advanced → Go to project*). This is your own script.
 6. Copy the **Web app URL** (ends with `/exec`).
-7. Open `index.html` in a text editor (Notepad / VS Code). Near the top, find:
-   ```js
-   LEADERBOARD_URL: ""
-   ```
-   Paste your URL inside the quotes and save.
+7. Put the URL into `data/config.json` (`"leaderboard_url": "https://script.google.com/.../exec"`) and rebuild with `python3 tools/build.py`. Or just send the URL to Claude, which will do it and push.
 
 Quick check: open the `/exec` URL in your browser. You should see `{"ok":true,"message":"SQL Quest leaderboard is running."}`.
 
@@ -105,9 +101,6 @@ Tip: for Worlds 7-8, have students explain their query out loud in pairs. The "W
 - **Cheating.** XP is computed in the browser, so a determined student could fake it, and reference solutions are only lightly obfuscated in the file. Treat the leaderboard as motivation, not assessment. Use the **Log** sheet to spot-check, and run graded OAs in a proctored lab.
 - **Runaway queries** (e.g. an endless recursive CTE) are stopped after 8 seconds; the page doesn't freeze.
 
-## Editing questions later
+## Editing questions, experiences or data later
 
-Unzip `sql-quest-source.zip`, then:
-1. Edit questions in `qbank1.py` / `qbank2.py` (MCQs in `mcq.py`, data in `gen_data.py`).
-2. `npm install sql.js@1.12.0` (one time), then run `python3 gen_data.py && python3 build.py "<your /exec URL>"`.
-3. The new file is in `dist/index.html`.
+See [UPDATING.md](UPDATING.md). In short: edit the files in `data/`, run `tools/build.py`, run `tools/test_portal.py`, then push. GitHub Pages updates in about a minute.

@@ -1,0 +1,482 @@
+[
+ {
+  "topic": "SQL order",
+  "q": "In which logical order does a SQL engine process these clauses?",
+  "opts": [
+   "SELECT → FROM → WHERE → GROUP BY",
+   "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY",
+   "FROM → GROUP BY → WHERE → SELECT → HAVING",
+   "WHERE → FROM → SELECT → ORDER BY"
+  ],
+  "ans": 1,
+  "explain": "FROM/JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT. This is why a SELECT alias can't be used in WHERE."
+ },
+ {
+  "topic": "SQL order",
+  "q": "Why does `SELECT price*2 AS p FROM products WHERE p > 100` fail in most databases?",
+  "opts": [
+   "p is a reserved word",
+   "WHERE runs before SELECT, so the alias doesn't exist yet",
+   "You can't multiply in SELECT",
+   "Aliases need double quotes"
+  ],
+  "ans": 1,
+  "explain": "WHERE is evaluated before SELECT. Repeat the expression or use a subquery/CTE."
+ },
+ {
+  "topic": "Filtering",
+  "q": "What is the difference between WHERE and HAVING?",
+  "opts": [
+   "No difference",
+   "WHERE filters rows before grouping; HAVING filters groups after aggregation",
+   "HAVING is faster",
+   "WHERE works only with numbers"
+  ],
+  "ans": 1,
+  "explain": "Use WHERE for row conditions and HAVING for conditions on aggregates like COUNT(*) > 5."
+ },
+ {
+  "topic": "NULL",
+  "q": "What does `SELECT COUNT(salary) FROM employees` count?",
+  "opts": [
+   "All rows",
+   "Rows where salary is not NULL",
+   "Distinct salaries",
+   "Rows where salary is NULL"
+  ],
+  "ans": 1,
+  "explain": "COUNT(col) skips NULLs. COUNT(*) counts all rows."
+ },
+ {
+  "topic": "NULL",
+  "q": "What is the result of `NULL = NULL` in SQL?",
+  "opts": [
+   "TRUE",
+   "FALSE",
+   "UNKNOWN (NULL)",
+   "Error"
+  ],
+  "ans": 2,
+  "explain": "Comparisons with NULL give UNKNOWN. Use IS NULL."
+ },
+ {
+  "topic": "NULL",
+  "q": "`SELECT * FROM a WHERE id NOT IN (SELECT id FROM b)`. If b.id contains a NULL, the query returns:",
+  "opts": [
+   "All rows of a",
+   "Rows of a not in b",
+   "No rows",
+   "An error"
+  ],
+  "ans": 2,
+  "explain": "x NOT IN (1, NULL) is UNKNOWN for every x, so no rows qualify. Use NOT EXISTS instead."
+ },
+ {
+  "topic": "Joins",
+  "q": "Table A has 5 rows, table B has 4 rows. How many rows does `A CROSS JOIN B` return?",
+  "opts": [
+   "9",
+   "20",
+   "5",
+   "4"
+  ],
+  "ans": 1,
+  "explain": "A Cartesian product: 5 × 4 = 20."
+ },
+ {
+  "topic": "Joins",
+  "q": "Which join returns all rows from the left table and matching rows from the right (NULL where there is no match)?",
+  "opts": [
+   "INNER JOIN",
+   "LEFT JOIN",
+   "RIGHT JOIN",
+   "CROSS JOIN"
+  ],
+  "ans": 1,
+  "explain": "LEFT (OUTER) JOIN keeps every left row."
+ },
+ {
+  "topic": "Joins",
+  "q": "A customers table (100 rows) is LEFT JOINed to orders (300 rows, every order has a valid customer). 20 customers have no orders. How many rows come out?",
+  "opts": [
+   "100",
+   "300",
+   "320",
+   "120"
+  ],
+  "ans": 2,
+  "explain": "300 matched order rows + 20 unmatched customers with NULLs = 320."
+ },
+ {
+  "topic": "Joins",
+  "q": "Which statement about MySQL is true?",
+  "opts": [
+   "It supports FULL OUTER JOIN",
+   "It does not support FULL OUTER JOIN; emulate it with LEFT JOIN UNION RIGHT JOIN",
+   "It has no LEFT JOIN",
+   "It supports only INNER JOIN"
+  ],
+  "ans": 1,
+  "explain": "A frequent OA trick question. PostgreSQL, SQL Server and SQLite 3.39+ support FULL JOIN; MySQL does not."
+ },
+ {
+  "topic": "Set ops",
+  "q": "Difference between UNION and UNION ALL?",
+  "opts": [
+   "UNION ALL removes duplicates",
+   "UNION removes duplicates; UNION ALL keeps them and is faster",
+   "They are identical",
+   "UNION works only on numbers"
+  ],
+  "ans": 1,
+  "explain": "UNION does an extra de-duplication step. Use UNION ALL when duplicates are impossible or wanted."
+ },
+ {
+  "topic": "DDL/DML",
+  "q": "Which command removes all rows but keeps the table structure, and usually cannot be filtered with WHERE?",
+  "opts": [
+   "DELETE",
+   "DROP",
+   "TRUNCATE",
+   "ALTER"
+  ],
+  "ans": 2,
+  "explain": "TRUNCATE empties the table (fast, minimal logging). DELETE can use WHERE. DROP removes the table itself."
+ },
+ {
+  "topic": "DDL/DML",
+  "q": "Which of these is a DDL command?",
+  "opts": [
+   "SELECT",
+   "INSERT",
+   "ALTER",
+   "UPDATE"
+  ],
+  "ans": 2,
+  "explain": "DDL: CREATE, ALTER, DROP, TRUNCATE. DML: SELECT, INSERT, UPDATE, DELETE. DCL: GRANT, REVOKE. TCL: COMMIT, ROLLBACK."
+ },
+ {
+  "topic": "Keys",
+  "q": "Which statement about a PRIMARY KEY is correct?",
+  "opts": [
+   "It can contain NULLs",
+   "A table can have many primary keys",
+   "It must be unique and NOT NULL; one per table",
+   "It must be an integer"
+  ],
+  "ans": 2,
+  "explain": "One primary key per table (which may span several columns); unique and not null."
+ },
+ {
+  "topic": "Keys",
+  "q": "Difference between a PRIMARY KEY and a UNIQUE constraint?",
+  "opts": [
+   "None",
+   "UNIQUE allows NULL (usually) and a table can have many; only one primary key",
+   "UNIQUE doesn't enforce uniqueness",
+   "PRIMARY KEY allows duplicates"
+  ],
+  "ans": 1,
+  "explain": "UNIQUE columns can typically hold NULL; you can have multiple UNIQUE constraints."
+ },
+ {
+  "topic": "Keys",
+  "q": "A FOREIGN KEY is used to:",
+  "opts": [
+   "Speed up every query",
+   "Enforce referential integrity between two tables",
+   "Encrypt a column",
+   "Make a column unique"
+  ],
+  "ans": 1,
+  "explain": "It ensures that a value in the child table exists in the parent table."
+ },
+ {
+  "topic": "Keys",
+  "q": "A composite key is:",
+  "opts": [
+   "A key made of two or more columns",
+   "An encrypted key",
+   "A foreign key to itself",
+   "A key on a view"
+  ],
+  "ans": 0,
+  "explain": "Example: (order_id, product_id) in order_items."
+ },
+ {
+  "topic": "Normalization",
+  "q": "A table is in 1NF when:",
+  "opts": [
+   "It has a primary key and no partial dependency",
+   "Every column holds atomic values (no lists/repeating groups)",
+   "It has no transitive dependency",
+   "It has no NULLs"
+  ],
+  "ans": 1,
+  "explain": "1NF = atomic values. A column 'phones' = '98..., 99...' breaks 1NF."
+ },
+ {
+  "topic": "Normalization",
+  "q": "2NF removes which problem?",
+  "opts": [
+   "Repeating groups",
+   "Partial dependency on part of a composite key",
+   "Transitive dependency",
+   "Multi-valued dependency"
+  ],
+  "ans": 1,
+  "explain": "In order_items(order_id, product_id, product_name), product_name depends only on product_id, which is a partial dependency."
+ },
+ {
+  "topic": "Normalization",
+  "q": "3NF removes which problem?",
+  "opts": [
+   "Transitive dependency (non-key → non-key)",
+   "Atomicity",
+   "Partial dependency",
+   "Duplicate rows"
+  ],
+  "ans": 0,
+  "explain": "employees(emp_id, dept_id, dept_name): dept_name depends on dept_id, not on emp_id directly."
+ },
+ {
+  "topic": "Normalization",
+  "q": "Why do analytics warehouses often denormalize?",
+  "opts": [
+   "To save storage",
+   "To reduce joins and make read-heavy queries faster",
+   "Because normalization is wrong",
+   "To enforce foreign keys"
+  ],
+  "ans": 1,
+  "explain": "OLTP favours normalization (safe writes). OLAP favours denormalized star schemas (fast reads)."
+ },
+ {
+  "topic": "Transactions",
+  "q": "ACID stands for:",
+  "opts": [
+   "Atomicity, Consistency, Isolation, Durability",
+   "Accuracy, Consistency, Integrity, Durability",
+   "Atomicity, Concurrency, Isolation, Data",
+   "Availability, Consistency, Isolation, Durability"
+  ],
+  "ans": 0,
+  "explain": "Example for Atomicity: a UPI transfer debits and credits both, or neither."
+ },
+ {
+  "topic": "Transactions",
+  "q": "Which property guarantees a committed transaction survives a power failure?",
+  "opts": [
+   "Atomicity",
+   "Consistency",
+   "Isolation",
+   "Durability"
+  ],
+  "ans": 3,
+  "explain": "Durability: committed changes are written to stable storage."
+ },
+ {
+  "topic": "Transactions",
+  "q": "A 'dirty read' means:",
+  "opts": [
+   "Reading uncommitted data from another transaction",
+   "Reading deleted rows",
+   "Reading with no index",
+   "Reading NULLs"
+  ],
+  "ans": 0,
+  "explain": "Prevented by READ COMMITTED and higher isolation levels."
+ },
+ {
+  "topic": "Indexes",
+  "q": "An index on a column mainly helps:",
+  "opts": [
+   "INSERT speed",
+   "Lookup and filter speed on that column, at the cost of slower writes and extra storage",
+   "Data security",
+   "Normalization"
+  ],
+  "ans": 1,
+  "explain": "Indexes are like a book index: fast lookup, but they must be updated on every write."
+ },
+ {
+  "topic": "Indexes",
+  "q": "Which WHERE clause is LEAST likely to use an index on order_date?",
+  "opts": [
+   "order_date = '2025-03-01'",
+   "order_date >= '2025-03-01'",
+   "YEAR(order_date) = 2025",
+   "order_date BETWEEN '2025-01-01' AND '2025-01-31'"
+  ],
+  "ans": 2,
+  "explain": "Wrapping the column in a function makes the predicate non-sargable. Rewrite it as a range."
+ },
+ {
+  "topic": "Indexes",
+  "q": "Clustered vs non-clustered index:",
+  "opts": [
+   "A table can have many clustered indexes",
+   "A clustered index decides the physical row order (one per table); non-clustered indexes are separate structures (many allowed)",
+   "Non-clustered is always faster",
+   "They are the same"
+  ],
+  "ans": 1,
+  "explain": "In MySQL InnoDB, the primary key is the clustered index."
+ },
+ {
+  "topic": "Window",
+  "q": "For salaries 100, 100, 90, what does DENSE_RANK() (ORDER BY salary DESC) give?",
+  "opts": [
+   "1, 2, 3",
+   "1, 1, 3",
+   "1, 1, 2",
+   "1, 2, 2"
+  ],
+  "ans": 2,
+  "explain": "DENSE_RANK has no gaps. RANK would give 1, 1, 3."
+ },
+ {
+  "topic": "Window",
+  "q": "Why can't you write `WHERE ROW_NUMBER() OVER (...) = 1`?",
+  "opts": [
+   "ROW_NUMBER doesn't exist",
+   "Window functions are evaluated after WHERE; filter in an outer query/CTE",
+   "You need HAVING",
+   "It works fine"
+  ],
+  "ans": 1,
+  "explain": "Wrap the window query in a CTE or subquery, then filter. (Some engines offer QUALIFY.)"
+ },
+ {
+  "topic": "Window",
+  "q": "`SUM(x) OVER (ORDER BY d)` computes:",
+  "opts": [
+   "Grand total on every row",
+   "A running total up to the current row",
+   "The previous row's value",
+   "An error"
+  ],
+  "ans": 1,
+  "explain": "With ORDER BY, the default frame is from the start of the partition to the current row."
+ },
+ {
+  "topic": "Views",
+  "q": "A (non-materialized) VIEW is:",
+  "opts": [
+   "A copy of the data",
+   "A saved query that runs when you select from it",
+   "An index",
+   "A backup"
+  ],
+  "ans": 1,
+  "explain": "A materialized view stores the result and must be refreshed."
+ },
+ {
+  "topic": "Constraints",
+  "q": "Which constraint ensures that age is always ≥ 18?",
+  "opts": [
+   "UNIQUE",
+   "CHECK (age >= 18)",
+   "DEFAULT 18",
+   "FOREIGN KEY"
+  ],
+  "ans": 1,
+  "explain": "CHECK enforces a condition on column values."
+ },
+ {
+  "topic": "Data warehousing",
+  "q": "In a star schema, the central table that stores measurable events (sales amount, quantity) is the:",
+  "opts": [
+   "Dimension table",
+   "Fact table",
+   "Lookup table",
+   "Staging table"
+  ],
+  "ans": 1,
+  "explain": "Facts store numbers at a grain (e.g. one row per order line); dimensions store descriptive attributes (product, date, customer)."
+ },
+ {
+  "topic": "Data warehousing",
+  "q": "OLTP vs OLAP:",
+  "opts": [
+   "OLTP: many small transactional writes; OLAP: large analytical reads/aggregations",
+   "Both are for reporting",
+   "OLAP is for UPI payments",
+   "OLTP is only for warehouses"
+  ],
+  "ans": 0,
+  "explain": "Your app's MySQL/Postgres is OLTP; BigQuery, Snowflake and Redshift are OLAP."
+ },
+ {
+  "topic": "Data warehousing",
+  "q": "A Slowly Changing Dimension Type 2 handles a customer's city change by:",
+  "opts": [
+   "Overwriting the old city",
+   "Adding a new row with effective dates and keeping the old row",
+   "Deleting the customer",
+   "Adding a new column"
+  ],
+  "ans": 1,
+  "explain": "SCD1 = overwrite, SCD2 = new row with history (valid_from, valid_to, is_current)."
+ },
+ {
+  "topic": "Functions",
+  "q": "`SELECT COALESCE(NULL, NULL, 'x', 'y')` returns:",
+  "opts": [
+   "NULL",
+   "'x'",
+   "'y'",
+   "Error"
+  ],
+  "ans": 1,
+  "explain": "COALESCE returns the first non-NULL argument."
+ },
+ {
+  "topic": "Functions",
+  "q": "In PostgreSQL/SQL Server/SQLite, what does `SELECT 7/2` return?",
+  "opts": [
+   "3.5",
+   "3",
+   "4",
+   "Error"
+  ],
+  "ans": 1,
+  "explain": "Integer division. In MySQL, 7/2 = 3.5000 and 7 DIV 2 = 3."
+ },
+ {
+  "topic": "Aggregates",
+  "q": "`SELECT AVG(x)` over values 10, NULL, 20 returns:",
+  "opts": [
+   "10",
+   "15",
+   "NULL",
+   "30"
+  ],
+  "ans": 1,
+  "explain": "NULL is ignored: (10 + 20) / 2 = 15."
+ },
+ {
+  "topic": "Subqueries",
+  "q": "A correlated subquery is one that:",
+  "opts": [
+   "Runs only once",
+   "References columns of the outer query and is (logically) evaluated per outer row",
+   "Uses UNION",
+   "Is always faster than a join"
+  ],
+  "ans": 1,
+  "explain": "Example: WHERE salary > (SELECT AVG(salary) FROM employees x WHERE x.dept_id = e.dept_id)."
+ },
+ {
+  "topic": "Performance",
+  "q": "Which is usually the best first step to speed up a slow analytical query?",
+  "opts": [
+   "Add DISTINCT everywhere",
+   "Check the execution plan (EXPLAIN), filter early, select only needed columns, index or partition the filter columns",
+   "Use SELECT *",
+   "Convert to a cursor loop"
+  ],
+  "ans": 1,
+  "explain": "Interviewers expect EXPLAIN + filtering + avoiding SELECT * + appropriate indexing/partitioning."
+ }
+]

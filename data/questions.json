@@ -1,0 +1,2886 @@
+[
+ {
+  "id": 1,
+  "world": "Basics Camp",
+  "title": "Who works in Pune?",
+  "diff": "E",
+  "tables": [
+   "employees"
+  ],
+  "prompt": "HR wants a quick list of everyone based in **Pune**. Return `name` and `city` of all employees whose city is Pune.",
+  "hints": [
+   "You only need one table and a filter.",
+   "Use `WHERE` with an equality check on `city`.",
+   "SELECT name, city FROM employees WHERE city = '...';"
+  ],
+  "sol": "PTY4aDAlTAASGUhfUQ8HBw0NNSMjI1MRQAMdAxcWEV5TJiQrITENEBgYF1NJDVQhGQAWUxY=",
+  "explain": "`WHERE` filters rows before anything else is returned. Text values go inside single quotes. In SQLite and most databases, string comparison with `=` is case-sensitive for data ('pune' would not match 'Pune'), while MySQL's default collation is case-insensitive.",
+  "mysql": "Same query works in MySQL. Note: MySQL compares strings case-insensitively by default.",
+  "checks": "Basic SELECT/WHERE syntax and quoting. Warm-up question, usually asked in the first 2 minutes.",
+  "jd": [
+   "ZenStatement",
+   "Eternz"
+  ],
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 2,
+  "world": "Basics Camp",
+  "title": "Budget buys under ₹1000",
+  "diff": "E",
+  "tables": [
+   "products"
+  ],
+  "ordered": true,
+  "prompt": "List `product_name` and `price` of products priced **below 1000**. Sort by price (lowest first); if prices tie, sort by product_name A→Z.",
+  "hints": [
+   "Filter with `<`, then sort.",
+   "`ORDER BY` can take more than one column.",
+   "... WHERE price < 1000 ORDER BY price, product_name;"
+  ],
+  "sol": "PTY4aDAlTB4BG0kGEhgxHRVAFl1MHgEdThZRKjw8OQ0DAwMKBhdZAFE7JjYmaFMBHgcQEQ1PUV1eQ0QNPCMoKyFUbypRHBwaF0hTMD8tX1RdAR4IGxAAch0QAQtTNX4wSg==",
+  "explain": "`ORDER BY price, product_name` sorts by price first and uses product_name only to break ties. ASC is the default direction.",
+  "checks": "Multi-column sorting and tie-breaking. Interviewers like candidates who mention tie-breaks without being asked.",
+  "jd": [
+   "ZenStatement"
+  ],
+  "mysql": "",
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 3,
+  "world": "Basics Camp",
+  "title": "What do we sell?",
+  "diff": "E",
+  "tables": [
+   "products"
+  ],
+  "prompt": "Return the list of **unique** product categories (one column: `category`).",
+  "hints": [
+   "Each category appears many times in the table.",
+   "There is a keyword that removes duplicate rows.",
+   "SELECT DISTINCT ..."
+  ],
+  "sol": "PTY4aDAlTCo6J3k6Py86UxdMBxQLAQENDTUjIyNTBF8cFRkNBwcW",
+  "explain": "`DISTINCT` removes duplicate rows from the result. It applies to the whole row: `SELECT DISTINCT category, brand` would return unique category+brand pairs.",
+  "checks": "Knowing DISTINCT applies to the full row, not one column. A common follow-up: 'how else can you do this?' → GROUP BY category.",
+  "jd": [
+   "ZenStatement"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 4,
+  "world": "Basics Camp",
+  "title": "Top 5 premium products",
+  "diff": "E",
+  "tables": [
+   "products"
+  ],
+  "ordered": true,
+  "prompt": "Show the **5 most expensive** products: `product_name`, `price`, highest first.",
+  "hints": [
+   "Sort descending.",
+   "Limit the number of rows returned.",
+   "ORDER BY price DESC LIMIT 5"
+  ],
+  "sol": "PTY4aDAlTB4BG0kGEhgxHRVAFl1MHgEdThZRKjw8OQ0DAwMKBhdZAFEjPDcxf1MzNU4DBkQQFEwqNiduUz0lIzogDUZK",
+  "explain": "`ORDER BY ... DESC` sorts high to low and `LIMIT 5` keeps the first five rows. Without ORDER BY, LIMIT returns an arbitrary 5 rows.",
+  "mysql": "MySQL/PostgreSQL: LIMIT 5. SQL Server: SELECT TOP 5. Oracle: FETCH FIRST 5 ROWS ONLY.",
+  "checks": "Top-N basics. Good candidates ask: 'what if two products tie at the 5th position?'",
+  "jd": [
+   "Eternz",
+   "ZenStatement"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 5,
+  "world": "Basics Camp",
+  "title": "Card and NetBanking deliveries",
+  "diff": "E",
+  "tables": [
+   "orders"
+  ],
+  "prompt": "Finance is reconciling gateway payments. Return `order_id` and `payment_mode` for **delivered** orders paid by **Card** or **NetBanking**.",
+  "hints": [
+   "Two conditions must both be true.",
+   "`IN (...)` is cleaner than two ORs.",
+   "WHERE status = 'delivered' AND payment_mode IN ('Card','NetBanking')"
+  ],
+  "sol": "PTY4aDAlTAEBEEgBLgUKX1RdEggBCx0Ach4eCAtTMn88PEwBARBIAQJMOTsxfzZRHxoSAFgAUVFOVBBIHxgaCwERSVRRLSA3VF0SCAELHQByHh4IC1M9Y1NZSy0SBklUXUxJPRFZMRACBRoaSlRYVw==",
+  "explain": "`IN` checks membership in a list. If you write `status = 'delivered' AND payment_mode = 'Card' OR payment_mode = 'NetBanking'` you get a bug: AND binds tighter than OR, so undelivered NetBanking orders sneak in. Use IN or brackets.",
+  "checks": "AND/OR precedence. This is the #1 silent bug in OA submissions.",
+  "jd": [
+   "ZenStatement",
+   "Upstox"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 6,
+  "world": "Basics Camp",
+  "title": "March orders",
+  "diff": "E",
+  "tables": [
+   "orders"
+  ],
+  "ordered": true,
+  "prompt": "Return `order_id` and `order_date` for all orders placed in **March 2025**, sorted by order_date then order_id. Dates are stored as text in `YYYY-MM-DD` format.",
+  "hints": [
+   "You need a date range.",
+   "`BETWEEN` is inclusive on both ends.",
+   "WHERE order_date BETWEEN '2025-03-01' AND '2025-03-31'"
+  ],
+  "sol": "PTY4aDAlTAEBEEgBLgUKX1RCARUJHCwQTAcUTCghO2BTHh4KFgZeUyYkKyExDRwDCAsBK0kSBQlOMTF5JDQpIFNTH0NDWUNDRwBDQEtOMjppU1ZeXkFBAENCQV1CUw08IygrIVRvKlEDHBcRXywVDRoWWA0cAwgLAStEF0o=",
+  "explain": "BETWEEN is inclusive. Careful with datetime columns: `BETWEEN '2025-03-01' AND '2025-03-31'` misses '2025-03-31 18:00:00'. The safer pattern for timestamps is `>= '2025-03-01' AND < '2025-04-01'`.",
+  "mysql": "Same in MySQL. You can also write MONTH(order_date) = 3 AND YEAR(order_date) = 2025, but that blocks index usage.",
+  "checks": "Date range filtering and the inclusive-end trap with timestamps.",
+  "jd": [
+   "ZenStatement",
+   "Tata CLiQ"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 7,
+  "world": "Basics Camp",
+  "title": "Names starting with A",
+  "diff": "E",
+  "tables": [
+   "customers"
+  ],
+  "prompt": "Marketing is testing a personalised banner. Return `customer_id` and `name` of customers whose name **starts with the letter A**.",
+  "hints": [
+   "Pattern matching uses LIKE.",
+   "`%` matches any number of characters.",
+   "WHERE name LIKE 'A%'"
+  ],
+  "sol": "PTY4aDAlTA0GB1kcHAkcLB1JX1ECDx4RDTUjIyNTF1gABQMDFgZeUyYkKyExDR0QAQtTOGQ4NExJMlEKSA==",
+  "explain": "`LIKE 'A%'` = starts with A. `'%a'` = ends with a. `'%a%'` = contains a. `_` matches exactly one character. In SQLite, LIKE is case-insensitive for ASCII letters.",
+  "checks": "Wildcards % and _. Follow-up: 'names whose second letter is r' → LIKE '_r%'.",
+  "jd": [
+   "ZenStatement"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 8,
+  "world": "Basics Camp",
+  "title": "Missing salaries",
+  "diff": "E",
+  "tables": [
+   "employees"
+  ],
+  "prompt": "Payroll says some salaries were never entered. Return the `name` of employees whose salary is **missing**.",
+  "hints": [
+   "Missing values are NULL.",
+   "`= NULL` never works. There is a special operator.",
+   "WHERE salary IS NULL"
+  ],
+  "sol": "PTY4aDAlTAASGUhTNz4hPlRIHgEAAQoRSABROyY2JmhTAg0CEgZUUzg/Tj0hYT9K",
+  "explain": "NULL means 'unknown', so `salary = NULL` is neither true nor false. It is unknown, and the row is dropped. Always use `IS NULL` / `IS NOT NULL`.",
+  "checks": "NULL semantics. Interviewers often ask 'what does salary = NULL return?' Answer: no rows, because the comparison is unknown.",
+  "jd": [
+   "Eternz",
+   "Tata CLiQ"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 9,
+  "world": "Basics Camp",
+  "title": "Recent tech and analytics hires",
+  "diff": "E",
+  "tables": [
+   "employees"
+  ],
+  "ordered": true,
+  "prompt": "Return `name`, `dept_id` and `hire_date` of employees in departments **10 or 20** who were hired **on or after 2020-01-01**. Sort by hire_date.",
+  "hints": [
+   "Combine IN with a date comparison.",
+   "Text dates in YYYY-MM-DD compare correctly as strings.",
+   "WHERE dept_id IN (10,20) AND hire_date >= '2020-01-01' ORDER BY hire_date"
+  ],
+  "sol": "PTY4aDAlTAASGUhfUQgLAwByGhVAThsdXxYuCA8HEQ01IyMjUxFAAx0DFxYRXlMmJCshMQ0XFBwaLB1JUzgiTltFHV9RXl5aVGw9NUwGGgZILBUNGhZUE05RS1xDRh1eQV1DQ0UKUz4+KjYmDTEoTAYaBkgsFQ0aFk8=",
+  "explain": "ISO dates (YYYY-MM-DD) sort the same way as text and as dates, which is why storing dates in this format matters.",
+  "checks": "Combining filters correctly.",
+  "jd": [
+   "ZenStatement"
+  ],
+  "mysql": "",
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 10,
+  "world": "Basics Camp",
+  "title": "Price bands with CASE",
+  "diff": "E",
+  "tables": [
+   "products"
+  ],
+  "prompt": "Label every product with a price band: **Budget** (price < 1000), **Mid** (1000 to 2999), **Premium** (3000 and above). Return `product_name`, `price`, `price_band`.",
+  "hints": [
+   "CASE WHEN works like IF-ELSE inside SELECT.",
+   "Conditions are checked top to bottom; the first true one wins.",
+   "CASE WHEN price < 1000 THEN 'Budget' WHEN price < 3000 THEN 'Mid' ELSE 'Premium' END"
+  ],
+  "sol": "PTY4aDAlTB4BG0kGEhgxHRVAFl1MHgEdThZdZk5TN2wgNEw5OzFjUwEeBxARDU9RXV5DRA0nOSkgU1NvBhULCwdTJ1NRTE5TVA0kOSkgUwRfGhIJTk9UHkNBXE4nPGg9UUsjGhAKeVFMTlNUDVM0ID02VAojAwkDGgFAVFEpIDdUbCBRHBwaF0gsEw0AF35rIT4hTgMGQhcEDxoATw==",
+  "explain": "CASE evaluates conditions in order and stops at the first match, so the second condition does not need `price >= 1000`. Always add ELSE, otherwise unmatched rows get NULL.",
+  "checks": "CASE WHEN logic. It is the base of bucketing, pivots and segment labels in every BA job.",
+  "jd": [
+   "ZenStatement",
+   "Tata CLiQ"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 11,
+  "world": "Basics Camp",
+  "title": "Product margins (integer trap)",
+  "diff": "M",
+  "tables": [
+   "products"
+  ],
+  "ordered": true,
+  "prompt": "For each product return `product_name`, `margin` (price − cost) and `margin_pct` = margin ÷ price × 100, **rounded to 2 decimals**. Sort by margin_pct, highest first.",
+  "hints": [
+   "Both price and cost are INTEGER columns. What is 3/4 in integer maths?",
+   "Multiply by 100.0 (a decimal) before dividing.",
+   "ROUND(100.0 * (price - cost) / price, 2)"
+  ],
+  "sol": "PTY4aDAlTB4BG0kGEhgxHRVAFl1MHgEdThZRQU4QG14HUS09UxlMARYFAF9+DVMjIzs9MAVCQVxAQ1QHU1kcHBoXSFNcTA0cB1laUUNOAwZEEBRATkFdDTIiTAMSBkoaHzMeEAAnNSMjI1MEXxwVGQ0HByc8IygrIVRvKlEBDwETRB0uHA0HVGk2Ii9V",
+  "explain": "In SQLite, PostgreSQL and SQL Server, INTEGER / INTEGER does integer division (1400/3499 = 0). Multiplying by 100.0 first forces decimal maths. MySQL's `/` always returns a decimal, so students who learned on MySQL often miss this in other OAs.",
+  "mysql": "MySQL returns decimals for / automatically; DIV is integer division there.",
+  "checks": "Integer division awareness and rounding. A very common 'why is my percentage 0?' bug.",
+  "jd": [
+   "Tata CLiQ",
+   "Shadowfax"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ]
+ },
+ {
+  "id": 12,
+  "world": "Basics Camp",
+  "title": "Org chart sort",
+  "diff": "E",
+  "tables": [
+   "employees"
+  ],
+  "ordered": true,
+  "prompt": "Return `name`, `dept_id`, `salary` for employees **who have a department**, sorted by dept_id (ascending) and, within a department, by salary (highest first), then name.",
+  "hints": [
+   "Exclude rows where dept_id is NULL.",
+   "Each ORDER BY column can have its own direction.",
+   "ORDER BY dept_id ASC, salary DESC, name"
+  ],
+  "sol": "PTY4aDAlTAASGUhfUQgLAwByGhVATgAVQRIDFU41JmI+UQkDAxhCChQJHVMjZTYjKU4XEV0HLgUKUz1+Uz8jOlM6eD89TCEhMGghUS43UxBIAwUzBxdUbCAyQE4AFUESAxVONzF+MF1MABIZSEg=",
+  "explain": "ASC/DESC applies to each column separately. NULL salaries come last in DESC order in both SQLite and MySQL (they are treated as the smallest value).",
+  "mysql": "Same in MySQL. PostgreSQL treats NULL as largest; use NULLS LAST there to be explicit.",
+  "checks": "Mixed sort directions and NULL ordering awareness.",
+  "jd": [
+   "ZenStatement"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 13,
+  "world": "Basics Camp",
+  "title": "Highly rated restaurants",
+  "diff": "E",
+  "tables": [
+   "restaurants"
+  ],
+  "ordered": true,
+  "prompt": "FoodDash wants to feature good restaurants. Return `name`, `city`, `rating` for restaurants rated **4.0 or above**, sorted by rating (high to low), then name.",
+  "hints": [
+   "Filter, then sort.",
+   "rating is a REAL (decimal) column.",
+   "WHERE rating >= 4.0 ORDER BY rating DESC, name"
+  ],
+  "sol": "PTY4aDAlTAASGUhfUQ8HBw0BUwMNGhoaSlM3PiE+VF8WAhgPBgZMHQUfTiQ8aCE0TBwSAEQdFkxQTlQZXUFMISEwaCFRLjdTBkwHGAIJUzBoIDJATh0VQBZK",
+  "explain": "Straightforward filter + sort. Tie-breaking by name makes the output deterministic, which matters when an OA auto-grades row order.",
+  "checks": "Deterministic ordering.",
+  "jd": [
+   "Swiggy"
+  ],
+  "mysql": "",
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 14,
+  "world": "Basics Camp",
+  "title": "Failed COD shipments",
+  "diff": "E",
+  "tables": [
+   "shipments"
+  ],
+  "prompt": "ShipFast loses money when a **cash-on-delivery** parcel is returned. Return `shipment_id`, `hub_id`, `cod_amount` for shipments with status **'rto'** (return to origin) and a cod_amount greater than 0.",
+  "hints": [
+   "Two conditions.",
+   "COD shipments have cod_amount > 0.",
+   "WHERE status = 'rto' AND cod_amount > 0"
+  ],
+  "sol": "PTY4aDAlTB0bHV0eFAIaLB1JX1EEGxErRBddTA0cEHISHAMbHQANNSMjI1MHRRoBAQsdAF5TJiQrITENAAUNGgYHDU5RSxwHGwpTMCIqUxdCFy4NAxwBQwdRUk5DTw==",
+  "explain": "RTO = Return To Origin, a key cost metric in Indian logistics and e-commerce. Knowing the business term helps in BA interviews at logistics companies.",
+  "checks": "Filters plus domain vocabulary (RTO, COD).",
+  "jd": [
+   "Shadowfax"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 15,
+  "world": "Basics Camp",
+  "title": "Orders 3 to 5 (pagination)",
+  "diff": "M",
+  "tables": [
+   "orders"
+  ],
+  "ordered": true,
+  "prompt": "Return `order_id` and `order_date` for the **3rd, 4th and 5th most recent** orders. Most recent = latest order_date; break ties by higher order_id first.",
+  "hints": [
+   "Sort newest first.",
+   "LIMIT can skip rows with OFFSET.",
+   "ORDER BY order_date DESC, order_id DESC LIMIT 3 OFFSET 2"
+  ],
+  "sol": "PTY4aDAlTAEBEEgBLgUKX1RCARUJHCwQTAcUTCghO2BTHh4KFgZeUz4+KjYmDTEoTAEBEEgBLggPBxENNzQ/LV9UQgEVCRwsHUlTNSk9MFRhOjwlOlNHDTw3Kj02IA1BSg==",
+  "explain": "OFFSET 2 skips the first two rows, then LIMIT 3 returns the next three. This is how apps paginate results.",
+  "mysql": "MySQL also accepts LIMIT 2, 3 (offset, count).",
+  "checks": "LIMIT/OFFSET. Also a lead-in to the 'Nth highest' family of questions.",
+  "jd": [
+   "ZenStatement"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 16,
+  "world": "Aggregation Arena",
+  "title": "Orders by status",
+  "diff": "E",
+  "tables": [
+   "orders"
+  ],
+  "prompt": "Return each order `status` and the number of orders in it as `order_count`.",
+  "hints": [
+   "One output row per status.",
+   "GROUP BY + COUNT.",
+   "SELECT status, COUNT(*) ... GROUP BY status"
+  ],
+  "sol": "PTY4aDAlTB0HFVkGAkBOMDt4PSVERFpUbCBRAxwXEV8sEgMbHQANNSMjI1MbXxcUHh1TM388JDxOMS0NAAUNGgYHFg==",
+  "explain": "GROUP BY collapses rows with the same status into one, and COUNT(*) counts the rows in each group.",
+  "checks": "GROUP BY fundamentals.",
+  "jd": [
+   "ZenStatement",
+   "Eternz",
+   "Tata CLiQ"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 17,
+  "world": "Aggregation Arena",
+  "title": "Average salary by department",
+  "diff": "E",
+  "tables": [
+   "employees"
+  ],
+  "prompt": "Return `dept_id` and `avg_salary` (rounded to 2 decimals) for every department that has employees. Ignore employees with no department.",
+  "hints": [
+   "Filter NULL departments first.",
+   "AVG ignores NULL salaries automatically.",
+   "SELECT dept_id, ROUND(AVG(salary),2) ... WHERE dept_id IS NOT NULL GROUP BY dept_id"
+  ],
+  "sol": "PTY4aDAlTAoWBFksGAhCUyZiJj8oRjIialsCDQISBlRaXUxcWlRsIFENGBQrXhIdDRwKVGshPiFOFhldHx4VCxYHDSQ5KTw2VEkWARgxGhANOiJMIDwgDT0kICJTM388JDxOMS0NFxQcGiwdSUg=",
+  "explain": "AVG skips NULLs. Dept 50 has 3 employees but one has no salary, so its average uses 2 values. If the business wanted 'missing = 0' you would need AVG(COALESCE(salary,0)), which gives a different answer.",
+  "checks": "Whether you know aggregate functions skip NULLs. Classic follow-up question.",
+  "jd": [
+   "ZenStatement",
+   "Eternz"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 18,
+  "world": "Aggregation Arena",
+  "title": "COUNT(*) vs COUNT(column)",
+  "diff": "E",
+  "tables": [
+   "employees"
+  ],
+  "prompt": "In one row return: `total_employees` (all rows), `with_salary` (salary not missing) and `with_department` (dept_id not missing).",
+  "hints": [
+   "Different COUNT forms treat NULL differently.",
+   "COUNT(column) skips NULLs; COUNT(*) does not.",
+   "SELECT COUNT(*), COUNT(salary), COUNT(dept_id) FROM employees"
+  ],
+  "sol": "PTY4aDAlTC08IWMnWUZHUzV+UwUDGhIYchYcHAIcDUgWAkBOMDt4PSVEHRIYTAEIRU4yJw0EGBgGLAdMHxAeF19UbjwkIjpbEEgDBTMHF10NMiJMGRoARSwVCR4SBlkeFAIaUzJ/PDxMCx4EQRwICQsATw==",
+  "explain": "COUNT(*) counts rows. COUNT(col) counts non-NULL values. COUNT(DISTINCT col) counts unique non-NULL values. You can use this as a quick data-quality check on any table.",
+  "checks": "Asked verbally in almost every DA interview: 'difference between COUNT(*), COUNT(1) and COUNT(col)?'",
+  "jd": [
+   "Eternz",
+   "Tata CLiQ",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DE"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 19,
+  "world": "Aggregation Arena",
+  "title": "Biggest baskets",
+  "diff": "M",
+  "tables": [
+   "order_items"
+  ],
+  "ordered": true,
+  "prompt": "For each order compute `gross_value` = SUM(quantity × unit_price) and `net_value` = SUM(quantity × unit_price × (1 − discount_pct/100)), rounded to 2 decimals. Return `order_id`, `gross_value`, `net_value` for the **top 5 orders by net_value** (highest first).",
+  "hints": [
+   "Aggregate order_items per order_id.",
+   "discount_pct is an integer, so divide by 100.0 not 100.",
+   "ROUND(SUM(quantity*unit_price*(1 - discount_pct/100.0)),2) ... ORDER BY net_value DESC LIMIT 5"
+  ],
+  "sol": "PTY4aDAlTAEBEEgBLgUKX34NUyI5I1sFWBIfGAcHDQ1ZURkAGgByAwMFDRZdDTIiTAkBG14ALhoPHwFIX3tMTiE7eD01RD0mOQUCBA0ABx1ZClFGTgYaRAcuHBwaF0hTW0xGQlQAUxUFHRAbWB0FMx4QAA1cUV1eQ1odWlhATkFdDTIiTAAWAHIFEAAbFn5rIT4hThwGSRYDMwcHEUAAeys8PCF9UzM1ThwGSRYDMwcXfmIhNSk8UzZ0Ux8JGiwCTB8ECU43MX4weyAnPj15U0RX",
+  "explain": "You can aggregate an expression, not just a column. `discount_pct/100` would be 0 with integer division, so every net value would equal gross. Always check one row by hand.",
+  "checks": "Aggregating expressions, integer-division awareness, GMV vs net revenue (common e-commerce vocabulary).",
+  "jd": [
+   "Tata CLiQ",
+   "Eternz"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 20,
+  "world": "Aggregation Arena",
+  "title": "Loyal customers (HAVING)",
+  "diff": "M",
+  "tables": [
+   "orders"
+  ],
+  "ordered": true,
+  "prompt": "Return `customer_id` and `order_count` for customers with **more than 5 orders** (any status). Sort by order_count desc, then customer_id.",
+  "hints": [
+   "Count per customer first.",
+   "You cannot filter an aggregate in WHERE.",
+   "GROUP BY customer_id HAVING COUNT(*) > 5"
+  ],
+  "sol": "PTY4aDAlTA0GB1kcHAkcLB1JX1EvISY6eVtbRU4yJw0cAwgLAStOHAQCGlMyfzw8TAEBEEgBAkwpITt4I1EuN1MXWAAFAwMWBnIaFUwmMiJkPTZMLTwhYydZRkdTSg1GUSM8NzF/UzM1ThwGSRYDMw0cAUMHUSgrIDcBUxIZHQcbQBYDMwcXTw==",
+  "explain": "WHERE filters rows **before** grouping; HAVING filters groups **after** aggregation. Logical order: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT.",
+  "checks": "WHERE vs HAVING. One of the top 5 most-asked verbal SQL questions in India.",
+  "jd": [
+   "ZenStatement",
+   "Tata CLiQ"
+  ],
+  "mysql": "",
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 21,
+  "world": "Aggregation Arena",
+  "title": "Busy restaurants",
+  "diff": "M",
+  "tables": [
+   "food_orders"
+  ],
+  "ordered": true,
+  "prompt": "Consider only **delivered** food orders. For each restaurant return `restaurant_id`, `delivered_orders`, `total_amount`, `avg_amount` (2 decimals). Keep restaurants with **at least 15 delivered orders**. Sort by total_amount desc.",
+  "hints": [
+   "Filter delivered rows in WHERE, filter groups in HAVING.",
+   "Use COUNT, SUM and AVG together.",
+   "WHERE status='delivered' GROUP BY restaurant_id HAVING COUNT(*) >= 15"
+  ],
+  "sol": "PTY4aDAlTBwWB1kSBB4PHQByGhVATjA7eD0lRERaVGwgUQgLHx1bFgMJCiwbXxcUHh1fVH4mPEQPHhtYHQVFTjInDQceGA8fK0weHhkAB1gNIT45IDdcbCU2RA8eG1gdBUVCU0YEUzA/ThICSiwQAQEGGll5Nz4hPlRLHB4IMRwGSRYDH2QkPGghNEwdBxVZBgJMU1NTSRYdBRgWBkgXVmYpITt4I1EuN1MGSAAFDRsBFUMHLgUKeTxsJTgiKVM3YiY/OEZZXQ1NTExfRn5iITUpPFM2dFMFAxoSGHISHAMbHQANNzQ/LUg=",
+  "explain": "WHERE and HAVING in one query: rows are filtered to delivered first, then groups with fewer than 15 rows are dropped.",
+  "checks": "Using WHERE and HAVING together correctly.",
+  "jd": [
+   "Swiggy",
+   "Snabbit"
+  ],
+  "mysql": "",
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 22,
+  "world": "Aggregation Arena",
+  "title": "Orders per month",
+  "diff": "M",
+  "tables": [
+   "orders"
+  ],
+  "ordered": true,
+  "prompt": "Return `month` (format `YYYY-MM`) and `orders` (count of orders) for every month, sorted by month.",
+  "hints": [
+   "Extract year-month from the date.",
+   "In SQLite use strftime('%Y-%m', date).",
+   "SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) ... GROUP BY month ORDER BY month"
+  ],
+  "sol": "PTY4aDAlTB0HBksHGAELW1MIKlxJA1RYDRwDCAsBK0kSBQlHUzV+UxwDAAccAVMyIzs9IAVZWEwvIFRCARUJHABUayE+IU4cBkkWAx9ONCZiJiFMLCpUQBwfGAZTO383ND5OMS0NHh4CGhtP",
+  "explain": "Grouping by a derived value is very common in reporting. Grouping by month alone (without year) would merge Jan 2025 with Jan 2026, a classic dashboard bug.",
+  "mysql": "MySQL: DATE_FORMAT(order_date, '%Y-%m'). PostgreSQL: TO_CHAR(order_date, 'YYYY-MM') or DATE_TRUNC('month', order_date).",
+  "checks": "Date bucketing. You will do this in every MIS/report-building task.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox",
+   "ZenStatement"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ]
+ },
+ {
+  "id": 23,
+  "world": "Aggregation Arena",
+  "title": "Pivot: status by payment mode",
+  "diff": "M",
+  "tables": [
+   "orders"
+  ],
+  "prompt": "Build a pivot. One row per `payment_mode` with columns `total`, `delivered`, `cancelled`, `returned` (order counts).",
+  "hints": [
+   "One GROUP BY, several counts with conditions.",
+   "SUM(CASE WHEN condition THEN 1 ELSE 0 END) counts rows that match.",
+   "SUM(CASE WHEN status='delivered' THEN 1 ELSE 0 END) AS delivered, ..."
+  ],
+  "sol": "PTY4aDAlTB4SDUAWHxgxHhtJFl1mTlM3YiY/OEZZXQ0yIkwaHABMH11mTlMneD5ZLy8gMQ0kOSkgUwdZEgUZHVNJDVQVCQIaAkgBFAhJUyBlNj9MX1MxYSA0TF5TMWM3WEwvIFRJFh0FGBYGSBddZk5TJ3g+WS8vIDENJDkpIFMHWRIFGR1TSQ1UEg0AEBFBHxQISVMgZTY/TF9TMWEgNExeUzFjN1hMLyBUThIfDwsfGEgXXWZOUyd4PlkvLyAxDSQ5KSBTB1kSBRkdU0kNVAMJGgYGQxYVS04nPGg9UV1ONjh+NlFcTjY6aVpRLT1TBkgHBB4AFhAnNSMjI1MbXxcUHh15M388JDxOMS0NAxAVAxYaWSwcAwoWTw==",
+  "explain": "Conditional aggregation turns rows into columns. It works in every database, while PIVOT syntax does not. Expect this in almost every BA SQL round.",
+  "mysql": "MySQL also allows SUM(status = 'delivered') because booleans are 1/0. SQLite does too.",
+  "checks": "Conditional aggregation / pivoting. This separates 'knows syntax' from 'can build a report'.",
+  "jd": [
+   "Swiggy",
+   "Tata CLiQ",
+   "Shadowfax"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ],
+  "ordered": false
+ },
+ {
+  "id": 24,
+  "world": "Aggregation Arena",
+  "title": "Which payment mode cancels most?",
+  "diff": "M",
+  "tables": [
+   "orders"
+  ],
+  "ordered": true,
+  "prompt": "Return `payment_mode` and `cancel_rate_pct` = cancelled orders ÷ all orders × 100 (2 decimals), sorted from highest cancel rate to lowest.",
+  "hints": [
+   "Same pattern as the pivot, then divide.",
+   "Use 100.0 to avoid integer division.",
+   "ROUND(100.0 * SUM(CASE WHEN status='cancelled' THEN 1 ELSE 0 END) / COUNT(*), 2)"
+  ],
+  "sol": "PTY4aDAlTB4SDUAWHxgxHhtJFl1mTlMmYiY/KEZCRB1dQUxEUyd4PlkvLyAxDSQ5KSBTB1kSBRkdU0kNVBINABARQR8UCElTIGU2P0xfUzFhIDRMXlMxYzdYTEFTN2ImPzhGWV0BU0NFTjInDRAQAg0WGHIBEBgLLAROB3sqPDw5DRwDCAsBByc0IyM7I1RvKlEcDwoZSB0FMwMcEEh5Pj4qNiYNMShMDRIaThYdMxwSAEgsAQ8aUzBoIDJX",
+  "explain": "A rate = conditional count ÷ total count. In an interview, follow up with the business angle: COD usually has higher cancellation because there is no upfront commitment, which is why platforms push prepaid with offers.",
+  "checks": "Rates/ratios and turning a number into a business insight.",
+  "jd": [
+   "Tata CLiQ",
+   "Snabbit",
+   "Grab"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 25,
+  "world": "Aggregation Arena",
+  "title": "Hub delivery scorecard",
+  "diff": "M",
+  "tables": [
+   "shipments"
+  ],
+  "prompt": "For each `hub_id` return `total`, `delivered`, `rto` counts and `rto_pct` (RTO ÷ total × 100, 2 decimals).",
+  "hints": [
+   "Conditional aggregation again.",
+   "Compute rto_pct from the same CASE expression.",
+   "ROUND(100.0 * SUM(CASE WHEN status='rto' THEN 1 ELSE 0 END) / COUNT(*), 2)"
+  ],
+  "sol": "PTY4aDAlTAYGFnIaFUBkU1RuPCQiOlteBFMwP04HG1kSHUBkU1R+JjxELTInaFMmJCs9VF4HEBgbAFQQU1YICx8dWxYDCQpUVHk7NCJOQlRoPyIpTkNUaD01RU4yJw0XFAAHBRFfFhVAZFNUfiY8RC0yJ2hTJiQrPVReBxAYGwBUEFNWHhocUw0nOSkgU0UNNj0/K1NEDTY/KEdTNX5TAxgBX34NUyMjOz0wBUJBXEBDVAdTIjkjWzdsIDRMOTsxY1MCGA8HAV5TTExJAQBCVFE4JjY6DUJRKSIgMQ1DUSkgN10NXFEvISY6eVtbRUJTRgRTMD9OAQBCLAEPGnkyfzw8TB0bHV0eFAIaAH5qIT45PlM2dFMZGQwsHUlI",
+  "explain": "This is a typical ops scorecard. Note that 'in_transit' shipments are in total but not delivered or RTO, so delivered + rto ≠ total. Mention this kind of nuance in interviews.",
+  "checks": "Building KPIs from raw operational data.",
+  "jd": [
+   "Shadowfax"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 26,
+  "world": "Aggregation Arena",
+  "title": "Distance stats by status",
+  "diff": "E",
+  "tables": [
+   "shipments"
+  ],
+  "prompt": "For each shipment `status`, return `shipments`, `min_km`, `max_km`, `avg_km` (avg rounded to 2 decimals) of distance_km.",
+  "hints": [
+   "Multiple aggregates in one SELECT.",
+   "MIN, MAX, AVG, COUNT.",
+   "GROUP BY status"
+  ],
+  "sol": "PTY4aDAlTB0HFVkGAkBOMDt4PSVERFpUbCBRHwYaBEAWHxgdX1RgOj9EChoHWRIfDwssH0BaUS09UxlEHS4HA19UYDIpRAoaB1kSHw8LLB9AWlEtPVMZTAsuBwNfVH88JCIqWzV7NFkIBwAATB0SCTEYGQRfUV5HUzV+UxAaCSwfQFM3PiE+VF4bGBwDFhpZAFErPDwhfVMzNU4AAEwHBB9V",
+  "explain": "Profiling a numeric column by segment is the first step of any EDA.",
+  "checks": "Comfort with multiple aggregates.",
+  "jd": [
+   "Shadowfax",
+   "Snabbit"
+  ],
+  "roles": [
+   "DA",
+   "DS"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 27,
+  "world": "Aggregation Arena",
+  "title": "Orders vs unique customers",
+  "diff": "E",
+  "tables": [
+   "food_orders"
+  ],
+  "prompt": "For each `restaurant_id` return `total_orders` and `unique_customers` (distinct user_id), considering all statuses.",
+  "hints": [
+   "COUNT(*) vs COUNT(DISTINCT ...).",
+   "GROUP BY restaurant_id.",
+   "COUNT(DISTINCT user_id)"
+  ],
+  "sol": "PTY4aDAlTBwWB1kSBB4PHQByGhVATjA7eD0lRERaVGwgURgBBxVBLB4eChYGXl9RLyEmOnlbNSU9Jz1jMCVMGwARXywYCEdTNX5TBAIHAgFILBIZHQcbQBYDH041JmI+UQoBHBByHAMICwEHDTQjIzsjVG8qUR4LAABMBgMNAAcrRBdK",
+  "explain": "total_orders ÷ unique_customers = orders per customer, a quick loyalty signal.",
+  "checks": "COUNT DISTINCT, the basis of 'active users' metrics (DAU/MAU).",
+  "jd": [
+   "Swiggy",
+   "ShareChat"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 28,
+  "world": "Aggregation Arena",
+  "title": "Duplicate phone numbers",
+  "diff": "E",
+  "tables": [
+   "raw_leads"
+  ],
+  "prompt": "Find phone numbers that appear **more than once** exactly as stored. Return `phone` and `times_seen`. Ignore missing phones.",
+  "hints": [
+   "Group by the column you suspect has duplicates.",
+   "Keep groups with count > 1.",
+   "WHERE phone IS NOT NULL GROUP BY phone HAVING COUNT(*) > 1"
+  ],
+  "sol": "PTY4aDAlTB4bG0MWXUwtPCFjJ1lGR1M1flMFBQMWB3IAFAkAUzJ/PDxMHBIDch8UDQoAVHo7ND4rUwRFHB8JTjonDT0+OE49IWE/USs8PCF9UzM1TgMcQh0UTCYyImQ9NkwtPCFjJ1lGR1NKDUJK",
+  "explain": "GROUP BY + HAVING COUNT(*) > 1 is THE duplicate-finding pattern. Notice '+91-9876543210' and '9876543210' are the same person but are not caught here. World 6 fixes that with cleaning.",
+  "checks": "'How do you find duplicates?' is asked in nearly every SQL interview in India.",
+  "jd": [
+   "Eternz",
+   "Tata CLiQ"
+  ],
+  "roles": [
+   "DA",
+   "DE"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 29,
+  "world": "Aggregation Arena",
+  "title": "Ad campaign efficiency",
+  "diff": "M",
+  "tables": [
+   "ad_campaigns"
+  ],
+  "ordered": true,
+  "prompt": "For each campaign return `campaign_id`, `ctr_pct` (clicks ÷ impressions × 100) and `roas` (attributed_revenue ÷ spend), both rounded to 2 decimals. Sort by roas, highest first.",
+  "hints": [
+   "No GROUP BY needed; one row per campaign already.",
+   "Watch integer division in both ratios.",
+   "ROUND(100.0*clicks/impressions,2), ROUND(1.0*attributed_revenue/spend,2)"
+  ],
+  "sol": "PTY4aDAlTA0SGV0SGAsALB1JX3tMTiE7eD01RF9DRANDUUZOEBhEEBofTlxURB4BHgsAB0QcHx9CU0YEUzA/ThAAXywBDxpffg1TIyM7PTAFQl9cTllUTAcFHgcRAVkWFTMcFgJIHQQJTlxUXgMUAgpfVB9aUS09UwZCEgJmKCE7YFMQCDEQFUADEAUJHQcnPCMoKyFUbypRHgESBw03ND8tSA==",
+  "explain": "CTR = clicks/impressions, ROAS = revenue/ad spend. ROAS < 1 means the campaign lost money. Swiggy's BA JD names CTR, CPM, ROAS and fill rate explicitly.",
+  "checks": "Ads metric vocabulary + correct ratio maths.",
+  "jd": [
+   "Swiggy"
+  ],
+  "roles": [
+   "BA",
+   "DA"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 30,
+  "world": "Aggregation Arena",
+  "title": "Buy vs sell value per stock",
+  "diff": "M",
+  "tables": [
+   "trades"
+  ],
+  "prompt": "For each `symbol` return `buy_value` and `sell_value` = SUM(quantity × price) for BUY and SELL trades respectively, rounded to 2 decimals. Show 0 when there are no trades of that side.",
+  "hints": [
+   "Conditional SUM, not conditional COUNT.",
+   "ELSE 0 makes missing sides 0 instead of NULL.",
+   "SUM(CASE WHEN side='BUY' THEN quantity*price ELSE 0 END)"
+  ],
+  "sol": "PTY4aDAlTB0KGU8cHUBkU1R/PCQiKlsneD5ZLy8gMQ0kOSkgUwdEFxRMU1NTbyYoS04nPGg9UR0bEhpZGgUVTllUXQEYDwtTMWEgNExeUzFjN1hATkFdDTIiTAwGDXIFEAAbFlgnU1E+ISY6aVsiOSNbN2wgNEw5OzFjUwIFChZUEFNWPys/OApTJSQrPVRcBhACGhoAVFNbTB4BHU4WUSkiIDENQ1EpIDddAVNDRU4yJw0AFAACLAJMHwQJZDUmYj5RGBwSEEgAeys8PCF9UzM1TgANQBEeAFU=",
+  "explain": "Conditional aggregation works with any expression, not just 1/0. Without ELSE 0, a symbol with no SELL trades would show NULL.",
+  "checks": "Conditional sums. Fintech interviews love buy/sell, credit/debit variants of this.",
+  "jd": [
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 31,
+  "world": "Join Junction",
+  "title": "Employees with department names",
+  "diff": "E",
+  "tables": [
+   "employees",
+   "departments"
+  ],
+  "prompt": "Return `name` and `dept_name` for employees who belong to a department.",
+  "hints": [
+   "The two tables share dept_id.",
+   "INNER JOIN keeps only matching rows.",
+   "FROM employees e JOIN departments d ON e.dept_id = d.dept_id"
+  ],
+  "sol": "PTY4aDAlTAtdGkweFEBOF1pJFgEYMR0VQBZRKjw8OQ0WHBwCHA1IFgJMC1M+Yjo/TAoWBEwBBQELHQBeUxVMIT1USF0VCR4HK0QXUVFOF1pJFgEYMRoQFg==",
+  "explain": "INNER JOIN keeps rows with a match on both sides. Zara (no dept) and Legal (no employees) both disappear.",
+  "checks": "Join syntax and table aliases.",
+  "jd": [
+   "ZenStatement",
+   "Eternz",
+   "Tata CLiQ"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 32,
+  "world": "Join Junction",
+  "title": "Nobody left behind (LEFT JOIN)",
+  "diff": "E",
+  "tables": [
+   "employees",
+   "departments"
+  ],
+  "prompt": "Return **every** employee's `name` and `dept_name`. If an employee has no department, show **'Unassigned'**.",
+  "hints": [
+   "Keep all rows from employees.",
+   "LEFT JOIN + COALESCE.",
+   "COALESCE(d.dept_name, 'Unassigned')"
+  ],
+  "sol": "PTY4aDAlTAtdGkweFEBOMDtsPzQ/LTZcSV0VCR4HK0MSHAlCU1N4HRAfHRoTQxYVS0dTNX5TFQkeBytDEhwJTjUmYj5RCQMDGEIKFAkdUxENPzQqOlM+Yjo/TAoWBEwBBQELHQBeUxVMIT1USF0VCR4HK0QXUVFOF1pJFgEYMRoQFg==",
+  "explain": "LEFT JOIN keeps every row of the left table; unmatched right-side columns become NULL. COALESCE returns the first non-NULL argument.",
+  "mysql": "MySQL also has IFNULL(x, y); COALESCE is standard and works everywhere.",
+  "checks": "INNER vs LEFT JOIN. Expect 'draw the Venn diagram' or 'how many rows will this return?'",
+  "jd": [
+   "ZenStatement",
+   "Tata CLiQ"
+  ],
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 33,
+  "world": "Join Junction",
+  "title": "Empty departments",
+  "diff": "E",
+  "tables": [
+   "employees",
+   "departments"
+  ],
+  "prompt": "Return `dept_name` of departments that have **no employees**.",
+  "hints": [
+   "Start from departments.",
+   "LEFT JOIN, then keep rows where the employee side is NULL.",
+   "... LEFT JOIN employees e ON ... WHERE e.emp_id IS NULL"
+  ],
+  "sol": "PTY4aDAlTApdEEgDBTMAEhlIUzc+IT5USRYBDRwHGUgdBR9OF1RhNjc4Tjk7ZD1RCQMDGEIKFAkdUxENPD9MCl0QSAMFMwcXVBBTFEIKFgRZLBgITiQ8aCE0TAtdEUADLgUKUz1+Uz85Ij9P",
+  "explain": "This is the 'anti-join' pattern. Alternatives: NOT EXISTS (preferred) or NOT IN. Avoid NOT IN when the subquery column can contain NULL: `dept_id NOT IN (SELECT dept_id FROM employees)` returns **zero rows** here because Zara's dept_id is NULL.",
+  "checks": "Anti-join + the NOT IN NULL trap. Strong candidates mention the trap on their own.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DE"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 34,
+  "world": "Join Junction",
+  "title": "Signed up, never ordered",
+  "diff": "M",
+  "tables": [
+   "customers",
+   "orders"
+  ],
+  "prompt": "Growth wants to target customers who signed up but **never placed an order**. Return `customer_id` and `name`.",
+  "hints": [
+   "Anti-join again.",
+   "NOT EXISTS reads naturally: 'no order exists for this customer'.",
+   "WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id)"
+  ],
+  "sol": "PTY4aDAlTA1dF1gABQMDFgZyGhVAThBaQxIcCWQ1JmI+UQ8bAABCHhQeHVMXJyQ5KTw2VGM8JUwrKz1+JyJMRiAxYTYyOE5CVGshPiFOHAZJFgMfThxUejs0PitTGwMQBB8aHBlIAS4FClNJDRBfDxsAAEIeFB4xGhAESA==",
+  "explain": "NOT EXISTS stops at the first match and is NULL-safe. LEFT JOIN ... WHERE o.order_id IS NULL gives the same result.",
+  "checks": "Classic 'customers who never ordered' question. Asked at almost every analytics company.",
+  "jd": [
+   "Tata CLiQ",
+   "Snabbit",
+   "ShareChat"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 35,
+  "world": "Join Junction",
+  "title": "Who is my manager? (self join)",
+  "diff": "M",
+  "tables": [
+   "employees"
+  ],
+  "prompt": "Return `employee` (name) and `manager` (manager's name) for every employee. The top boss has no manager; show NULL for them.",
+  "hints": [
+   "The manager is also a row in employees.",
+   "Join employees to itself with two aliases.",
+   "FROM employees e LEFT JOIN employees m ON e.manager_id = m.emp_id"
+  ],
+  "sol": "PTY4aDAlTAtdGkweFEwvIFRIHgEAAQoRSF9RAUAdFUAWUS09UxlMHRALCwFUayE+IU4WGV0fHhULFgcNFlEgKzUgDTk+JSBTEUADHQMXFhFeUxxMIT1USF0cDQASE0gBLgUKU0kNHl8JAwMrRBdK",
+  "explain": "A self join treats one table as two. LEFT JOIN keeps the CEO, whose manager_id is NULL.",
+  "checks": "Self-join understanding. Hierarchy questions are a favourite.",
+  "jd": [
+   "Upstox",
+   "Tata CLiQ"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DE"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 36,
+  "world": "Join Junction",
+  "title": "Earning more than the boss",
+  "diff": "M",
+  "tables": [
+   "employees"
+  ],
+  "prompt": "Return `employee`, `employee_salary`, `manager`, `manager_salary` for employees who earn **more than their manager**.",
+  "hints": [
+   "Self join like the previous question.",
+   "Compare the two salary columns in WHERE.",
+   "WHERE e.salary > m.salary"
+  ],
+  "sol": "PTY4aDAlTAtdGkweFEwvIFRIHgEAAQoRSF9RCUAAFUESAxVOMicNFhwcAhwNSBYuHw8fFV8KXUwDXRpMHhRMLyBUQBIfDQkWBgFTHEIdEhhMAQhMLyBUQBIfDQkWBnIAEAAPAQ0nNSMjI1MRQAMdAxcWEV5TFEwkPD1jUxQBHh8bVBYUH04eVGI9UQlAHhVDEhYJHCwdSVNMTANdEUADLgUKeSNlNiMpThZaXhIdDRwKVBNTHEIdEhhMAQhX",
+  "explain": "Famous LeetCode-style question (#181). Inner join is fine here because a person without a manager cannot earn more than one.",
+  "checks": "Self-join + comparison. Very frequently asked in Indian service and product company OAs.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 37,
+  "world": "Join Junction",
+  "title": "Net revenue by category",
+  "diff": "M",
+  "tables": [
+   "orders",
+   "order_items",
+   "products"
+  ],
+  "ordered": true,
+  "prompt": "Using only **delivered** orders, return `category` and `net_revenue` = SUM(quantity × unit_price × (1 − discount_pct/100)), rounded to 2 decimals, highest first.",
+  "hints": [
+   "You need three tables: status lives in orders, category in products.",
+   "Join orders → order_items → products, filter delivered, group by category.",
+   "... WHERE o.status='delivered' GROUP BY p.category ORDER BY net_revenue DESC"
+  ],
+  "sol": "PTY4aDAlTB5dF0wHFAsBAQ0BeVFMPDwhYzdZPzs+XEIaXx0bEhpZGgUVTllUQhpfGQAaAHIDAwUNFlQHU1ldTl5UQhpfCAcAF0IGHxgxAxdZU15MX0NEA0NYRUJTRgRTMD9OHRFZLAMJGBYaWBZ7Kjw8OQ0cAwgLAQcNHHsmITo6DRwDCAsBK0QHFAEdUxtEUz4iThxaQgEVCRwsHUlTTEwBGlpCARUJHCwdSXk7Iyc9VF0BHggbEABeUwFMIT1UQhpfHBwcEFgQBTMHF1QQUwFCHgEbSQYSGDEaECckOSk8NlRCXQIYDwcBXlNMTEkXEUEaBwkcFhAKeTY+ISYkDTEoTB5dF0wHFAsBAQ0nPCMoKyFUbypRAgsHK18WBwkABhENNzQ/LUg=",
+  "explain": "Multi-table joins + aggregation. Read it in this order: FROM/JOIN builds one wide table, WHERE removes non-delivered rows, GROUP BY rolls up.",
+  "checks": "Joining 3+ tables cleanly. Category revenue is a standard e-commerce question.",
+  "jd": [
+   "Tata CLiQ",
+   "Eternz"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 38,
+  "world": "Join Junction",
+  "title": "Dead stock",
+  "diff": "E",
+  "tables": [
+   "products",
+   "order_items"
+  ],
+  "prompt": "Return `product_name` of products that have **never been ordered**.",
+  "hints": [
+   "Anti-join from products to order_items.",
+   "LEFT JOIN ... IS NULL or NOT EXISTS.",
+   "WHERE NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.product_id = p.product_id)"
+  ],
+  "sol": "PTY4aDAlTB5dBF8cFRkNBytDEhwJTjUmYj5RHBwcEFgQBR9OA1R6OzQ+K1M6YidRKTY6J3kgUUQ9NjhoMCVMX1Myfzw8TAEBEEgBLgUaFhleUx4FTiQ8aCE0TAEaWl0BHggbEAByGhVMU1MEAwMDAwoGF1ksGAhHSA==",
+  "explain": "Same anti-join pattern, different business story (inventory). Recognising the pattern behind the story is the real skill.",
+  "checks": "Pattern recognition.",
+  "jd": [
+   "Tata CLiQ"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 39,
+  "world": "Join Junction",
+  "title": "City performance",
+  "diff": "M",
+  "tables": [
+   "customers",
+   "orders"
+  ],
+  "prompt": "For each customer `city`, return `buying_customers` (distinct customers with at least one delivered order) and `delivered_orders`.",
+  "hints": [
+   "Join customers to orders and filter delivered.",
+   "Count distinct customers and count orders.",
+   "COUNT(DISTINCT c.customer_id), COUNT(o.order_id) ... GROUP BY c.city"
+  ],
+  "sol": "PTY4aDAlTA1dF0QHCEBOMDt4PSVEKjoneTo/LzpTFwMQBB8aHBlIAS4FClpUbCBRDhsKHUMULg8bAABCHhQeHV9UbjwkIjpbGwMcAwgLAStEF1hMLyBUSRYdBRgWBkgXLgMcFxFfAHsqPDw5DRAEHxocGUgBAkwNUz5iOj9MAQEQSAECTAFTO2NTEkINBgdZHBwJHCwdSVNMTAFdF1gABQMDFgZyGhVmOTsxfzZRA0AAAEwHBB9OTlQKFxQABwURXxYVS2Q0JmImIUwsKlROXRIFGgpP",
+  "explain": "After a one-to-many join, rows multiply (one row per order). COUNT(DISTINCT customer_id) gives back the true number of customers.",
+  "checks": "Understanding row multiplication after joins. This causes most 'my numbers are inflated' bugs.",
+  "jd": [
+   "Tata CLiQ",
+   "Snabbit"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 40,
+  "world": "Join Junction",
+  "title": "Restaurant leaderboard",
+  "diff": "E",
+  "tables": [
+   "restaurants",
+   "food_orders"
+  ],
+  "ordered": true,
+  "prompt": "Return restaurant `name`, `cuisine` and `delivered_revenue` (sum of amount for delivered orders), highest revenue first.",
+  "hints": [
+   "Join on restaurant_id.",
+   "Filter delivered, group by restaurant.",
+   "GROUP BY r.restaurant_id, r.name, r.cuisine ORDER BY delivered_revenue DESC"
+  ],
+  "sol": "PTY4aDAlTBxdGkweFEBOAVpOBhgfBx0RAVMiOSNbEgMSHAMbHQAEUzA/ThcRQRoHCRwWEHIBFBoLHQFIeTc+IT5UXxYCGA8GBkwdBR9OAVRnPDgiThUbQhcuAxwXEV8AUQpOPDoNAV8eCwAATAYDDQAHK0QXUVFOFVpfFgIYDwYGTB0FMwcXfno7ND4rUxIDAAUNGgYHDU5RSwoWGEQFFB4LF1MnNCMjOyNUbypRHkABEV4HEBkcEhpZLBgIQlMGAx0QAQtfVF9dEhkHAB1DFnsjPDcxf1MzNU4XEUEaBwkcFhByARQaCx0BSFM1KT0wTw==",
+  "explain": "Group by the id (unique), plus the descriptive columns you show. Grouping by name only would merge two restaurants with the same name.",
+  "checks": "Grouping by keys, not just labels.",
+  "jd": [
+   "Swiggy"
+  ],
+  "mysql": "",
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 41,
+  "world": "Join Junction",
+  "title": "Hubs with high RTO",
+  "diff": "M",
+  "tables": [
+   "hubs",
+   "shipments"
+  ],
+  "ordered": true,
+  "prompt": "Return `hub_name`, `city`, `total_shipments` and `rto_pct` (2 decimals) for hubs whose RTO rate is **above 13%**. Sort by rto_pct desc, then hub_name.",
+  "hints": [
+   "Join hubs to shipments, aggregate per hub.",
+   "Filter the computed percentage in HAVING.",
+   "HAVING 100.0 * SUM(CASE WHEN s.status='rto' THEN 1 ELSE 0 END) / COUNT(*) > 13"
+  ],
+  "sol": "PTY4aDAlTAZdHFgRLgIPHhEBUxlCDRoAVF9RLyEmOnlbW0VOMicNBx4YDx8rXhsYHAMWGlkAXWZOUyZiJj8oRkJEHV1BTERTJ3g+WS8vIDENJDkpIFMHAwAFDRoGBw1OUUscBxsKUyUkKz1UHFM0ID02VB1TNCIqWlQCUzIjOz0gBVlYQE5BXQ0yIkwcBxtyAxIYZDUmYj5RBBsRBw0bUSYhOjoNABkFHh4RQwcCTB1TO2NTGUIGBhZyGhVMU1MHAxsEDjEaECc0IyM7I1RvKlEEQBsBTywYCEJTHAMbBA4xHRVAFl1MBl0XRAcIZiYyImQ9NkxfQ0QDQ1FGTiAhYFsyLT02VHo7NCJOAFpeBxAYGwBUEFNWHhocUw0nOSkgU0UNNj0/K1NEDTY/KEdTWw0wPjkgJ1wHWlFSTkJHJzwjKCshVG8qUR4aHCtdEAVMKjYnbl9RBEAbAU8sHw0DFk8=",
+  "explain": "Filter on the unrounded expression in HAVING. Filtering on the rounded value can include or drop borderline hubs. SQLite and MySQL let you use the alias in HAVING (`HAVING rto_pct > 13`), but the full expression is portable.",
+  "checks": "HAVING on a computed ratio.",
+  "jd": [
+   "Shadowfax"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 42,
+  "world": "Join Junction",
+  "title": "Star riders",
+  "diff": "M",
+  "tables": [
+   "riders",
+   "hubs",
+   "shipments"
+  ],
+  "ordered": true,
+  "prompt": "Return rider `name`, `hub_name` and `delivered` (count of delivered shipments) for riders with **at least 9 deliveries**. Sort by delivered desc, then name.",
+  "hints": [
+   "riders → hubs for the hub name, riders → shipments for the deliveries.",
+   "Filter delivered shipments, then HAVING.",
+   "GROUP BY r.rider_id, r.name, h.hub_name HAVING COUNT(*) >= 9"
+  ],
+  "sol": "PTY4aDAlTBxdGkweFEBOG1pFBhMzABIZSF9RLyEmOnlbW0VOMicNFxQABwURXxYVZighO2BTAwUKFgZeUwNmJDw9Y1MZGQwAVEVTPiJOAVpFBhMzBxdUEFMZQgYGFnIaFWYkPD1jUwIEBwMZSB0FH04AVGI9UR9AAR1JFgMzBxdUEFMDQhwaEEgBLgUKeSNlNiMpTgBaXgcQGBsAVBBTVggLHx1bFgMJClR+aiE+OT5TNnRTA0IcGhBIAS4FCl9UX10fDQMWWA0bXwQbEStDEhwJZDs1ezo/K04wO3g9JUREWlQTTlFVZDwmaTYjTCwqVEkWHQUYFgZIF1EoKyA3AVMDQgASGUhI",
+  "explain": "Three-table join where the tables connect through the riders table (a 'star' around riders).",
+  "checks": "Multi-join + HAVING.",
+  "jd": [
+   "Shadowfax"
+  ],
+  "mysql": "",
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 43,
+  "world": "Join Junction",
+  "title": "Fill the gaps (CROSS JOIN)",
+  "diff": "H",
+  "tables": [
+   "hubs",
+   "riders"
+  ],
+  "prompt": "Ops wants a complete grid: every **zone × vehicle_type** combination with the number of riders, **including combinations with 0 riders**. Return `zone`, `vehicle_type`, `riders`.",
+  "hints": [
+   "First build every possible combination, then attach the counts.",
+   "CROSS JOIN the distinct zones with the distinct vehicle types, then LEFT JOIN the actual riders.",
+   "FROM (SELECT DISTINCT zone FROM hubs) z CROSS JOIN (SELECT DISTINCT vehicle_type FROM riders) v LEFT JOIN (riders JOIN hubs) ... COUNT(rider_id)"
+  ],
+  "sol": "PTY4aDAlTBRdDkIdFEBOBVpbFhkFDR8RcgcIHAtfVG48JCI6WwwDARgICwErRBdYTC8gVF8aFQkcAH5rIT4hTlsnaD80LzpTMGQgJSUgMCANCR4CC1Myfzw8TAYGFl5aURZkMCZiICJMJDw9Y1NZPys/MW4nUSgnICBkPTI4TgURRRoSAAssAFQDFEwoITtgUwMFChYGXlpRGmQ/MWsnUSYhOjoNWyIpIjY3eVMDQhwaEEgBLgUKX1RfXQcJBhoXQRYuGBcDEQFTGUIUHBpIUzc+IT5UXxoVCRwAVF9TOyMnPVRFBhMfThtUYj1RHkAbAU8sGAhOTlRFXRkZDCwdSVpRFGRTVGI9URRACRtDFlFRTglaVxwfCU4yOmlTCUIYFhxEEB0JMQcNXRZRUU4FWlsWGQUNHxFyBwgcC3kzfzwkPE4xLQ0JXxYBHREBUwdCGBYcRBAdCTEHDV0WSg==",
+  "explain": "A plain GROUP BY only shows combinations that exist. Dashboards need zeros too, otherwise a missing bar looks like a bug. CROSS JOIN builds the full grid; COUNT(x.rider_id) counts 0 for unmatched rows (COUNT(*) would wrongly give 1).",
+  "checks": "CROSS JOIN use case + COUNT(*) vs COUNT(col) after LEFT JOIN. A strong BI-round signal.",
+  "jd": [
+   "Shadowfax",
+   "Grab"
+  ],
+  "roles": [
+   "BI",
+   "DA",
+   "BA"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 44,
+  "world": "Join Junction",
+  "title": "Hubs vs cost target",
+  "diff": "M",
+  "tables": [
+   "hubs",
+   "shipments",
+   "zone_targets"
+  ],
+  "prompt": "For delivered shipments, compute each hub's average cost per shipment. Return `hub_name`, `zone`, `avg_cost` (2 decimals), `target` (from zone_targets) and `flag` = **'Above target'** if avg_cost > target else **'Within target'**.",
+  "hints": [
+   "Join hubs → shipments and hubs → zone_targets (on zone).",
+   "Aggregate per hub; the target is the same for every row of a hub.",
+   "CASE WHEN AVG(s.cost) > t.target_cost_per_shipment THEN 'Above target' ELSE 'Within target' END"
+  ],
+  "sol": "PTY4aDAlTAZdHFgRLgIPHhEBUxlCFBwaSF9RPiEmOmlbMDopWwcDEB4fGlpYDUFYTC8gVEwFFjMNHAdZX1EYQAcVXxQUGDEQG14HLhwLASteGxgcAxYaWVMwP04HFV8UFBhCeVQNMDA/K1MjZTY/TC8lMwUAXw8BAAAEU09MGl0ATAEWCRosF0IABTMeFgZyABkFHh4RQwdROCY2Og1UMA4BBRENBxAeCRYAClM0ID02VAokGBgGGhoNBxAeCRYAClM0IipTNX5TFwAPFH5rIT4hThsBTwBRBGQ5O2Q9UR8GGgRAFh8YHVMHDTw/TB1dHFgRLgUKU0kNG18EGxErRBd7JiE6Og0JHgILLABMARYJGgBUWVM+Ik4HWlccHwlOTlRFXQsDABZ+ejs0PitTBwMABQ0aBgcNTlFLChYYRAUUHgsXUyc0IyM7I1RvKlEEQBsBTywYCEJTHAMbBA4xHRVAFl1MBl0OQh0UQE4HWlkSAwsLBytOHAIYMQMRXywCBAcDGUgdBVc=",
+  "explain": "Shadowfax's JD talks about cost per shipment and zonal cost targets. This is that exact analysis. Join keys do not have to be IDs; here the join is on zone text.",
+  "checks": "Joining on non-ID keys + business framing (cost vs target).",
+  "jd": [
+   "Shadowfax"
+  ],
+  "roles": [
+   "BA",
+   "DA"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 45,
+  "world": "Join Junction",
+  "title": "Restaurant cities vs hub cities (FULL OUTER JOIN)",
+  "diff": "H",
+  "tables": [
+   "restaurants",
+   "hubs"
+  ],
+  "prompt": "Compare FoodDash and ShipFast presence. Return `city`, `restaurants` (count) and `hubs` (count) for every city that has **either** a restaurant **or** a hub. Show 0 instead of NULL.",
+  "hints": [
+   "Aggregate each table by city first.",
+   "You need cities from both sides, so think FULL OUTER JOIN (or UNION).",
+   "SELECT COALESCE(r.city, h.city), COALESCE(r.n,0), COALESCE(h.n,0) FROM (...) r FULL OUTER JOIN (...) h ON r.city = h.city"
+  ],
+  "sol": "PTY4aDAlTC08NWE2Ii8rWwYDEBgYF19URV0SBRoKXQ0yIkwNGgBUX1EvITI4aCAyKUYBWkNfUVxHUzV+UwMJHQcVWAEQAhoAWA0wPi0iNiduNlkEQB1YDUNYTC8gVEUGEx9kNSZiPlFEPTY4aDAlTA0aAFRfUS8hJjp5W1tFTjInDR1RKjw8OQ0BFB8aEgFfEh8YHVMzfzwkPE4xLQ0QGBgXWlRfeTc5Ij9UYiYlKTxTPmI6P0xGIDFhNjI4ThAdWQpdTC08IWMnWUZHUzV+Ux9MKCE7YFMZGQwAVGohPjk+UzZ0UxIFGgpdDRt7TE48Og0BXw8HBw0NTlEEQBAdWQpK",
+  "explain": "FULL OUTER JOIN keeps unmatched rows from both sides (Kochi has only restaurants, Hyderabad only hubs). Aggregate before joining, or the counts multiply.",
+  "mysql": "MySQL has no FULL OUTER JOIN. Write it as a LEFT JOIN ... UNION ... a RIGHT JOIN, or UNION ALL the two lists and GROUP BY city.",
+  "checks": "Knowing FULL JOIN, and the MySQL workaround. Interviewers ask 'how would you do this in MySQL?'",
+  "jd": [
+   "Grab",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DE"
+  ],
+  "ordered": false
+ },
+ {
+  "id": 46,
+  "world": "Subquery & CTE Cave",
+  "title": "Second highest salary",
+  "diff": "E",
+  "tables": [
+   "employees"
+  ],
+  "prompt": "Return the **second highest distinct salary** as `second_highest_salary` (single value).",
+  "hints": [
+   "What is the highest salary that is less than the maximum?",
+   "A subquery can give you the MAX.",
+   "SELECT MAX(salary) FROM employees WHERE salary < (SELECT MAX(salary) FROM employees)"
+  ],
+  "sol": "PTY4aDAlTCMyLAUAEAAPAQ0EUzA/TgARThwfCDEbHUobFB8aLAdMHxAeF1Myfzw8TAseBEEcCAkLAFR6OzQ+K1MHTB8QHhdTSA1bIikiNjd5UzwtNlsHTB8QHhdaVGshPiFOFhldHx4VCxYHBEg=",
+  "explain": "The most-asked SQL interview question in India. Know at least 3 ways: (1) MAX with subquery (above), (2) DISTINCT + ORDER BY DESC LIMIT 1 OFFSET 1, (3) DENSE_RANK() = 2. Version (1) returns NULL if there is no second salary, which is the behaviour LeetCode expects.",
+  "checks": "Multiple approaches + edge cases (ties, only one salary, NULLs). Always state your edge cases.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox",
+   "Eternz"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DE",
+   "DS"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 47,
+  "world": "Subquery & CTE Cave",
+  "title": "Third highest salary",
+  "diff": "M",
+  "tables": [
+   "employees"
+  ],
+  "prompt": "Return the **3rd highest distinct salary** as `third_highest_salary`.",
+  "hints": [
+   "The MAX trick gets ugly for N = 3. Use sorting instead.",
+   "Remove duplicates before skipping rows.",
+   "SELECT DISTINCT salary ... ORDER BY salary DESC LIMIT 1 OFFSET 2"
+  ],
+  "sol": "PTY4aDAlTCo6J3k6Py86UwdMHxAeF1M1flMFBAcBEHIbGAsGFgdZLAINAhIGVFM3PiE+VEgeAQABChFIAFE7JjYmaFMCDQISBlRTOD9OPTt5Uz85Ij9UYiE1KTxTNnRTAg0CEgZUUzUpPTBUYTo8JTpTRQ08Nyo9NiANQUo=",
+  "explain": "For the Nth highest: DISTINCT + ORDER BY DESC + LIMIT 1 OFFSET N-1. Without DISTINCT, tied salaries (two people at 120000) shift the answer. DENSE_RANK() = N is the window-function version (see World 5).",
+  "checks": "Generalising to N, handling ties.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DE",
+   "DS"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 48,
+  "world": "Subquery & CTE Cave",
+  "title": "Above company average",
+  "diff": "E",
+  "tables": [
+   "employees"
+  ],
+  "prompt": "Return `name` and `salary` of employees who earn **more than the company-wide average salary**.",
+  "hints": [
+   "You can't use AVG directly in WHERE.",
+   "Compute the average in a subquery.",
+   "WHERE salary > (SELECT AVG(salary) FROM employees)"
+  ],
+  "sol": "PTY4aDAlTAASGUhfUR8PHxVfClEqPDw5DRYcHAIcDUgWAkw5OzF/NlEfDx8VXwpRUk5bJ2g/NC86UzV7NFkfDx8VXwpYTCghO2BTFAEeHxtUFhQfR0g=",
+  "explain": "A scalar subquery returns one value and can be used anywhere a value fits. `WHERE salary > AVG(salary)` is an error because aggregates are not allowed in WHERE.",
+  "checks": "Scalar subqueries.",
+  "jd": [
+   "ZenStatement",
+   "Tata CLiQ"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 49,
+  "world": "Subquery & CTE Cave",
+  "title": "Above department average",
+  "diff": "M",
+  "tables": [
+   "employees"
+  ],
+  "prompt": "Return `name`, `dept_id` and `salary` of employees who earn **more than the average salary of their own department**.",
+  "hints": [
+   "The average changes per row: it depends on the employee's dept.",
+   "A correlated subquery references the outer row.",
+   "WHERE e.salary > (SELECT AVG(salary) FROM employees x WHERE x.dept_id = e.dept_id)"
+  ],
+  "sol": "PTY4aDAlTAtdGkweFEBOFlpJFgEYMRoQAVMUQh0SGEwBCGYoITtgUxQBHh8bVBYUH04Wfno7ND4rUxEDABAADwENDU1RRD02OGgwJUwvJTMFC18fDx8VXwpYTCghO2BTFAEeHxtUFhQfTgtUejs0PitTDAMXFBwaLB1JU0xMC10QSAMFMwcXXRY=",
+  "explain": "A correlated subquery runs once per outer row. Alternatives: a CTE of dept averages joined back, or AVG(salary) OVER (PARTITION BY dept_id). Mention the window version for bonus points.",
+  "checks": "Correlated subqueries and alternatives.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DS"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 50,
+  "world": "Subquery & CTE Cave",
+  "title": "Top earner in each department",
+  "diff": "M",
+  "tables": [
+   "employees",
+   "departments"
+  ],
+  "prompt": "Return `dept_name`, `name` and `salary` of the highest-paid employee(s) in each department. If two people tie for the top, show both.",
+  "hints": [
+   "First find the max salary per department.",
+   "Then join back to find who earns it.",
+   "JOIN (SELECT dept_id, MAX(salary) AS mx FROM employees GROUP BY dept_id) m ON e.dept_id = m.dept_id AND e.salary = m.mx"
+  ],
+  "sol": "PTY4aDAlTApdEEgDBTMAEhlIX1EJQB0VQBZdTAtdB0wfEB4XeTJ/PDxMCx4EQRwICQsAVEh5OyMnPVQFIDQgKzAgDRcUHBosHUlfUSEvK1xeEh0NHApdDTIiTAMLVGshPiFOFhldHx4VCxYHDTQjIzsjVG8qUQgLAwByGhVFTh5+DVM+Ik4WWkkWARgxGhANTlEBQBcRXQcuBQpTNWM3UQlAABVBEgMVTk5UQF0cFGQ5O2Q9UQgLAxVfBxwJAAcHDRdRIyBTEAMXFBwaLB1JU0xMC10QSAMFMwcXTw==",
+  "explain": "LeetCode #184. The join-back pattern keeps ties automatically. A common wrong answer is `SELECT dept_id, name, MAX(salary) ... GROUP BY dept_id`: some databases allow it, but `name` comes from an arbitrary row.",
+  "checks": "Group-max + join back, awareness of the 'bare column' trap.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DE"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 51,
+  "world": "Subquery & CTE Cave",
+  "title": "Above-average spenders (CTE)",
+  "diff": "M",
+  "tables": [
+   "orders",
+   "order_items"
+  ],
+  "prompt": "Using delivered orders and **gross** value (quantity × unit_price), find customers whose total spend is **above the average customer's total spend**. Return `customer_id` and `total_spend`.",
+  "hints": [
+   "Step 1: total spend per customer. Step 2: compare with the average of those totals.",
+   "A CTE (WITH ...) lets you name step 1 and reuse it.",
+   "WITH spend AS (...) SELECT * FROM spend WHERE total_spend > (SELECT AVG(total_spend) FROM spend)"
+  ],
+  "sol": "OTogZVMCHAsdEA0yIkxGeVQNIDQgKzAgDRxfDxsAAEIeFB4xGhABUyI5I1sbRF0AGQ8dAEQHCExEUxtEXQQCBwcrXQEYDwtaVGwgURgBBxVBLAIcCx0QJ1NRKjw8OQ0cAwgLAQcNHFEmITo6DRwDCAsBK0QHFAEdUxtEUz4iThxaQgEVCRwsHUlTTEwBGlpCARUJHCwdSXlRTDk7MX82UQNAAABMBwQfTk5UChcUAAcFEV8WFUtkU1RqIT45PlM2dFMeQg0GB1kcHAkcLB1JeVhmPTY4aDAlTA0GB1kcHAkcLB1JX1EYAQcVQSwCHAsdEA01IyMjUwddFh8IZCQ8aCE0TBocAEwfLh8eFhpJU09MRiAxYTYyOE4yImpbBQMaEhhyAAEJABddDTUjIyNTB10WHwhHSA==",
+  "explain": "'Average customer spend' ≠ AVG of line items. You must aggregate to customer level first, then average. CTEs make this two-step logic readable, which is why interviewers prefer them.",
+  "checks": "Aggregating at the correct grain + CTE readability.",
+  "jd": [
+   "Tata CLiQ",
+   "Snabbit"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 52,
+  "world": "Subquery & CTE Cave",
+  "title": "Electronics buyers (EXISTS)",
+  "diff": "M",
+  "tables": [
+   "customers",
+   "orders",
+   "order_items",
+   "products"
+  ],
+  "prompt": "Return `customer_id` and `name` of customers who bought at least one **Electronics** product (any order status).",
+  "hints": [
+   "You only need to know whether such a purchase exists.",
+   "EXISTS with a subquery that joins orders → order_items → products.",
+   "WHERE EXISTS (SELECT 1 FROM orders o JOIN order_items oi ... JOIN products p ... WHERE o.customer_id = c.customer_id AND p.category = 'Electronics')"
+  ],
+  "sol": "PTY4aDAlTA1dF1gABQMDFgZyGhVAThBaQxIcCWQ1JmI+UQ8bAABCHhQeHVMXJyQ5KTw2VGgrOD86IFQFeVFMPTY4aDAlTF9TMn88PEwBARBIAQJMAXlUDTk+JSBTG18XFB4xGgBIHgJMARpUYj1RA0AcBkkWAzMHF1QQUx4FQBwGSRYDMwcXfg1TOyMnPVRdAR4IGxAAXlMBTCE9VF1dAR4BFwFOBy4FClNJDRwYQh4BG0kGEhgxGhAnU1E7JjYmaFMeQg0GB1kcHAkcLB1JU0xMDV0XWAAFAwMWBnIaFUwvPTANA18PDwcRShwDFU5OVAo2HQkNBwZCHRgPHVR+BEg=",
+  "explain": "EXISTS returns each customer once. A plain join would return one row per Electronics item and need DISTINCT.",
+  "checks": "EXISTS vs JOIN + DISTINCT.",
+  "jd": [
+   "Tata CLiQ"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 53,
+  "world": "Subquery & CTE Cave",
+  "title": "Footwear AND Apparel buyers",
+  "diff": "M",
+  "tables": [
+   "orders",
+   "order_items",
+   "products"
+  ],
+  "prompt": "Return `customer_id` of customers who have bought **both** Footwear **and** Apparel (any status).",
+  "hints": [
+   "Filtering category IN ('Footwear','Apparel') gives customers who bought either.",
+   "Group per customer and count distinct categories.",
+   "HAVING COUNT(DISTINCT p.category) = 2"
+  ],
+  "sol": "PTY4aDAlTAFdF1gABQMDFgZyGhVmKCE7YFMeHgoWBl5THmYkPD1jUx4eChYGchoFCQMAVEIaUSMgUxsDHAMICwErRBdRUU4cHQMcAwgLAStEF3smITo6DQMDAwoGF1kAURxOPDoNA18cHBwQWBAFMwcXVBBTHgVAAwZCFwQPGiwdSXkmJCshMQ0DXw8PBxFKHAMVTjo6DVtWKgEcAFoWEB5JX1QKMgEcDwERQVRYZikhO3gjUS43UxsDEAQfGhwZSAEuBQp5PGwlOCIpUzdiJj84Rjc9fic4Ii0nVF1dEg0aFhNCAQhFTk5UH0g=",
+  "explain": "'Both A and B' across rows = filter to A or B, then require both via COUNT(DISTINCT) = 2. INTERSECT of two lists also works.",
+  "checks": "The 'both X and Y' pattern. Many students wrongly write WHERE category = 'Footwear' AND category = 'Apparel', which returns nothing.",
+  "jd": [
+   "Tata CLiQ",
+   "Snabbit"
+  ],
+  "mysql": "",
+  "ordered": false,
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 54,
+  "world": "Subquery & CTE Cave",
+  "title": "Popular products",
+  "diff": "M",
+  "tables": [
+   "order_items",
+   "orders",
+   "products"
+  ],
+  "ordered": true,
+  "prompt": "Return `product_name` and `buyers` (number of distinct customers who ordered it, any status) for products with **more than 10 distinct buyers**. Sort by buyers desc, then product_name.",
+  "hints": [
+   "Customer lives in orders, product in order_items.",
+   "COUNT(DISTINCT customer_id) per product.",
+   "HAVING COUNT(DISTINCT o.customer_id) > 10"
+  ],
+  "sol": "PTY4aDAlTB5dBF8cFRkNBytDEhwJQlM3YiY/OEY3PX4nOCItJ1RCXRIZHQcbQBYDMwcXXQ0yIkwMBg1IAQJmKCE7YFMeHgoWBnIaBQkDAFRCGnsmITo6DRwDCAsBBw0cUSMgUxsDHAMICwErRBdRUU4cHQMcAwgLAStEF3smITo6DQMDAwoGF1kAURxOPDoNA18cHBwQWBAFMwcXVBBTHgVAAwZCFwQPGiwdSXk2PiEmJA0xKEweXQRfHBUZDQcrRBddTB5dBF8cFRkNBytDEhwJZDs1ezo/K04wO3g9JUQqOid5Oj8vOlMbAxAEHxocGUgBLgUKWlQTU0BcZDwmaTYjTCwqVE8GCAkcAFRpNiIvQlMEAwMDAwoGF1ksHw0DFk8=",
+  "explain": "'Buyers' and 'orders' are different metrics. One customer ordering 3 times is 1 buyer.",
+  "checks": "Picking the right counting unit.",
+  "jd": [
+   "Tata CLiQ"
+  ],
+  "mysql": "",
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 55,
+  "world": "Subquery & CTE Cave",
+  "title": "Orders bigger than usual",
+  "diff": "H",
+  "tables": [
+   "orders",
+   "order_items"
+  ],
+  "prompt": "For each order compute gross value (quantity × unit_price). Return `order_id`, `customer_id`, `order_value` for orders whose value is **greater than that customer's own average order value**. Consider all statuses.",
+  "hints": [
+   "Build order-level values first.",
+   "Then compare each order with the average of the same customer's orders.",
+   "WITH ov AS (SELECT o.order_id, o.customer_id, SUM(...) AS order_value ... GROUP BY ...) SELECT ... FROM ov a WHERE order_value > (SELECT AVG(order_value) FROM ov b WHERE b.customer_id = a.customer_id)"
+  ],
+  "sol": "OTogZVMeGk4yJw1be0xOIDFhNjI4ThxaQgEVCRwsHUlfUQNAEAFeBx4BCwErRBddTD0mOQUcGEIfBhVDBxgYF1NeDRwYQhsdHVksAR4HEBEEUzA/ThwGSRYDMxgSGFgWe0xONSZiPlEDHBcRXwBRA045O2Q9UQMcFxFfLBgYCx4HDRwYTCE9VEJdHh4KFgZyGhVMU1MbRF0eHgoWBnIaFWZOUzN/PCQ8TjEtDRxfAxwXEV8sGAhCUxsDEAQfGhwZSAEuBQp5XScgNCArMCANEl8DHBcRXywYCEJTFQMQBB8aHBlIAS4FCl9UTF0eHgoWBnIFEAAbFn5rIT4hThwCDRJ7OyY2JmhTEEIBARBIAS4aDx8BSFNPTEYgMWE2MjhOMiJqWxNCAQEQSAEuGg8fAUhaUSo8PDkNHAdMDFMjZTYjKU4RWk4GAhgBHhFfLBgITk5UTF0SGR0HG0AWAzMHF10W",
+  "explain": "CTE + correlated subquery. The window version, `AVG(order_value) OVER (PARTITION BY customer_id)`, is shorter. Know both.",
+  "checks": "Multi-step reasoning at two grains (line item → order → customer).",
+  "jd": [
+   "Tata CLiQ",
+   "Grab"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DS"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 56,
+  "world": "Subquery & CTE Cave",
+  "title": "KYC done, money not deposited",
+  "diff": "M",
+  "tables": [
+   "app_events"
+  ],
+  "prompt": "TradeUp wants to nudge users who **completed KYC but never made a first deposit**. Return their `user_id`.",
+  "hints": [
+   "Two event types: kyc_completed and first_deposit.",
+   "Users with event A where no event B exists.",
+   "WHERE event_name='kyc_completed' AND user_id NOT IN (SELECT user_id FROM app_events WHERE event_name='first_deposit')"
+  ],
+  "sol": "PTY4aDAlTCo6J3k6Py86UxEDBgIJHCwdSXk3PiE+VEwDATMLBRFDBwJMC3kjZTYjKU4WWkgFFAIaLBpMHhRMU1NTRgoSMw0cGV0fFBgLF1MnU1EtIDdUYzwlTCsrPX4nIkxGIDFhNjI4TkJUayE+IU4SBF0sFBoLHQBeUxVMOTsxfzZRCEAGB0gBLgUKU0kNFl8ZHRYGchoVTC89MA0XXwkYFhpZLB8NAxZUEFNWCgcBB1ksFQkeHAdEB1ZFVQ==",
+  "explain": "Funnel drop-off at one step. This is the exact list a growth team would send to a CRM tool for a push notification. NOT IN is safe here only because user_id is never NULL.",
+  "checks": "Event-table thinking: one row per event, not per user. Product analytics roles test this heavily.",
+  "jd": [
+   "Upstox",
+   "Snabbit",
+   "ShareChat",
+   "Sarvam AI"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 57,
+  "world": "Subquery & CTE Cave",
+  "title": "Org levels (recursive CTE)",
+  "diff": "H",
+  "tables": [
+   "employees"
+  ],
+  "ordered": true,
+  "prompt": "Return `name` and `level` for every employee, where the top boss (no manager) is level 1, their direct reports level 2, and so on. Sort by level, then name.",
+  "hints": [
+   "You don't know how deep the tree is, so a fixed number of self-joins won't work.",
+   "WITH RECURSIVE: an anchor row (the boss) UNION ALL a step that joins children to the previous level.",
+   "WITH RECURSIVE t AS (SELECT emp_id, name, 1 AS level FROM employees WHERE manager_id IS NULL UNION ALL SELECT e.emp_id, e.name, t.level+1 FROM employees e JOIN t ON e.manager_id = t.emp_id) ..."
+  ],
+  "sol": "OTogZVMjKS0mJn46JylOBwZIFlEtPVNcJ1NRPys/MW4nUQkDAytEF11MABIZSF9RXU4yJw0fFBoLH1RrIT4hThYZXR8eFQsWBw0kOSk8NlRAEh8NCRYGchoVTCcgVGMmPSBkU1R4PTgjIFM1YT97TE4gMWE2MjhOFlpIHgEzBxdYDRZfAg8eEQFTBUICFgJIH1FHTkJ+DVM3PiE+VEgeAQABChFIAFEJTjk7ZD1RGBwWEQ0HUSMgUxEDHhACDxQRXywYCE5OVFldFAEeLB1JeVhmPTY4aDAlTAASGUhfUQALBRFBUzc+IT5UWQEUCU48Jmk2I0wsKlRBFgcJAl9UQxIcCVU=",
+  "explain": "Recursive CTE = anchor + recursive step, repeated until no new rows are produced. Used for org charts, category trees and generating date series.",
+  "mysql": "MySQL 8+ supports WITH RECURSIVE with the same syntax.",
+  "checks": "Advanced SQL. Rare in intern OAs, but a strong differentiator in final rounds.",
+  "jd": [
+   "Grab",
+   "Tata CLiQ"
+  ],
+  "roles": [
+   "DA",
+   "DE"
+  ]
+ },
+ {
+  "id": 58,
+  "world": "Window Wizardry",
+  "title": "Number within department (ROW_NUMBER)",
+  "diff": "E",
+  "tables": [
+   "employees"
+  ],
+  "ordered": true,
+  "prompt": "For employees with both a department and a salary, return `dept_id`, `name`, `salary` and `rn`: their position within the department by salary (highest = 1, ties broken by name A→Z). Sort by dept_id, rn.",
+  "hints": [
+   "Window functions add a column without collapsing rows.",
+   "PARTITION BY restarts the numbering per department.",
+   "ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC, name)"
+  ],
+  "sol": "PTY4aDAlTAoWBFksGAhCUxpMHhRATgAVQRIDFUJ5VA0hPjsxPSFgMTQ+RlpUYiU0Pk5bJGwhJSU6OjtjUzM1ThcRXQcuBQpTO383ND5OMS0NABAADwENDTc0Py1fVEMSHAlHUzV+UwMCZDUmYj5RCQMDGEIKFAkdeSNlNiMpThcRXQcuBQpTPX5TPyM6Uzp4Pz1MLz0wDQAQAA8BDQ06IkwgPCANPSQgInk7fzc0Pk4xLQ0XFBwaLB1JX1EeAEg=",
+  "explain": "GROUP BY gives one row per group; a window function keeps every row and adds a calculation 'over' a window of related rows. PARTITION BY = the group, ORDER BY = the sequence inside it.",
+  "checks": "Window function basics. Tata CLiQ and Upstox JDs name window functions as a must-have.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DS",
+   "DE"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 59,
+  "world": "Window Wizardry",
+  "title": "RANK vs DENSE_RANK vs ROW_NUMBER",
+  "diff": "E",
+  "tables": [
+   "employees"
+  ],
+  "ordered": true,
+  "prompt": "For employees with a salary, return `name`, `salary`, `row_num`, `rnk`, `dense_rnk` (all ordered by salary, highest first; use name as the tie-breaker for row_num). Sort by salary desc, then name.",
+  "hints": [
+   "Three ranking functions, same ORDER BY.",
+   "Ties: RANK skips numbers after a tie; DENSE_RANK doesn't.",
+   "ROW_NUMBER() OVER (ORDER BY salary DESC, name), RANK() OVER (ORDER BY salary DESC), DENSE_RANK() OVER (ORDER BY salary DESC)"
+  ],
+  "sol": "PTY4aDAlTAASGUhfUR8PHxVfCl1mTlMmYiQuIjs+NmghWUVOPCJoIVFEISEwaCFRLjdTB0wfEB4XUzBoIDJATh0VQBZYTC8gVF8cBjMABhkBeVFMPDI6ZltYTCElMX9TWSM8NzF/UzM1TgAVQRIDFU43MX4wWEwvIFRfHRpAZFNUaTY/PyssJmw9OkRHUzt7NiNMRjwmaTYjTCwqVF4SHQ0cClRpNiIvR1M1flMVCQAAEXIBHwdkNSZiPlEJAwMYQgoUCR15I2U2IylOABVBEgMVTjonDT0+OE49IWE/eyM8NzF/UzM1TgAVQRIDFU43MX4wXUwAEhlISA==",
+  "explain": "For salaries 120000, 120000, 110000: ROW_NUMBER → 1,2,3; RANK → 1,1,3; DENSE_RANK → 1,1,2. Use DENSE_RANK for 'Nth highest value', ROW_NUMBER for 'exactly one row per group'.",
+  "checks": "Asked verbally in nearly every DA interview: 'difference between RANK and DENSE_RANK?' Answer with an example.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox",
+   "Grab"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DS",
+   "DE"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 60,
+  "world": "Window Wizardry",
+  "title": "Top 2 salaries per department",
+  "diff": "M",
+  "tables": [
+   "employees"
+  ],
+  "ordered": true,
+  "prompt": "Return `dept_id`, `name`, `salary` for employees whose salary is among the **top 2 distinct salaries** of their department (ties included). Ignore rows without department or salary. Sort by dept_id, salary desc, name.",
+  "hints": [
+   "Rank inside each department.",
+   "You can't filter a window function in WHERE; wrap it in a CTE/subquery.",
+   "WITH r AS (SELECT ..., DENSE_RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS dr ...) SELECT ... WHERE dr <= 2"
+  ],
+  "sol": "OTogZVMDTC8gVAV5UUw9NjhoMCVMChYEWSwYCEJTGkweFEBOABVBEgMVQnlUDVNRKCs9J2gsIy0gOFwEUz46KyFUBSMwPjo6IGQ8P0wsKlRJFgEYMRoQDTwjKCshVG8qUR8PHxVfClEoKyA3BFMwP04XBidTUSo8PDkNFhwcAhwNSBYCZk5TI2U2IylOFxFdBy4FClM9flM/IzpTOng/PUwvPTANABAADwENDToiTCA8IA09JCAieV0nIDQgKzAgDRcUHBosHUlfUQIPHhEBUwINAhIGVFM3PiE+VF9TJiQrITENFwNMUk5UH3k+Pio2Jg0xKEwKFgRZLBgIQlMHTB8QHhdTMGggMkBOHRVAFko=",
+  "explain": "'Top N per group' is the single most common window-function question. Window functions are computed after WHERE, so you need a CTE or subquery to filter on them.",
+  "mysql": "Same in MySQL 8+. In MySQL 5.7 (no window functions) you would need a correlated count subquery. Mention it if the OA uses old MySQL.",
+  "checks": "Top-N per group + knowing why WHERE can't see window results.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox",
+   "Grab"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DS",
+   "DE"
+  ]
+ },
+ {
+  "id": 61,
+  "world": "Window Wizardry",
+  "title": "Running revenue in January",
+  "diff": "M",
+  "tables": [
+   "orders",
+   "order_items"
+  ],
+  "ordered": true,
+  "prompt": "For **delivered** orders in **January 2025**, return `order_date`, `daily_revenue` (gross: SUM(quantity × unit_price)) and `running_revenue` (cumulative total up to that day). Sort by order_date.",
+  "hints": [
+   "First aggregate to one row per day.",
+   "Then SUM(...) OVER (ORDER BY order_date).",
+   "WITH d AS (SELECT order_date, SUM(...) AS daily_revenue ... GROUP BY order_date) SELECT *, SUM(daily_revenue) OVER (ORDER BY order_date) FROM d"
+  ],
+  "sol": "OTogZVMVTC8gVAV5UUw9NjhoMCVMAV0bXxcUHjEXFVkWXUw9JjkFHBhCHwYVQwcYGBdTXg0cGEIbHR1ZLAEeBxARBFMwP04XFUQfCDMcFgJIHQQJZFNUayE+IU4cBkkWAx9OHFRnPDgiThwGSRYDMwcHEUAAUQMHUztjUx5CAQEQSAEuBQpTSQ0cGEIBARBIAS4FCnlUDSQ5KTw2VEJdAhgPBwFeU0xMSRcRQRoHCRwWEApTMCIqUxsDHAMICwErSRIFCU4xMXkkNCkgU1MfQ0NZQ0NFAENAS04yOmlTVl5eQUEAQ0BBXUJTJ1NRKzw8IX1TMzVOHFpCARUJHCwQTAcUZkd5J2g/NC86UxtfFxQeMRcVWRZdTAoSHUEKLh4LBRFDBhRAZFNUfiY8RAoSHUEKLh4LBRFDBhRFTjwiaCFRRCEhMGghUS43UxtfFxQeMRcVWRZYTC8gVF8GHwIHHRNyARQaCx0BSHk3PiE+VEl5Pj4qNiYNMShMAQEQSAEuCA8HERY=",
+  "explain": "SUM() OVER (ORDER BY ...) gives a running total. With ORDER BY, the default frame is 'from the first row to the current row'. Aggregate to the day first, otherwise you get a running total per order line.",
+  "checks": "Cumulative sums. Every MTD/YTD dashboard uses this.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 62,
+  "world": "Window Wizardry",
+  "title": "Month-over-month growth",
+  "diff": "M",
+  "tables": [
+   "orders",
+   "order_items"
+  ],
+  "ordered": true,
+  "prompt": "Using delivered orders and gross revenue, return `month` (YYYY-MM), `revenue`, `prev_revenue` (previous month) and `mom_growth_pct` = (revenue − prev) ÷ prev × 100, 2 decimals. The first month has NULLs. Sort by month.",
+  "hints": [
+   "Monthly revenue first, then look one row back.",
+   "LAG(revenue) OVER (ORDER BY month).",
+   "ROUND(100.0 * (revenue - prev_revenue) / prev_revenue, 2)"
+  ],
+  "sol": "OTogZVMcTC8gVAV5UUw9NjhoMCVMHQcGSwcYAQtbUwgqXEkDVFgNHF8DHBcRXywVDRoWXQ0yIkwDHBpZG11MPSY5BRwYQh8GFUMHGBgXU14NHBhCGx0dWSwBHgcQEQRTMD9OARFbFh8ZC3lUDTUjIyNTG18XFB4dUxsNOT4lIFMbXxcUHjEaAEgeAkwBGlRiPVEDQBwGSRYDMwcXVBBTHgVAHAZJFgMzBxd+DVMmJCshMQ0cXx8aEgBYAFFRTlQQSB8YGgsBEUlUe0xONCZiJiFMLCpUQBwfGAZ5XQFTHUwvIFQFeVFMPTY4aDAlTAMcGlkbXUwcFgJIHQQJQlM4bDRZHgsFEUMGFEVOPCJoIVFEISEwaCFRLjdTGUIdBQRHUzV+UwEeCwUrXxYHCQAGEQ01IyMjUxknWns/Kz8xbidRAQEdAEVfUR4LBRFDBhRATgMGSAUuHgsFEUMGFEBkU1R/PCQiKltFHUNfXE5ZVAUBFBoLHQFIU1xMHgERWywDCRgWGlgWWExBUwRfFgczHBYCSB0ECUJTRgRTMD9OHhtALBYeAQQARSwBDxp5Mn88PEwCeTt/NzQ+TjEtDR4eAhobTw==",
+  "explain": "LAG looks at the previous row, LEAD at the next one. The growth formula is (current − previous) / previous. Interviewers watch for people dividing by the current month.",
+  "checks": "LAG + growth % formula. Top-3 most asked business SQL question.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox",
+   "Grab"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 63,
+  "world": "Window Wizardry",
+  "title": "Days between orders",
+  "diff": "M",
+  "tables": [
+   "orders"
+  ],
+  "ordered": true,
+  "prompt": "For each customer's orders (any status), return `customer_id`, `order_id`, `order_date`, `prev_order_date` and `days_gap` (days since their previous order). Only show rows that **have** a previous order. Order history by order_date then order_id. Sort output by customer_id, order_date, order_id.",
+  "hints": [
+   "LAG partitioned by customer.",
+   "Date difference in SQLite: julianday(a) − julianday(b).",
+   "Compute LAG in a CTE, then filter prev_order_date IS NOT NULL"
+  ],
+  "sol": "OTogZVMJTC8gVAV5UUw9NjhoMCVMDQYHWRwcCRwsHUlfUQMcFxFfLBgIQlMbXxcUHjEXFVkWXWZOU1QNPzArRhwGSRYDMwoSAEhaUSM4NiYNWyEtPCc9eTo+Ik4xLQ0QBB8aHBlIAS4FClM7fzc0Pk4xLQ0cAwgLAStJEgUJQlMbXxcUHjEaEARTMD9OAwZIBS4DHBcRXywVDRoWfg1TNz4hPlRCARUJHAB+BHkiKSI2N3lTEhkdBxtAFgMzBxdYDRwDCAsBK0QXXUwBARBIAS4IDwcRAVMBHgsFK0IBFQkcLBBMBxRAZFNUbjIiOEYZAUEaEAIKEg0FHAMICwErSRIFCUdTWQ0ZBAAHEhpJEghEHgERWyweHgoWBnIXEBgLWlRsIFElICcxajYjRU4yJw0XEBUdLBNMA3sqPDw5DQt7OyY2JmhTAR4LBStCARUJHCwQTAcUTCcgVGM8JUwgJjhheT4+KjYmDTEoTA0GB1kcHAkcLB1JX1EDHBcRXywVDRoWWA0cAwgLAStEF0o=",
+  "explain": "Inter-purchase time is used for churn and reorder predictions. Same-day repeat orders give a gap of 0.",
+  "mysql": "MySQL: DATEDIFF(order_date, prev_order_date). PostgreSQL: order_date - prev_order_date.",
+  "checks": "LAG with PARTITION BY + date maths.",
+  "jd": [
+   "Tata CLiQ",
+   "Snabbit"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DS"
+  ]
+ },
+ {
+  "id": 64,
+  "world": "Window Wizardry",
+  "title": "3-day moving average",
+  "diff": "M",
+  "tables": [
+   "stock_prices"
+  ],
+  "ordered": true,
+  "prompt": "For **RELIANCE**, return `price_date`, `close_price` and `ma_3`: the average close of the current day and the 2 previous trading days (fewer on the first days), rounded to 2 decimals. Sort by price_date.",
+  "hints": [
+   "You need a window frame, not just an ORDER BY.",
+   "ROWS BETWEEN 2 PRECEDING AND CURRENT ROW.",
+   "AVG(close_price) OVER (ORDER BY price_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)"
+  ],
+  "sol": "PTY4aDAlTB4BHU4WLggPBxEBUxIAAQARcgMDBQ0WWCdTUT4hJjppWzA6KVsXQRwCCTEDBkQQFEVOPCJoIVFEISEwaCFRLjdTBF8aEgkxFxVZFlE+ISQnDTE0ODk2MWNTQ0w+ITFuNjUlIDRUbD01TC0mJn82PzhOITt6Wl1MXFpUbCBRAQ8sRyc1IyMjUwdZHBIHMQMGRBAUH2QkPGghNEwdChlPHB1MU1NTfzY9JS89N2hUeyM8NzF/UzM1TgMGRBAUMwoSAEhI",
+  "explain": "Window frames control which rows are included. ROWS counts physical rows; RANGE uses values. Moving averages smooth noise in trading, demand and traffic data.",
+  "checks": "Window frames. A good signal for fintech DA roles.",
+  "jd": [
+   "Upstox",
+   "Grab"
+  ],
+  "roles": [
+   "DA",
+   "DS"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 65,
+  "world": "Window Wizardry",
+  "title": "Category share of revenue",
+  "diff": "M",
+  "tables": [
+   "orders",
+   "order_items",
+   "products"
+  ],
+  "ordered": true,
+  "prompt": "Using delivered orders and gross revenue, return `category`, `revenue` and `pct_of_total` (2 decimals), sorted by revenue desc.",
+  "hints": [
+   "Revenue per category first.",
+   "SUM(revenue) OVER () gives the grand total on every row.",
+   "ROUND(100.0 * revenue / SUM(revenue) OVER (), 2)"
+  ],
+  "sol": "OTogZVMSTC8gVAV5UUw9NjhoMCVMHl0XTAcUCwEBDQFTIjkjWxtEXQAZDx0ARAcITERTG0RdBAIHBytdARgPC1pUbCBRHgsFEUMGFGZOUzJ/PDxMAQEQSAECTAF5VA05PiUgUxtfFxQeMRoASB4CTAEaVGI9UQNAHAZJFgMzBxdUEFMeBUAcBkkWAzMHF34NUzsjJz1UXQEeCBsQAF5TAUwhPVRdXQEeARcBTgcuBQpTSQ0cGEIeARtJBhIYMRoQJ1NROyY2JmhTHkIdBxVZBgJMU1NTSRYdBRgWBkgXVmZOUzN/PCQ8TjEtDQNfDw8HEUocAxVkWn5+Nj0pLSdUThIFCQkcBlRfUR4LBRFDBhRATiE7eD01RF9DRANDUUZOARFbFh8ZC1NbDSAkIUYBEVsWHxkLWlRiJTQ+TltdAVNDRU4yJw0DEhgxHBJyBx4YDx9+ayE+IU4QfmIhNSk8UzZ0UwMJGBYaWBZRKCsgNxY=",
+  "explain": "An empty OVER () means 'the whole result set'. This avoids a separate subquery for the total. Percent-of-total and mix analysis come up in almost every BA case.",
+  "checks": "Share/mix calculation with an empty window.",
+  "jd": [
+   "Tata CLiQ",
+   "Swiggy"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 66,
+  "world": "Window Wizardry",
+  "title": "Spend quartiles (NTILE)",
+  "diff": "M",
+  "tables": [
+   "orders",
+   "order_items"
+  ],
+  "ordered": true,
+  "prompt": "Split customers with delivered orders into **4 quartiles** by total gross spend (quartile 1 = top spenders). Return `customer_id`, `total_spend`, `quartile`. Break ties by customer_id. Sort by quartile, total_spend desc, customer_id.",
+  "hints": [
+   "Total spend per customer first.",
+   "NTILE(4) OVER (ORDER BY ...) assigns buckets 1-4.",
+   "NTILE(4) OVER (ORDER BY total_spend DESC, customer_id)"
+  ],
+  "sol": "OTogZVMCTC8gVAV5UUw9NjhoMCVMAV0XWAAFAwMWBnIaFUBOICFgWx4FQAIBTB0FBRoKVAdTHgVABhpEBy4cHBoXSFpRLT1TAEIHEAAxAARIHRVmTlMyfzw8TAEBEEgBAkwBUz5iOj9MAQEQSAEuBRoWGV5THgVOPDoNHF8DHBcRXywYCE5OVEIaXwMcFxFfLBgIZFNUejs0PitTGwMABQ0aBgcNTlFLChYYRAUUHgsXUydTUSs8PCF9UzM1ThxaTgYCGAEeEV8sGAhkWn5+Nj0pLSdUTgYCGAEeEV8sGAhCUwBCBxAAMQAESB0VQGRTVGMnOCArW0AEUz46KyFUBTwjKCshVG8qURgBBxVBLAIcCx0QDTc0Py1fVE4GAhgBHhFfLBgIR1M1flMAGQ8BAEQfFGYoITtgUwJmISEwaCFRLjdTBVgSAxgHHxEBUwUDGhIYcgABCQAXVGk2Ii9CUxdYAAUDAxYGchoVVw==",
+  "explain": "NTILE(n) splits rows into n nearly-equal buckets. It is the basis of RFM segmentation. If rows don't divide evenly, the first buckets get one extra row.",
+  "checks": "Segmentation thinking (Tata CLiQ JD mentions segmentation).",
+  "jd": [
+   "Tata CLiQ"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DS"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 67,
+  "world": "Window Wizardry",
+  "title": "Gap to department top",
+  "diff": "E",
+  "tables": [
+   "employees"
+  ],
+  "ordered": true,
+  "prompt": "For employees with both department and salary, return `name`, `dept_id`, `salary`, `dept_max` (highest salary in their department) and `gap` = dept_max − salary. Sort by dept_id, gap, name.",
+  "hints": [
+   "MAX can be a window function too.",
+   "PARTITION BY dept_id, no ORDER BY needed.",
+   "MAX(salary) OVER (PARTITION BY dept_id)"
+  ],
+  "sol": "PTY4aDAlTAASGUhfUQgLAwByGhVATgAVQRIDFUJ5VA0+MDRGABVBEgMVR1M7ezYjTEYjNX8nODgnPDoNMShMChYEWSwYCEdTNX5TFQkeBytAEglAZFNUYDIpRB0SGEwBCEVOPCJoIVFEPjImeTolJSE9VG8qUQgLAwByGhVFTl5UXhIdDRwKVGwgUQsPA35rIT4hThYZXR8eFQsWByckOSk8NlRJFgEYMRoQDToiTCA8IA09JCAiUzVjN1EfDx8VXwpRJT1TOmInUSI7PzgnPCMoKyFUbypRCAsDAHIaFUBOFBVdX1ECDx4RFg==",
+  "explain": "Any aggregate (SUM, AVG, MIN, MAX, COUNT) becomes a window function with OVER. You get group-level numbers next to row-level ones, with no self-join needed.",
+  "checks": "Aggregate window functions.",
+  "jd": [
+   "Tata CLiQ",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 68,
+  "world": "Window Wizardry",
+  "title": "Each trader's first trade",
+  "diff": "M",
+  "tables": [
+   "trades"
+  ],
+  "prompt": "Return `user_id`, `trade_date`, `symbol` of each user's **first trade** (earliest trade_date; if two on the same day, the lower trade_id).",
+  "hints": [
+   "Exactly one row per user means ROW_NUMBER.",
+   "Order by trade_date, trade_id inside each user.",
+   "WITH r AS (SELECT ..., ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY trade_date, trade_id) rn ...) SELECT ... WHERE rn = 1"
+  ],
+  "sol": "OTogZVMDTC8gVAV5UUw9NjhoMCVMGwARXywYCEJTAF8SFQkxFxVZFl1MHQoZTxwdQGRTVA1TIyM5LDp4PjMpPFtdDTwnKTxTXH0yIzgnJz1iPVEuN1MBXhYDMwcXVGIhNSk8UzZ0UwUeDxcRchcQGAtfVFkBEAgLLB1JWlEtPVMGQ3lRTCghO2BTBR4PFxFeeVhmPTY4aDAlTBsAEV8sGAhCUwBfEhUJMRcVWRZdTB0KGU8cHUwoITtgUwNMOTsxfzZRHgBTSQ1CSg==",
+  "explain": "'First/last X per user' = ROW_NUMBER + filter rn = 1. Using MIN(trade_date) alone gives the date but not the symbol, and joining back can return 2 rows on ties.",
+  "checks": "Picking one row per group deterministically.",
+  "jd": [
+   "Upstox",
+   "Grab"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DE"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 69,
+  "world": "Window Wizardry",
+  "title": "Login streaks (gaps & islands)",
+  "diff": "H",
+  "tables": [
+   "app_events"
+  ],
+  "ordered": true,
+  "prompt": "Find users who opened the app (event `app_open`) on **5 or more consecutive days**. Return `user_id`, `streak_start`, `streak_end`, `streak_days`. A user may have several such streaks. Sort by user_id, streak_start.",
+  "hints": [
+   "First get distinct (user, date) pairs; several opens on one day count once.",
+   "Trick: date minus ROW_NUMBER() is constant within a run of consecutive days.",
+   "julianday(dt) - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY dt) AS grp, then GROUP BY user_id, grp HAVING COUNT(*) >= 5"
+  ],
+  "sol": "OTogZVMVTC8gVAV5UUw9NjhoMCVMKjoneTo/LzpTAV4WAzMHF1gNFxAYC1sRWxYfGDEHHUAWWEwvIFRJB1EqPDw5DRIBHDEWAkgdBR9OJDxoITRMCwURQwcuAg8eEQ1OUUsPAwRyHAEJAFR+BF9RC04yJw1be0xOIDFhNjI4TgYHSAEuBQpfVEkHXWZOU1QNGQQABxIaSRIIRAoHXQ1eUT4hJCtjJjwuKyFcBFM+OishVAUjMD46OiBkPD9MLCpUWAAUHjEaEA08IygrIVRvKlEIGlpUbCBRCxwDfg1TNz4hPlRJeVhmPTY4aDAlTBsAEV8sGAhCUzlkPVkIGlpUbCBRHxoBEUwYLh8aEgZZX1EhLytcSQdYTC8gVF4HAwkPGCtIHRVATjA7eD0lRERaVGwgUR8aARFMGC4IDwoHJzUjIyNTEyc0IyM7I1RvKlEZHRYGchoVQE4UBl15OS04OjpqUzIjOz0gBVlYTFBOVBh5Pj4qNiYNMShMGwARXywYCEJTB1kBFA0FLAdZEgMYVQ==",
+  "explain": "The 'gaps and islands' trick: for consecutive dates, date − row_number stays the same, so it labels each island. A famous hard question (e.g. 'users who logged in 3 days in a row').",
+  "mysql": "MySQL: DATE_SUB(dt, INTERVAL ROW_NUMBER() OVER (...) DAY) AS grp.",
+  "checks": "Advanced pattern recognition. Getting this right in an interview is a strong hire signal.",
+  "jd": [
+   "Grab",
+   "Upstox",
+   "ShareChat"
+  ],
+  "roles": [
+   "DA",
+   "DS",
+   "DE"
+  ]
+ },
+ {
+  "id": 70,
+  "world": "Window Wizardry",
+  "title": "Came back within 30 days",
+  "diff": "M",
+  "tables": [
+   "orders"
+  ],
+  "prompt": "Return the distinct `customer_id`s of customers who placed an order (any status) **within 30 days** of their previous order (gap of 0 to 30 days).",
+  "hints": [
+   "LAG on order_date per customer.",
+   "Compute the gap, filter ≤ 30.",
+   "SELECT DISTINCT customer_id FROM (...LAG...) WHERE julianday(order_date) - julianday(prev) <= 30"
+  ],
+  "sol": "OTogZVMJTC8gVAV5UUw9NjhoMCVMDQYHWRwcCRwsHUlfUQMcFxFfLBUNGhZYJ1NRTE4/NWpbHh4KFgZyFxAYC1pUYiU0Pk5bJGwhJSU6OjtjUzM1ThABXgceAQsBK0QXUSM8NzF/UzM1ThwGSRYDMwoSAEhfUQMcFxFfLBgIR1M1flMBHgsFK0kSBQlkU1RrIT4hThwGSRYDH2Rafn42PSktJ1RpOiI4Jz03eVMSGR0HG0AWAzMHF1RrIT4hTgt+ejs0PitTBF8WBzMKEgBIUzg/Tj07eVM/OSI/VGw9NUwEBhhEEh8IDwpcQgEVCRwsEEwHFEVOXlRHBh0FDx0QTApZHBwWAnIXEBgLWlQRTlFfXkg=",
+  "explain": "This is a repeat-purchase or 30-day reorder metric. A self-join can do it too, but LAG is cleaner and faster.",
+  "checks": "Turning a retention definition into SQL.",
+  "jd": [
+   "Tata CLiQ",
+   "Snabbit",
+   "Swiggy"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 71,
+  "world": "Window Wizardry",
+  "title": "City-wise restaurant ranking",
+  "diff": "E",
+  "tables": [
+   "restaurants",
+   "food_orders"
+  ],
+  "ordered": true,
+  "prompt": "Rank restaurants **within each city** by delivered revenue (sum of amount). Return `city`, `name`, `revenue`, `city_rank` (DENSE_RANK, 1 = highest). Sort by city, city_rank, name.",
+  "hints": [
+   "Aggregate revenue per restaurant first.",
+   "Then DENSE_RANK partitioned by city.",
+   "DENSE_RANK() OVER (PARTITION BY city ORDER BY revenue DESC)"
+  ],
+  "sol": "OTogZVMDCRhTNX5TWWZOUydoPzQvOlMGAxAYGBdfVF9dHw0DFlgNICQhRhVaTB4eGQAHXQ0yIkwcFgJIHQQJZFNUayE+IU4BEV4HEBkcEhpZAFEeTjk7ZD1RCgEcEHIcAwgLAQcNFVEjIFMGAwEUHxoSAV8SHxgxGhANTlEKQAERXgcQGRwSGlksGAhkU1R6OzQ+K1MSAwAFDRoGBw1OUUsKFhhEBRQeCxdTJ1NRKzw8IX1TMzVOAVpfFgIYDwYGTB0FMwcXWA0BXw8HBw0BUwNCABIZSHlYZj02OGgwJUwNGgBUX1ECDx4RAVMDCRgWGlgWXUwqNjp+Ni4+Lz0/BVpRIzg2Jg1bIS08Jz15Oj4iTjEtDRAYGBdTO383ND5OMS0NARQaCx0BSFM1KT0wXQ0yIkwNGgBULAMNABh+ayE+IU4BEVt5Pj4qNiYNMShMDRoAVF9RDwcHDXIBEAIFX1RDEhwJVQ==",
+  "explain": "You can apply a window function on top of an aggregated CTE. Aggregate first, rank second.",
+  "checks": "Combining GROUP BY and window functions in the right order.",
+  "jd": [
+   "Swiggy"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 72,
+  "world": "Window Wizardry",
+  "title": "Best-seller in each category",
+  "diff": "M",
+  "tables": [
+   "order_items",
+   "products"
+  ],
+  "ordered": true,
+  "prompt": "Find the product(s) with the **most units sold** (sum of quantity, any status) in each category. Include ties. Return `category`, `product_name`, `units`. Sort by category, product_name.",
+  "hints": [
+   "Units per product first.",
+   "RANK within category by units desc.",
+   "WITH u AS (...), r AS (SELECT *, RANK() OVER (PARTITION BY category ORDER BY units DESC) rk FROM u) SELECT ... WHERE rk = 1"
+  ],
+  "sol": "OTogZVMETC8gVAV5UUw9NjhoMCVMHl0XTAcUCwEBDQFTAUIeARtJBhIYMR0VQBZdTD0mOQUcGEIfBhVDBxgYF1pUbCBRGQAaAF55UUwoITtgUx4eChYGchoFCQMAVEIaUSYhOjoNAwMDCgYXWQBRHE48Og0DXxwcHBBYEAUzBxdUEFMeBUADBkIXBA8aLB1JeVFMKSE7eCNRLjdTBAMDAwMKBhdZLBgIQlMEAxAQGAsUG18KXUweXQRfHBUZDQcrQxIcCWRaWA0BUS09U1wnU1E/Kz8xbidRRkJTJmw9OkRHUzt7NiNMRiM1fyc4OCc8Og0xKEwNEgBIFB4eF1M7fzc0Pk4xLQ0GHwUaAFRpNiIvR1M1flMDB041JmI+URlkWn5+Nj0pLSdUThIFCQkcBlRfURwcHBBYEAUzABIZSF9RGQAaAF5TNz4hPlRfUyYkKyExDQEaTFNTRSc8IygrIVRvKlEPDwcRShwDFUJTBF8cFRkNBytDEhwJVQ==",
+  "explain": "RANK (not ROW_NUMBER) keeps ties. Choosing the function based on whether ties should be kept is exactly what interviewers probe.",
+  "checks": "Right ranking function for the business need.",
+  "jd": [
+   "Tata CLiQ"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 73,
+  "world": "Window Wizardry",
+  "title": "Cumulative app users",
+  "diff": "E",
+  "tables": [
+   "app_users"
+  ],
+  "ordered": true,
+  "prompt": "Return `month` (YYYY-MM of signup_date), `new_users` and `cumulative_users` (running total), sorted by month.",
+  "hints": [
+   "GROUP BY month for new users.",
+   "Running SUM over the grouped result.",
+   "SUM(COUNT(*)) OVER (ORDER BY month) works directly, or use a CTE."
+  ],
+  "sol": "PTY4aDAlTB0HBksHGAELW1MIKlxJA1RYDQAYCwAGBHIXEBgLWlRsIFEBAR0ARV9RLyEmOnlbW0VOMicNHRQbMQYHSAECQGRTVH4mPEQtPCFjJ1lGR1pUYiU0Pk5bO383ND5OMS0NAAUeCAcdQBZZS0sqWQgeVkBOAB1KHQQcMRcVWRZYRU4yJw0QBAEbHxVZGgcJMQYHSAECZighO2BTEBweLAFeFgMfZDQmYiYhTCwqVEAcHxgGeTt/NzQ+TjEtDR4eAhobTw==",
+  "explain": "A window function can wrap an aggregate: SUM(COUNT(*)) OVER (...). The inner COUNT runs per group, the outer SUM runs across groups.",
+  "checks": "Growth curves. This is the first chart in any user-growth review.",
+  "jd": [
+   "Upstox",
+   "ShareChat",
+   "Sarvam AI"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 74,
+  "world": "Window Wizardry",
+  "title": "Sharp price drops",
+  "diff": "M",
+  "tables": [
+   "stock_prices"
+  ],
+  "ordered": true,
+  "prompt": "Find days where a stock closed **more than 2.5% lower** than its previous trading day. Return `symbol`, `price_date`, `prev_close`, `close_price`, `change_pct` (2 decimals, negative). Sort by symbol, price_date.",
+  "hints": [
+   "LAG per symbol ordered by date.",
+   "change_pct = (close − prev) / prev × 100.",
+   "Filter change_pct < −2.5 in an outer query."
+  ],
+  "sol": "OTogZVMJTC8gVAV5UUw9NjhoMCVMHQoZTxwdQE4DBkQQFDMKEgBIX1EPAhwHSCwBHgcQEQF5UUxOUzhsNFkPAhwHSCwBHgcQEQRTPjorIVQFIzA+OjogZDw/TCwqVF4KHA4BH1RiITUpPFM2dFMBHgcQEXIXEBgLWlRsIFEcHBYCchAdAx0Wfg1TNz4hPlReBx4PBSwEXxoSCR15XScgNCArMCANAAgBDBwYAVMBHgcQEXIXEBgLX1RdARQaMRAYQgAUQE4QGEIAFDMeAR1OFl1mTlMmYiY/KEZCRB1dQUxEU1xOHx4fCywEXxoSCU5eVF0BFBoxEBhCABRFTlxUXQEUGjEQGEIAFEBOQV0NMiJMDRsVQxQUMx4QACc1IyMjUwwnJDkpPDZUHENBQl5TXg1bEgABABFyAwMFDRZUAFMBHgsFK04fHh8LWlQCUwEeCwUrTh8eHwtTSA1eQ0JbeTt/NzQ+TjEtDQAIAQwcGAFTAR4HEBFyFxAYC0g=",
+  "explain": "Day-over-day change with a threshold is the simplest form of anomaly detection (Grab's DA JD names anomaly detection).",
+  "checks": "LAG + threshold alerting.",
+  "jd": [
+   "Upstox",
+   "Grab"
+  ],
+  "roles": [
+   "DA",
+   "DS"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 75,
+  "world": "Window Wizardry",
+  "title": "Keep the latest lead per phone",
+  "diff": "M",
+  "tables": [
+   "raw_leads"
+  ],
+  "prompt": "Deduplicate leads: for each non-null `phone` (exact value) keep only the **most recent** row by created_at (ties: higher lead_id). Return `lead_id`, `full_name`, `phone`, `created_at`.",
+  "hints": [
+   "ROW_NUMBER per phone, newest first.",
+   "Keep rn = 1.",
+   "ROW_NUMBER() OVER (PARTITION BY phone ORDER BY created_at DESC, lead_id DESC)"
+  ],
+  "sol": "OTogZVMDTC8gVAV5UUw9NjhoMCVMAhYVSSwYCEJTElgfHTMAEhlIX1EcBhwaSF9RDxwWFVkWFTMPB1gnU1FMTiE7eiw/OSMxMX9bWEwhJTF/U1k8LyEgZCc4IyBTNnRTAQQBHRENPCMoKyFUbypRDxwWFVkWFTMPB1RpNiIvQlMYSBIVMwcXVGk2Ii9HUzV+UwMCZFNUayE+IU4BFVosHQkPFwcnU1E7JjYmaFMBBAEdEQ06IkwgPCANPSQgInldJyA0ICswIA0fFA0KLB1JX1EKGx8Ych0QAQtfVF0bHgILX1ROARQNGhYQchIFTCghO2BTA0w5OzF/NlEeAFNJDUJK",
+  "explain": "The standard dedup pattern in data engineering: ROW_NUMBER() OVER (PARTITION BY business_key ORDER BY updated_at DESC) and keep rn = 1. To actually delete, use DELETE ... WHERE lead_id IN (rows with rn > 1).",
+  "checks": "Dedup with window functions. 'How do you delete duplicates?' is a top DE/DA question.",
+  "jd": [
+   "Tata CLiQ",
+   "Eternz"
+  ],
+  "roles": [
+   "DA",
+   "DE"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 76,
+  "world": "Dates, Strings & Cleaning",
+  "title": "Tidy up leads",
+  "diff": "E",
+  "tables": [
+   "raw_leads"
+  ],
+  "prompt": "Return `lead_id`, `full_name` (spaces trimmed), `email` (trimmed + lowercase) and `city` (trimmed) for leads whose trimmed name is **not empty**.",
+  "hints": [
+   "TRIM removes leading/trailing spaces.",
+   "LOWER for emails; NULL stays NULL.",
+   "WHERE TRIM(full_name) <> ''"
+  ],
+  "sol": "PTY4aDAlTAIWFUksGAhCUyB/OjxECAYYQSwfDQMWXQ0yIkwIBhhBLB8NAxZYDT8+OyshXHkhOCFGFhlMGh1FR1M1flMUAQ8aGAFTJT4nPlxOGgUVR1M1flMSBRoKfmshPiFOARVaLB0JDxcHJyQ5KTw2VHkhOCFGFQFBHy4CDx4RBFNNUk5UUxY=",
+  "explain": "Most real data cleaning is TRIM, LOWER/UPPER, REPLACE and COALESCE. Clean values before grouping or joining, or 'Pune' and 'Pune ' will count as two cities.",
+  "checks": "Practical cleaning instincts.",
+  "jd": [
+   "Eternz",
+   "Tata CLiQ",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "DE"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 77,
+  "world": "Dates, Strings & Cleaning",
+  "title": "Standardise phone numbers",
+  "diff": "M",
+  "tables": [
+   "raw_leads"
+  ],
+  "prompt": "Return `lead_id` and `phone_clean`: the phone with spaces, '-' and '+' removed, keeping only the **last 10 digits**. Missing phones stay NULL.",
+  "hints": [
+   "Chain REPLACE calls to strip characters.",
+   "SUBSTR with a negative start counts from the end.",
+   "SUBSTR(REPLACE(REPLACE(REPLACE(phone,' ',''),'-',''),'+',''), -10)"
+  ],
+  "sol": "PTY4aDAlTAIWFUksGAhCeVQNICQuPScmBSE0PCIyN2hbIyk+PzVuNlk+KyM4bDA0RB4bG0MWXUxJU1MBU1ZLR19UCl5WQE5UUwRfUUtFVFgNVFZFQlNZHENYTC8gVF0bHgILLBdBFhACZDUmYj5RHg8EK0EWEAgdSA==",
+  "explain": "'+91-9876543210' → '919876543210' → last 10 → '9876543210'. Now the duplicate from World 2 becomes visible. Functions return NULL for NULL input, so no special handling is needed.",
+  "mysql": "MySQL: RIGHT(REPLACE(...), 10). MySQL 8 also has REGEXP_REPLACE(phone, '[^0-9]', '').",
+  "checks": "String functions applied to a real Indian data problem (+91 prefixes).",
+  "jd": [
+   "Eternz",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "DE"
+  ],
+  "ordered": false
+ },
+ {
+  "id": 78,
+  "world": "Dates, Strings & Cleaning",
+  "title": "Broken emails",
+  "diff": "M",
+  "tables": [
+   "raw_leads"
+  ],
+  "prompt": "Return `lead_id` and `email` (as stored) for non-null emails that are **invalid**: either no '@', or no '.' after the '@'.",
+  "hints": [
+   "INSTR(text, '@') gives the position (0 if missing).",
+   "Take the part after '@' with SUBSTR and look for '.'.",
+   "WHERE INSTR(email,'@') = 0 OR INSTR(SUBSTR(email, INSTR(email,'@')+1), '.') = 0"
+  ],
+  "sol": "PTY4aDAlTAIWFUksGAhCUxFAEhgAZDUmYj5RHg8EK0EWEAgdeSNlNiMpThYZTBodTCcgVGM8JUwgJjhheVFMLz0wDVs4Ij0nJgUWHA0HH1gNVDFLR1NJDUNRIzxTPWMgJT5GICFvICU+RhYZTBodQE46On4nI0QLHhVEH11MSTNTBFNaTF9aWA1UX0tHU0kNQ1hX",
+  "explain": "A simple rule-based validity check. 'meera@company' fails because the domain has no dot. Real pipelines use regex, but INSTR/SUBSTR logic is what OAs expect.",
+  "mysql": "MySQL: LOCATE('@', email) or email NOT REGEXP '^[^@]+@[^@]+\\\\.[^@]+$'.",
+  "checks": "Data-quality rules in SQL.",
+  "jd": [
+   "Eternz"
+  ],
+  "roles": [
+   "DA",
+   "DE"
+  ],
+  "ordered": false
+ },
+ {
+  "id": 79,
+  "world": "Dates, Strings & Cleaning",
+  "title": "Average delivery time",
+  "diff": "M",
+  "tables": [
+   "food_orders",
+   "restaurants"
+  ],
+  "ordered": true,
+  "prompt": "For delivered food orders, return restaurant `name` and `avg_delivery_mins` (minutes from order_time to delivered_time, rounded to 1 decimal). Sort by avg_delivery_mins (fastest first).",
+  "hints": [
+   "Datetime difference in SQLite: (julianday(end) − julianday(start)) is in days.",
+   "Days × 24 × 60 = minutes.",
+   "ROUND(AVG((julianday(delivered_time) - julianday(order_time)) * 24 * 60), 1)"
+  ],
+  "sol": "PTY4aDAlTBxdGkweFEBkU1R/PCQiKls1ezRZRAQGGEQSHwgPClxLXRUJAhoCSAEUCDEHHUAWWExDUx5YHxgNABcVVFsXQgEBEEgBLhgHHhEEWlFGTkFADVlRWl5aWA1CWEwvIFRMBRYzChYYRAUUHhcsGUQdAmYoITtgUxcDARcrQgEVCRwAVEtTOyMnPVRfFgIYDwYGTB0FH04BVGI9UR5AARFeBxAZHBIaWSwYCE5OVEtdAwkdBxVYARACGiwdSXkmJCshMQ0VXx8aEgBYAFFRTlQQSB8YGgsBEUlUeys8PCF9UzM1TgFaXxYCGA8GBkwdBTMHF1gNAV8CDx4RJzwjKCshVG8qUQ0YFCtJFh0FGBYGVCwcBQAATw==",
+  "explain": "Delivery time is a core quick-commerce/food-delivery KPI. In an interview, add that medians or P90 are often better than averages because a few late orders skew the mean.",
+  "mysql": "MySQL: TIMESTAMPDIFF(MINUTE, order_time, delivered_time).",
+  "checks": "Timestamp arithmetic + KPI thinking (mean vs median).",
+  "jd": [
+   "Swiggy",
+   "Snabbit"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 80,
+  "world": "Dates, Strings & Cleaning",
+  "title": "Peak ordering hours",
+  "diff": "E",
+  "tables": [
+   "food_orders"
+  ],
+  "ordered": true,
+  "prompt": "Return `order_hour` (0-23 as an integer) and `orders` (count, all statuses), sorted by order_hour.",
+  "hints": [
+   "Extract the hour from order_time.",
+   "strftime('%H', ...) returns text like '19'.",
+   "CAST(strftime('%H', order_time) AS INTEGER)"
+  ],
+  "sol": "PTY4aDAlTC0yJ3lbAhgcFQBEHhRESVY8Cl9RAxwXEV8sBQUDFl0NMiJMJz0gaDQ0PkdTNX5THh4KFgZyGx4ZHF9UbjwkIjpbXgRTMD9OHAZJFgMfZDUmYj5RCgEcEHIcAwgLAQcnNCMjOyNUbypRAxwXEV8sGQMbAX5iITUpPFM2dFMeHgoWBnIbHhkcSA==",
+  "explain": "Hour-of-day analysis drives rider scheduling and surge pricing. Notice the lunch and dinner peaks.",
+  "mysql": "MySQL: HOUR(order_time).",
+  "checks": "Extracting date parts.",
+  "jd": [
+   "Swiggy",
+   "Snabbit"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ]
+ },
+ {
+  "id": 81,
+  "world": "Dates, Strings & Cleaning",
+  "title": "Weekday pattern",
+  "diff": "M",
+  "tables": [
+   "orders"
+  ],
+  "ordered": true,
+  "prompt": "Return `day_name` ('Sunday' … 'Saturday') and `orders` (count of all orders), ordered from Sunday to Saturday.",
+  "hints": [
+   "strftime('%w', date) returns '0' for Sunday … '6' for Saturday.",
+   "Map numbers to names with CASE; sort by the number.",
+   "GROUP BY strftime('%w', order_date) ORDER BY strftime('%w', order_date)"
+  ],
+  "sol": "PTY4aDAlTC0yJ2hTAhgcFQBEHhRESVYDCl9RAxwXEV8sFQ0aFl0nU1FMTiQ8aD1RS15UVHk7NCJOVCdYHRUNF1RUejs0Ik5URQpTJSQrPVQKPh4CChINClMmJCs9VApBVkw6OzFjU1Y4GxYHSRIIS2RTVA1TJiQrPVQKQFZMOjsxY1NWOwsXGkgAFQ0XVFR6OzQiTlRAClMlJCs9VAonGRkcABBMClZMOTsxY1NWWUlTIGU2P0xJNQZEFxAVSXlUDVNRKSIgMQ1UIg0aBgZJEghLTjY6aVMwP04XFVQsHw0DFlgnU1EvISY6eVtbRU4yJw0cAwgLAQcnNSMjI1MbXxcUHh15M388JDxOMS0NAAUeCAcdQBZZS0sEUwFTHh4KFgZyFxAYC1p+YiE1KTxTNnRTAhgcFQBEHhRESVYDCl9RAxwXEV8sFQ0aFl0W",
+  "explain": "Sorting by day name alphabetically (Friday, Monday...) is a classic dashboard bug. Sort by the day number.",
+  "mysql": "MySQL: DAYNAME(order_date) and DAYOFWEEK(order_date) (1 = Sunday).",
+  "checks": "Correct ordering of categorical time labels.",
+  "jd": [
+   "Tata CLiQ",
+   "Swiggy"
+  ],
+  "roles": [
+   "DA",
+   "BI"
+  ]
+ },
+ {
+  "id": 82,
+  "world": "Dates, Strings & Cleaning",
+  "title": "SLA breaches",
+  "diff": "E",
+  "tables": [
+   "shipments"
+  ],
+  "ordered": true,
+  "prompt": "Return `shipment_id`, `created_date`, `delivered_date` and `days_taken` for delivered shipments that took **more than 2 days**. Sort by days_taken desc, then shipment_id.",
+  "hints": [
+   "Date difference in days with julianday.",
+   "Filter > 2.",
+   "CAST(julianday(delivered_date) - julianday(created_date) AS INTEGER)"
+  ],
+  "sol": "PTY4aDAlTB0bHV0eFAIaLB1JX1EPHBYVWRYVMwoSAEhfUQgLHx1bFgMJCiwQTAcUQGRTVG4yIjhGGQFBGhACChINBRcUAAcFEV8WFTMKEgBIWlFBThkBQRoQAgoSDQUQAwkPBxFJLBUNGhZdDTIiTCc9IGg0ND5HUzV+UxUNFwArWRIaCQB5Mn88PEwdGx1dHhQCGgB+ejs0PitTB1kSBRkdU0kNVBUJAhoCSAEUCElTNWM3UQYbHx1MHRUNF1sQSB8YGgsBEUksFQ0aFl0NXlEGGx8dTB0VDRdbF18WEBgLFytJEgUJR1NKDUF7Izw3MX9TMzVOFxVUAC4YDxgRQ1M1KT0wWA0AGQUeHhFDBy4FCkg=",
+  "explain": "SLA (service level agreement) breach reports are everyday logistics analytics.",
+  "mysql": "MySQL: DATEDIFF(delivered_date, created_date).",
+  "checks": "Date diff + ops vocabulary.",
+  "jd": [
+   "Shadowfax"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ]
+ },
+ {
+  "id": 83,
+  "world": "Dates, Strings & Cleaning",
+  "title": "Every day counts (date spine)",
+  "diff": "H",
+  "tables": [
+   "food_orders"
+  ],
+  "ordered": true,
+  "prompt": "Return `order_date` and `orders` for **every day of January 2025** (31 rows), including days with **0** food orders. Sort by date.",
+  "hints": [
+   "GROUP BY only shows days that have orders. You need a list of all dates first.",
+   "Generate dates with a recursive CTE, then LEFT JOIN the orders.",
+   "WITH RECURSIVE d(dt) AS (SELECT '2025-01-01' UNION ALL SELECT date(dt, '+1 day') FROM d WHERE dt < '2025-01-31') ..."
+  ],
+  "sol": "OTogZVMjKS0mJn46JylOF1xJB1hMLyBUBXlRTD02OGgwJUxJQUQfRlxcX15EHFR7TE4mOmQ8P0wvPzgnU1E/Kz8xbidRCA8HEQUXBUBOVF8cUxUNF1RdDTUjIyNTEA0kOSk8NlRJB1FQTlRGHUFEQV5CWR5CVmZHeSdoPzQvOlMQAxcFTC8gVEIBFQkcLBBMBxRATjA7eD0lRAhdG18XFB4xGhAEUzA/ThwGSRYDH2Q1JmI+UQhOPzFrJ1EmITo6DRUeAwosG18XFB4dUxINPD9MChIASFsXQgEBEEgBLhgHHhEEU0xMCl0QWXk2PiEmJA0xKEwKXRBZeT4+KjYmDTEoTApdEFlI",
+  "explain": "A 'date spine' (calendar table) prevents missing days in trend charts and keeps rolling averages correct. Many warehouses keep a permanent dim_date table for this.",
+  "mysql": "MySQL 8: WITH RECURSIVE d AS (SELECT DATE('2025-01-01') AS dt UNION ALL SELECT dt + INTERVAL 1 DAY FROM d WHERE dt < '2025-01-31').",
+  "checks": "Recursive CTE + LEFT JOIN + COUNT(col). A BI/DE favourite.",
+  "jd": [
+   "Grab",
+   "Swiggy"
+  ],
+  "roles": [
+   "BI",
+   "DA",
+   "DE"
+  ]
+ },
+ {
+  "id": 84,
+  "world": "Business Case Room",
+  "title": "Monthly AOV",
+  "diff": "M",
+  "tables": [
+   "orders",
+   "order_items"
+  ],
+  "ordered": true,
+  "prompt": "For delivered orders, return `month`, `orders` (distinct orders), `revenue` (net, 2 decimals) and `aov` (average order value = revenue ÷ orders, 2 decimals). Sort by month.",
+  "hints": [
+   "AOV = revenue / number of orders, not AVG of line items.",
+   "COUNT(DISTINCT order_id) because items multiply rows.",
+   "ROUND(SUM(net) / COUNT(DISTINCT o.order_id), 2)"
+  ],
+  "sol": "PTY4aDAlTB0HBksHGAELW1MIKlxJA1RYDRxfAxwXEV8sFQ0aFl0NMiJMAxwaWRtdZk5TN2ImPzhGNz1+JzgiLSdUQl0eHgoWBnIaFUVOMicNHAMICwEHAXlRTDw8IWM3WT87PlxCGl8dGxIaWRoFFU5ZVEIaXxkAGgByAwMFDRZUB1NZXU5eVEIaXwgHABdCBh8YMQMXWVNeTF9DRANDWEVCU0YEUzA/TgERWxYfGQtffg1TIyM7PTAFICQhRhwdAwIEDQAHHVkKUUZOHB0DBh8FGiwEXxoSCU5ZVAVCUUFOHB0DFxgfDRwBQwcuHA0HVAJTQFxeXUQEWlFDTjA7eD0lRCo6J3k6Py86UxsDHAMICwErRBdYQE5BXQ0yIkwPHAInNSMjI1MbXxcUHh1TGw05PiUgUxtfFxQeMRoASB4CTAEaVGI9UQNAHAZJFgMzBxdUEFMeBUAcBkkWAzMHF356OzQ+K1MbAwAFDRoGBw1OUUsKFhhEBRQeCxdTJzQjIzsjVG8qUQEBHQBFeT4+KjYmDTEoTAMcGlkbSg==",
+  "explain": "AVG(line value) would give average **item** value, which is a different metric. Revenue = Orders × AOV is the first decomposition to reach for in any 'why did revenue drop?' case.",
+  "checks": "Metric definitions. Tata CLiQ's JD names AOV, conversion, retention and CLV.",
+  "jd": [
+   "Tata CLiQ",
+   "Snabbit"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "BI"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 85,
+  "world": "Business Case Room",
+  "title": "Onboarding funnel",
+  "diff": "H",
+  "tables": [
+   "app_events"
+  ],
+  "ordered": true,
+  "prompt": "Build TradeUp's onboarding funnel with steps in order: app_open → kyc_started → kyc_completed → first_deposit → first_trade. Return `step_no`, `step`, `users` (distinct users who did the step), `pct_of_previous` and `pct_of_first` (2 decimals; NULL for pct_of_previous at step 1). Sort by step_no.",
+  "hints": [
+   "Count distinct users per event, then attach a step number with CASE.",
+   "LAG(users) gives the previous step; FIRST_VALUE(users) gives step 1.",
+   "ROUND(100.0 * users / LAG(users) OVER (ORDER BY step_no), 2), ROUND(100.0 * users / FIRST_VALUE(users) OVER (ORDER BY step_no), 2)"
+  ],
+  "sol": "OTogZVMCTC8gVAV5UUw9NjhoMCVMLTInaFMUGgsdAHIdEAELUyNlNj9MSRIEXSweHAsdUw0nOSkgU0UNJDkpIFNTRgoSMx0HFV8HFAhJUyBlNj9MXFMjZTY/TEkYDU4sEgMDAxhIBxQISVMgZTY/TF15VA1TUUxOU1QNU1FMTlMjZTY/TEkVHV8ABTMKFgRCABgYSVMgZTY/TFpTI2U2P0xJFR1fAAUzGgEVSRZWTDo7MWNTREwrPTANMiJMHQcRXSwfA0J5VA1TUUxOU1QNFgcJAAcrQxIcCU4yJw0ABQkeX1RuPCQiOlswZCAlJSAwIA0GAgkcLB1JWlEtPVMBXhYDH2RTVGshPiFOEgRdLBQaCx0AXlM2PiEmJA0xKEwLBRFDBy4CDx4RJ1p7Pys/MW4nUR8aFgRyHR5ATgAASANdTBsAEV8AXWZOUyZiJj8oRkJEHV1BTERTAV4WAx9OXFRhMjZEGwARXwBYTCElMX9TWSM8NzF/UzM1TgAASAMuAgFaWA1BWEwvIFRdEAUzARUrXQEUGgccAV5fe0xOITt4PTVEX0NEA0NRRk4GB0gBAkxBUzJkISI4MSU1YSY0RBsAEV8AWEwhJTF/U1kjPDcxf1MzNU4AAEgDLgIBWlgNQVhMLyBUXRAFMwEVK0saAx8aeTJ/PDxMHXk7fzc0Pk4xLQ0ABQkeLBpCSA==",
+  "explain": "Funnels are the #1 product-analytics question. Be ready to discuss: should a step count only if earlier steps happened? Should there be a time window (e.g. within 7 days)? Which step has the biggest drop, and why might that be (KYC friction)?",
+  "checks": "Funnel construction + step conversion. Snabbit and Grab JDs name funnel thinking explicitly.",
+  "jd": [
+   "Snabbit",
+   "Grab",
+   "ShareChat",
+   "Upstox",
+   "Sarvam AI"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 86,
+  "world": "Business Case Room",
+  "title": "Day-7 retention by signup cohort",
+  "diff": "H",
+  "tables": [
+   "app_users",
+   "app_events"
+  ],
+  "ordered": true,
+  "prompt": "For each signup month, return `cohort` (YYYY-MM), `users`, `retained_d7` (users with an `app_open` on any day **1 to 7 days after** signup_date) and `retention_pct` (2 decimals). Sort by cohort.",
+  "hints": [
+   "Per user: did any app_open fall between signup+1 and signup+7 days?",
+   "EXISTS inside SUM(CASE ...), or a LEFT JOIN to a list of retained users.",
+   "date(event_time) BETWEEN date(signup_date,'+1 day') AND date(signup_date,'+7 day')"
+  ],
+  "sol": "OTogZVMDTC8gVAV5UUw9NjhoMCVMG10BXhYDMwcXWA0ABR4IBx1AFllLSypZCB5WQE4GWl4aFgIbAytJEgUJR1M1flMSAwYcBllfe0xOU1RuMiIpTiQ8aD1RKTY6J3kgUURkU1QNU1FMPTY4aDAlTF9TMn88PEwPAwRyFgcJAAcHDRZ7TE5TVA1TJiQrITENFl8ZHRYGchoVTFNTAQMGAgkcLB1JUzAiKlMRAxYHCQAHK0MSHAlOTlQKEgEcMRwESB1WZk5TVA1TUUxOMjppUxUNGhZcSF0UGgsdAHIHGAELWlRvNiU7KzY6DRcQGAtbAQMAGAsABgRyFxAYC19UClhATAoSDQpaUS0gN1RJEgUJRgZaXhoWAhsDK0kSBQlCU1MGRFEIDwpTBHlRTE5TXQ0nOSkgU0UNNj0/K1NEDTY/KE4yJw0BFBgPGhpIF3tMTjUmYj5RDR4DK1gAFB4dUwEnWns/Kz8xbidRDwEbG18HXUwtPCFjJ1lGR1M1flMEHwsBBwFTIjkjWwZIBxAFABYQBFMwP04BEVkSGAILFytJRF1mTlMmYiY/KEZCRB1dQUxEUyd4PlkeCwcVRB0UCEdTWw0wPjkgJ1wHWl1MXFpUbCBRHgsHEUMHGAMALAROB3sqPDw5DQF7Kzw8IX1TMzVOEBtFHAMYZDwmaTYjTCwqVE4cGQMcB08=",
+  "explain": "Cohort retention is how product teams judge whether users find value. Always define the window precisely (day 1-7, excluding signup day). Interviewers want you to say the definition out loud before writing code.",
+  "mysql": "MySQL: DATE(e.event_time) BETWEEN u.signup_date + INTERVAL 1 DAY AND u.signup_date + INTERVAL 7 DAY.",
+  "checks": "Cohort logic + precise metric definition.",
+  "jd": [
+   "Tata CLiQ",
+   "Grab",
+   "ShareChat",
+   "Upstox"
+  ],
+  "roles": [
+   "DA",
+   "BA",
+   "DS"
+  ]
+ },
+ {
+  "id": 87,
+  "world": "Business Case Room",
+  "title": "Repeat purchase rate",
+  "diff": "M",
+  "tables": [
+   "orders"
+  ],
+  "prompt": "Considering delivered orders only, return one row: `buyers` (customers with ≥1 delivered order), `repeat_buyers` (≥2 delivered orders) and `repeat_rate_pct` (2 decimals).",
+  "hints": [
+   "Count delivered orders per customer first.",
+   "Then count customers and conditionally count repeaters.",
+   "WITH c AS (SELECT customer_id, COUNT(*) n ... GROUP BY customer_id) SELECT COUNT(*), SUM(CASE WHEN n >= 2 THEN 1 ELSE 0 END) ..."
+  ],
+  "sol": "OTogZVMSTC8gVAV5UUw9NjhoMCVMDQYHWRwcCRwsHUlfUS8hJjp5W1tFTjInDR1RKjw8OQ0cAwgLAQcNJDkpPDZUXgcQGBsAVBBTVggLHx1bFgMJClRUaiE+OT5TNnRTEhkdBxtAFgMzBxd+BHkiKSI2N3lTMiM7PSAFWVhMLyBUTwYICRwAWCdTUT87PlxuMiIpTiQ8aD1RAk5NSQ1BUTgmNjoNQlEpIiAxDUNRKSA3XQ0yIkwcFgRIEgUzDAYNSAECQGRTVH88JCIqW0UdQ19cTllUfiY8RC0yJ2hTJiQrPVRDU09RTkFUeTs0Ik5CVGg/IilOQ1RoPTVFTlxUbjwkIjpbXgRfUV5HUzV+UwMJHhYVWSwDDRoWK10QBWYoITtgUxJX",
+  "explain": "Repeat rate is a quick health metric for e-commerce. Aggregate twice: orders → customers → one summary row.",
+  "checks": "Two-level aggregation.",
+  "jd": [
+   "Tata CLiQ",
+   "Snabbit",
+   "Swiggy"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 88,
+  "world": "Business Case Room",
+  "title": "A/B test readout",
+  "diff": "M",
+  "tables": [
+   "experiment_users"
+  ],
+  "prompt": "Summarise the `new_onboarding` experiment. Per `variant` return `users`, `conversions`, `conversion_rate_pct` (2 decimals) and `revenue_per_user` (total revenue ÷ users, 2 decimals).",
+  "hints": [
+   "One GROUP BY variant.",
+   "converted is 0/1, so SUM gives conversions and AVG gives the rate.",
+   "ROUND(100.0 * AVG(converted), 2), ROUND(1.0 * SUM(revenue) / COUNT(*), 2)"
+  ],
+  "sol": "PTY4aDAlTBgSBkQSHxhCUzdiJj84RlldDTIiTBsAEV8AXUw9JjkFEB4CGBYGWRYVRU4yJw0QHgIYFgZeGh4CHV9+DVMjIzs9MAVCQVxAQ1QHUzA6KVsXQh0HCRwHEUlaXUxcWlRsIFEPAR0CSAECBQEdK18SBQkxAxdZX3tMTiE7eD01RF9dRA1ZUT87PlxfFgcJAAYRBFNeTC08IWMnWUZHX1QfWlEtPVMGSAUUAhsWK10WAzMbABFfeTc+IT5USAsBCRwaGUgdBTMbABFfAHs7JjYmaFMUFB4WBkQeFAIaU0kNVB8JGSwbQxEeDRwXHUMUVmYpITt4I1EuN1MCTAEYDQAHTw==",
+  "explain": "AVG of a 0/1 flag = the rate. In the interview, don't stop at 'treatment is higher'. Ask: is the difference statistically significant (see the z-test in World 8)? Was the split 50/50 (sample ratio mismatch)? Are there guardrail metrics?",
+  "checks": "Experiment literacy. Swiggy's BA JD names A/B readouts as a must-have.",
+  "jd": [
+   "Swiggy",
+   "Grab"
+  ],
+  "roles": [
+   "BA",
+   "DA",
+   "DS"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 89,
+  "world": "Business Case Room",
+  "title": "Restaurant ad ROI",
+  "diff": "M",
+  "tables": [
+   "ad_campaigns",
+   "restaurants"
+  ],
+  "ordered": true,
+  "prompt": "Roll up all campaigns per restaurant. Return `name`, `spend`, `revenue` (attributed), `roas` (revenue ÷ spend, 2 decimals), `cpc` (spend ÷ clicks, 2 decimals) and `verdict` = 'Scale' if roas ≥ 5, 'Optimise' if roas ≥ 1, else 'Pause'. Sort by roas desc.",
+  "hints": [
+   "SUM the raw numbers first, then divide. Do not average campaign-level ratios.",
+   "CASE on the computed ROAS.",
+   "ROUND(1.0*SUM(attributed_revenue)/SUM(spend),2)"
+  ],
+  "sol": "PTY4aDAlTBxdGkweFEBOICFgWxBCHQMRQxdYTC8gVF4DFAIKX1R+JjxED10VWQcDBQwGAEgXLh4LBRFDBhRFTjInDQEUGgsdAUhfe0xOITt4PTVEX11EDVlRPzs+XExdEBgaAR1PBgUJCiwGSAUUAhsWXQ1cUT87PlxMXQIcCx0QBF9RXkdTNX5TAwMPAFgnU1E+ISY6aVtAQl5TXg0gJCFGElpeAxQCClpUAlMiOSNbFQMQHQUNGAcEX1FeR1M1flMSHA1ffg1TMi09NlR6OzQiTkJaHVNbTD0mOQUSXw0aBwZEEQQYCxcrXxYHCQAGEQRTXkw9JjkFEl8fHhYaSVpRUlNTQQ0nOSkgU1N+EBAAC1R+DVNRTE5TVHo7NCJOQlodU1tMPSY5BRJfDRoHBkQRBBgLFytfFgcJAAYRBFNeTD0mOQUSXx8eFhpJWlFSU1NFDSc5KSBTU2IDBQUDGgdIVHtMTlNUDVNRKSIgMQ1UIQ0bABEKUzQiKlM1flMHCRwXHU4Heyo8PDkNEhUzDRIZXRIYCwAAVExTOyMnPVRfFgIYDwYGTB0FH04BVGI9UR5AARFeBxAZHBIaWSwYCE5OVExdAwkdBxVYARACGiwdSXk2PiEmJA0xKEwcXQZIAAUNGwEVQwcuBQpfVF9dHw0DFn5iITUpPFM2dFMDAw8AVGk2Ii9V",
+  "explain": "Ratio of sums, not average of ratios: AVG(roas) treats a ₹5k campaign the same as a ₹35k one. This is one of the most common analytical mistakes interviewers look for.",
+  "checks": "Ratio-of-sums vs average-of-ratios + turning numbers into a decision.",
+  "jd": [
+   "Swiggy"
+  ],
+  "roles": [
+   "BA",
+   "DA"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 90,
+  "world": "Business Case Room",
+  "title": "Order spikes vs 7-day average",
+  "diff": "H",
+  "tables": [
+   "food_orders"
+  ],
+  "ordered": true,
+  "prompt": "Count food orders per calendar date (days with orders only). Flag dates where orders are **at least 50% above** the average of the **previous 7 rows** (excluding the current day). Return `order_date`, `orders`, `trailing_avg` (2 decimals), sorted by date. Only rows with a full 7-row history.",
+  "hints": [
+   "Daily counts first.",
+   "Frame: ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING. Use COUNT(*) OVER the same frame to check there are 7 rows.",
+   "WHERE orders >= 1.5 * trailing_avg AND history_rows = 7"
+  ],
+  "sol": "OTogZVMVTC8gVAV5UUw9NjhoMCVMChIASFseHgoWBnIHGAELWlRsIFEDHBcRXywVDRoWWA0wPjkgJ1wHWlEtPVMbXxcUHh1TMn88PEwIHBtJLB4eChYGXlM2PiEmJA0xKEwKEgBIWx4eChYGcgcYAQtafgRfURtOMicNW3tMTiAxYTYyOE4cBkkWAzMKEgBIX1EDHBcRXwBdZk5TVA0yJytGHAZJFgMfR1M7ezYjTEY8Jmk2I0wsKlRCARUJHCwQTAcUTDw8I35TMyk6JDFoPVFbTiMmaDA0KCc9Mw0yPyhOQlR9ITQvKzc9YzRYTC8gVFkBEAUCGhpKLBAaCV9+DVNRTC08IWMnWUZHUzt7NiNMRjwmaTYjTCwqVEIBFQkcLBBMBxRMPDwjflMzKTokMWg9UVtOIyZoMDQoJz0zDTI/KE5CVH0hNC8rNz1jNFhMLyBURRoCGAEBDXIBHhsdeVQNNSMjI1MQJ1p7Pys/MW4nUQMcFxFfLBUNGhZYDRwDCAsBBwFTIyM7PTAFBwMNBx8dQxQuDRgUWA1BWEwvIFRZARAFAhoaSiwQGgl5Mn88PEwZeSNlNiMpThsdXgceHhcsBkIEAkxTU0MNMj8oThwGSRYDH05NSQ1CX1lOWVRZARAFAhoaSiwQGgl5O383ND5OMS0NHAMICwErSRIFCVU=",
+  "explain": "A baseline-vs-current rule is how simple anomaly alerts work in production (Grab's JD: anomaly detection, trust & safety). In an interview, mention that you would use a date spine so missing days count as 0 in the baseline.",
+  "checks": "Window frames that exclude the current row + anomaly thinking.",
+  "jd": [
+   "Grab",
+   "Swiggy"
+  ],
+  "roles": [
+   "DA",
+   "DS"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 91,
+  "world": "Business Case Room",
+  "title": "Pareto: who drives 80% of revenue?",
+  "diff": "H",
+  "tables": [
+   "orders",
+   "order_items"
+  ],
+  "prompt": "Using delivered orders and gross revenue: rank customers by revenue (desc, ties by customer_id) and find how many top customers it takes to reach **80% of total revenue**. Return one row: `total_customers`, `customers_for_80pct`, `share_of_customers_pct` (2 decimals).",
+  "hints": [
+   "Customer revenue → running sum → running share.",
+   "A customer is 'needed' if the running share BEFORE them is below 80%.",
+   "running_before = running_sum − revenue; count rows where running_before < 0.8 × total"
+  ],
+  "sol": "OTogZVMSTC8gVAV5UUw9NjhoMCVMAV0XWAAFAwMWBnIaFUBOICFgWx4FQAIBTB0FBRoKVAdTHgVABhpEBy4cHBoXSFpRLT1TBkgFFAIbFn4NUzc+IT5UQgEVCRwAVEJTOyMnPVRCARUJHCwdWRYcH04cHQ08P0wBXRtfFxQeMRoQDU5RAwddG18XFB4xGhAnU1E7JjYmaFMeQh0HFVkGAkxTU1NJFh0FGBYGSBdWTCkhO3gjUS43UxsDEAQfGhwZSAEuBQp5XQFTA0wvIFQFeVFMPTY4aDAlTA0GB1kcHAkcLB1JX1EeCwURQwYUQGRTVA1TIjkjWwZIBRQCGxZdDTwnKTxTXGIhNSk8UzZ0UwMJGBYaWBZRKCsgNwFTEhkdBxtAFgMzBxddDTIiTBwGGkMaHwtCeVQNU1E/Oz5cXxYHCQAGEQRTPjorIVQFWlEtPVMAQgcQAGRTVGshPiFOEH4EeSIpIjY3eVMyIzs9IAVZWEwvIFRZHAUNAiwXWAAFAwMWBl5fe0xOICFgWzItPTZUejs0Ik4BAUMdGAIJU1kNARQaCx0BSFNNTF5dTA1ZURgBBxVBUyUkKz1UHFM0ID02VB1TNCIqWlRsIFEPGwAAQh4UHh0sEkIBLlReAxdZX3tMTiE7eD01RF9DRANDUUZOICFgWzItPTZUejs0Ik4BAUMdGAIJU1kNARQaCx0BSFNNTF5dTA1ZURgBBxVBUyUkKz1UHFM0ID02VB1TNCIqWlQCUzIjOz0gBVlYQE5BXQ0yIkwdGxVfFi4DCCwXWAAFAwMWBl4sAQ8aeTJ/PDxMHEg=",
+  "explain": "Pareto (80/20) analysis tells the business where to focus (VIP programs, key accounts). The 'running sum before this row' trick avoids an off-by-one error.",
+  "checks": "Cumulative share logic + business framing.",
+  "jd": [
+   "Tata CLiQ",
+   "Swiggy"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 92,
+  "world": "Business Case Room",
+  "title": "Frequently bought together",
+  "diff": "H",
+  "tables": [
+   "order_items",
+   "products"
+  ],
+  "ordered": true,
+  "prompt": "Find product pairs that appear in the **same order at least 3 times**. Return `product_a`, `product_b` (names, with product_a's id smaller than product_b's) and `times_together`. Sort by times_together desc, product_a, product_b.",
+  "hints": [
+   "Self-join order_items on order_id.",
+   "Use a.product_id < b.product_id to avoid (X,X) and counting (X,Y) and (Y,X) twice.",
+   "GROUP BY the pair HAVING COUNT(*) >= 3, then join products twice for names"
+  ],
+  "sol": "PTY4aDAlTB4SWl0BHggbEAByHRABC1M1flMBHgEXAU4HLg1CUwRPXQEeARcBTgcuAg8eEQ0yIkweARtJBhIYMRFYDTA+OSAnXAdaUS09UwBEHhQfMQcbShYFBAsBfmshPiFOHAZJFgMzBwcRQABRDWQ5O2Q9UQMcFxFfLBgYCx4HDRFRIyBTFQMcAwgLAStEF1FRThFaQgEVCRwsHUlTMCIqUxUDAwMDCgYXWSwYCE5PVE9dAR4BFwFOBy4FCnk+Yjo/TB4BG0kGEhgdUwRMUz4iTgMVAwMDAwoGF1ksGAhOTlRMXQEeARcBTgcuBQp5PmI6P0weARtJBhIYHVMET1M+Ik4DFgMDAwMKBhdZLBgITk5UT10BHgEXAU4HLgUKeTN/PCQ8TjEtDRJfHBwcEFgQBTMHF1gNEV8cHBwQWBAFMwcXWA0DEEIeARtJBhIYMR0VQBZdTB4RWl0BHggbEAByHRABC3k8bCU4IilTN2ImPzhGWV0NTUxMXXk7fzc0Pk4xLQ0HGAELACtZHBYJGhsRX1M1KT0wWA0DAwMKBhdZLBBATgMGQhcEDxosFhY=",
+  "explain": "Market-basket analysis is the SQL behind 'frequently bought together' widgets and simple recommendation systems (good-to-have in the Tata CLiQ JD). The `<` condition is the key insight.",
+  "checks": "Self-join on a non-key + de-duplicating pairs.",
+  "jd": [
+   "Tata CLiQ"
+  ],
+  "roles": [
+   "DA",
+   "DS"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 93,
+  "world": "Business Case Room",
+  "title": "New vs returning customer orders",
+  "diff": "H",
+  "tables": [
+   "orders"
+  ],
+  "ordered": true,
+  "prompt": "For each month, split all orders (any status) into orders from **new** customers (the order is in the same month as that customer's first-ever order) and **returning** customers. Return `month`, `new_customer_orders`, `returning_customer_orders`. Sort by month.",
+  "hints": [
+   "Find each customer's first order month.",
+   "MIN(order_date) OVER (PARTITION BY customer_id) gives it on every row.",
+   "SUM(CASE WHEN month = first_month THEN 1 ELSE 0 END)"
+  ],
+  "sol": "OTogZVMJTC8gVAV5UUw9NjhoMCVMHQcGSwcYAQtbUwgqXEkDVFgNHAMICwErSRIFCUdTNX5THAMABxwBeVFMTlMHWQEXGAceEQVUVDVDVhkKX1EhJz1cQgEVCRwsEEwHFEVOPCJoIVFEPjImeTolJSE9VG8qUQ8bAABCHhQeMRoQBFpRLT1TEkQBAhgxHhtDBxlmTlMyfzw8TAEBEEgBAmZHeSdoPzQvOlMZQh0FBEJ5VA0gJCFGMDV+NlE7JjY6DR4eAhobVBBTFwUcAAByHh4CGhtUeTs0Ik5CVGg/IilOQ1RoPTVFTjInDR0UGzEQAV4HHgELAStCARUJHABYJ1NRPzs+XG4yIilOJDxoPVEBAR0ARVNNUk4VHV8ABTMDHBpZG1E4JjY6DUJRKSIgMQ1DUSkgN10NMiJMHBYAWAEfBQAUK04GAhgBHhFfLB4eChYGXnk3PiE+VFV5Nj4hJiQNMShMAxwaWRt7Izw3MX9TMzVOHhtDBxlX",
+  "explain": "New vs returning mix shows whether growth comes from acquisition or retention, a key question in any growth review.",
+  "checks": "Window MIN + conditional aggregation in a business frame.",
+  "jd": [
+   "Tata CLiQ",
+   "Snabbit",
+   "Swiggy"
+  ],
+  "roles": [
+   "DA",
+   "BA"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 94,
+  "world": "Data Science SQL Lab",
+  "title": "Median income without MEDIAN()",
+  "diff": "H",
+  "tables": [
+   "loan_applications"
+  ],
+  "prompt": "Return the **median** monthly_income of all applications as `median_income` (if the count is even, average the two middle values).",
+  "hints": [
+   "Number the rows in sorted order and count them.",
+   "Middle positions: (n+1)/2 and (n+2)/2 in integer maths; both are the same when n is odd.",
+   "WHERE rn IN ((cnt + 1) / 2, (cnt + 2) / 2), then AVG"
+  ],
+  "sol": "OTogZVMCTC8gVAV5UUw9NjhoMCVMAxwaWRsdFTEaGk4cHAlCeVQNU1E+ISQrYyY8LishXARTPjorIVQFPCMoKyFUbypRAQEdAEUfCDMHHRdCHhRFTjInDQEfQGRTVA1TMiM7PSAFWVhMISUxf1NZRU4yJw0QHxhkU1RrIT4hTh8bTB0uDR4DGEQQEBgHHBpeeVhmPTY4aDAlTC8lMwUeHgIaGxhULBgCDRwZSFpRLT1TGUgXGA0ALB1DEB4BC3kyfzw8TB15I2U2IylOARoNOj9MRlsXQwdRR05CXQ1cUV5CU1xOHQVMRVNGBFNeTFxaTw==",
+  "explain": "SQLite and MySQL have no MEDIAN. With n = 120, the middle rows are 60 and 61. Median is robust to outliers (one ₹24 lakh/month income barely moves it, while the mean jumps).",
+  "mysql": "Same approach in MySQL 8. PostgreSQL: PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY monthly_income).",
+  "checks": "Statistics in SQL + mean vs median reasoning. Asked in DS intern rounds (Grab, Carousell, Spinny).",
+  "jd": [
+   "Grab",
+   "Carousell",
+   "Spinny",
+   "Temple"
+  ],
+  "roles": [
+   "DS",
+   "DA"
+  ],
+  "ordered": false
+ },
+ {
+  "id": 95,
+  "world": "Data Science SQL Lab",
+  "title": "Impute missing credit scores",
+  "diff": "M",
+  "tables": [
+   "loan_applications"
+  ],
+  "prompt": "For applications with a **missing credit_score**, return `application_id` and `credit_score_imputed` = the average credit score of the **same employment_type**, rounded to the nearest integer.",
+  "hints": [
+   "Average per employment_type, ignoring NULLs.",
+   "AVG(credit_score) OVER (PARTITION BY employment_type) puts the group average on every row.",
+   "Filter WHERE credit_score IS NULL in the outer query; CAST(ROUND(x) AS INTEGER)"
+  ],
+  "sol": "OTogZVMJTC8gVAV5UUw9NjhoMCVMDwMEQRoSDRoaG0MsGAhCUxdfFhUFGiwHThwDCUJ5VA1TUS04NFxOARQIBwcrXhAeHgtaVGIlND5OWyRsISUlOjo7Y1MzNU4WGV0fHhUDFhpZLAUVHhZdDTIiTAkBBHISBwtkU1RrIT4hTh8bTB0uDR4DGEQQEBgHHBpeeVhmPTY4aDAlTA8DBEEaEg0aGhtDLBgIQlM3bCAlRDw8IWM3WQscAytMBRZFTjInDTo/OCs0MX9aUS09UxdfFhUFGiwHThwDCTEaGV0GBQkKeTJ/PDxMFnkjZTYjKU4QBkgXGBgxABdCARRMJyBUYyY9IFU=",
+  "explain": "Group-wise mean imputation is a standard preprocessing step before modelling, done in SQL so it scales. Discuss the trade-off: imputation hides the fact that a value was missing, so also add an is_missing flag as a feature.",
+  "checks": "Missing-data handling, a core DS fundamental.",
+  "jd": [
+   "Grab",
+   "Spinny",
+   "Snabbit",
+   "Carousell"
+  ],
+  "roles": [
+   "DS"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 96,
+  "world": "Data Science SQL Lab",
+  "title": "Default rate by income band",
+  "diff": "M",
+  "tables": [
+   "loan_applications"
+  ],
+  "ordered": true,
+  "prompt": "Create income bands: '<50k' (below 50,000), '50k-1L' (50,000 to 99,999), '1L+' (100,000 and above). Return `income_band`, `applications`, `default_rate_pct` (2 decimals), ordered '<50k', '50k-1L', '1L+'.",
+  "hints": [
+   "CASE for the band.",
+   "AVG(defaulted) gives the default rate.",
+   "Sort with a CASE that returns 1, 2, 3 or MIN(monthly_income)."
+  ],
+  "sol": "PTY4aDAlTC0yJ2hTJiQrPVRAHB8YBh8NchofDwEeEQ1PUVleQ0QdUyUkKz1UCk9EXAVUfg1TUUxOU1QNU1FMTiQ8aD1RAQEdAEUfCDMHHRdCHhRMUlNFHUNBXF5TIGU2P0xJRkRGXkAgSXlUDVNRTE5TVA1TUUwrPydoU1ZdIlhTDTY/KE4yJw0aHw8BHhFyERACCl9+DVMyIzs9IAVZWEwvIFRMAwEABxAVWRoeAh1ffg1TIyM7PTAFQkFcQENUB1MwOilbEEgVEBkCBxFJWl1MXFpUbCBRCAsVFVgfBTMcEgBILAEPGnkyfzw8TAIcFUMsEBweHx1OEgUFAR0HJzQjIzsjVG8qUQUAEBtAFi4ODx0QJzwjKCshVG8qUSEnPVxAHB8YBh8NchofDwEeEQRI",
+  "explain": "Binning a numeric feature and checking the target rate per bin is how you sanity-check a feature before modelling (and how credit risk teams build scorecards).",
+  "checks": "Feature binning + target-rate analysis.",
+  "jd": [
+   "Grab",
+   "Spinny",
+   "Upstox"
+  ],
+  "roles": [
+   "DS",
+   "DA"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 97,
+  "world": "Data Science SQL Lab",
+  "title": "Income outliers (z-score)",
+  "diff": "H",
+  "tables": [
+   "loan_applications"
+  ],
+  "ordered": true,
+  "prompt": "Return `application_id`, `monthly_income` and `z_score` (2 decimals) for applications whose income z-score is **above 3**. Use the population standard deviation: sqrt(avg(x²) − avg(x)²). Sort by z_score desc.",
+  "hints": [
+   "Compute mean and std once in a CTE.",
+   "z = (x − mean) / std.",
+   "WITH s AS (SELECT AVG(monthly_income) m, SQRT(AVG(1.0*monthly_income*monthly_income) - AVG(monthly_income)*AVG(monthly_income)) sd FROM loan_applications) ..."
+  ],
+  "sol": "OTogZVMCTC8gVAV5UUw9NjhoMCVMLyUzBR4eAhobGFQsGAINHBlIWlEtPVMZAXlRTE5TJ3whJUQvJTMFQl9cTllUQBwfGAYfDXIaHw8BHhENWVEBAR0ARR8IMwcdF0IeFEVOXlRsJTZEAxwaWRsdFTEaGk4cHAlHU14NMicrRh4bQwcZABcsHUMQHgELWl0NMiJMHRd+DVM3PiE+VEEcEAIxEgRdHxgPDwcdQh0CZkd5J2g/NC86UxUDEgEcAhoXTAcYAwAsHUlfUQ1AHhtDBxkAFywdQxAeAQtfVH88JCIqW1xMXRwDAAccQQouBQAQG0AWUUFOAFpAWlFDTgBaXhddTFxaVGwgURYxABdCARRmKCE7YFMdAw8dK0wDAQAHEBVZGh4CHVMVDTAjIz0gVGc8OCJOAH56OzQ+K1NcTF0cAwAHHEEKLgUAEBtAFlFBTgBaQFpRQ04AWl4XUVJOQH5iITUpPFM2dFMLMx0QG18WUSgrIDcW",
+  "explain": "SQLite has no STDDEV, so we use Var(X) = E[X²] − E[X]². Multiply by 1.0 to avoid integer overflow and integer maths. In an interview, mention that the outlier itself inflates the std, so the IQR method is more robust.",
+  "mysql": "MySQL: STDDEV_POP(monthly_income). PostgreSQL: STDDEV_POP().",
+  "checks": "Stats formulas in SQL + outlier-method trade-offs.",
+  "jd": [
+   "Grab",
+   "Carousell",
+   "Spinny"
+  ],
+  "roles": [
+   "DS"
+  ]
+ },
+ {
+  "id": 98,
+  "world": "Data Science SQL Lab",
+  "title": "Deterministic train/test split",
+  "diff": "M",
+  "tables": [
+   "loan_applications"
+  ],
+  "ordered": true,
+  "prompt": "Put applications whose `application_id % 5 = 0` into **test** and the rest into **train**. Return `split`, `rows`, `default_rate_pct` (2 decimals), sorted by split name.",
+  "hints": [
+   "CASE on the modulo.",
+   "Group by the split label.",
+   "CASE WHEN application_id % 5 = 0 THEN 'test' ELSE 'train' END"
+  ],
+  "sol": "PTY4aDAlTC0yJ2hTJiQrPVRMAwEABxAVWRoeAjEaEA1WUVlOTlQdUyUkKz1UCgcUHxpUVGg/IilOVABfEhgCSVMxYzdRLT1TB10fGBhCeVQNMD45ICdcB1pRLT1TBkIEAkBkU1R/PCQiKltFHUNfXE5ZVGwlNkQKFhJMBh0YCxddAVNDRU4yJw0XFAoPBhhZLAMNGhYrXRAFZighO2BTHQMPHStMAwEABxAVWRoeAh15M388JDxOMS0NAAEABwd+YiE1KTxTNnRTAhwCGgAW",
+  "explain": "A hash/modulo split is reproducible (same rows every run), unlike ORDER BY RANDOM(). Comparing the target rate across splits checks for bias: here test (~8%) and train (~20%) differ a lot because the test set has only 24 rows. That is a good reason to stratify the split by the target. In production you would hash a stable key, e.g. ABS(hash(user_id)) % 100 < 20.",
+  "checks": "ML workflow awareness in SQL.",
+  "jd": [
+   "Spinny",
+   "Grab",
+   "Carousell"
+  ],
+  "roles": [
+   "DS"
+  ],
+  "mysql": ""
+ },
+ {
+  "id": 99,
+  "world": "Data Science SQL Lab",
+  "title": "Is the A/B lift significant? (z-test)",
+  "diff": "H",
+  "tables": [
+   "experiment_users"
+  ],
+  "prompt": "Run a two-proportion z-test on `new_onboarding`. Return one row: `p_control`, `p_treatment` (conversion rates as fractions, 4 decimals) and `z_score` (3 decimals) where p_pool = total conversions ÷ total users and z = (p_t − p_c) ÷ sqrt(p_pool × (1 − p_pool) × (1/n_c + 1/n_t)).",
+  "hints": [
+   "Get n and conversions per variant into one row with conditional aggregation.",
+   "Then plug into the formula.",
+   "WITH g AS (SELECT SUM(CASE WHEN variant='control' THEN 1 END) nc, SUM(CASE WHEN variant='control' THEN converted END) xc, ... ) SELECT ..."
+  ],
+  "sol": "OTogZVMWTC8gVAV5UUw9NjhoMCVmTlNUDSAkIUYwNX42UTsmNjoNBRAeBxIaWVNMTEkQG0MHAwMCVFR5OzQiTkJUaD8iKU5DVGg9NUVOMicNHRJAZFNUDVMiOSNbN2wgNEw5OzFjUwcNHBoVQwdRUU5UF0IdBR4BH1MNJzkpIFMXQh0HCRwHEUlTNCA9NlQdUzQiKlpUbCBRFA1ffg1TUUw9JjkFMDA/K1MjZTY/TBgSBkQSHxhOTlQKBwMJDwcZSB0FS04nPGg9UV1ONjh+NlFcTjY6aVpRLT1TGllfe0xOU1R+JjxELTInaFMmJCs9VFsSAwUPHQANTlFLGgERTAccCQAHUw0nOSkgUxdCHQcJHAcRSVM0ID02VB1TNCIqWlRsIFEUGnlUDTUjIyNTEVUDFB4HHhFDBy4ZHRYGXlMmJCshMQ0WCRwLAR1AFh8YTk5UCh0UGzEcGk8cEB4KGhpKVHtFQlMEDTIiTEZ5VA0gNCArMCANHRJATh0AAVNAQl5TXg0LEkxBUxpOUzA/TgMXAVNAQl5TXg0LBUxBUxpZUzA/TgMAAVNAQl5TXg1bCQ9OWFRVB1hMQVNcQxBRR04dAARTMD9OAwQNNSMjI1MTJ1p7Pys/MW4nUT4hJjppWwEPQlNABFMwP04DK04cHxgcHBgBUyMjOz0wBQMFQE5HXQ0yIkweLABfFhAYAxYaWV97TE4hO3g9NURGAwANXlEcDVpUAlMiPTwnXF0DUUZOW0UNXlEcHlpUB1NZXUBDVAJTHw9OWFQcXUFMQVMaWVpYQE5AXQ0yIkwULAdOHAMJZDUmYj5RHFU=",
+  "explain": "|z| > 1.96 ≈ significant at 95% confidence (two-sided). A z around 2 here means the lift is borderline. A good answer also mentions the test's power, peeking risk and the practical (business) significance of the lift.",
+  "checks": "Hypothesis testing fundamentals. Swiggy (experiments) and DS JDs (statistics, probability) ask for this.",
+  "jd": [
+   "Swiggy",
+   "Grab",
+   "Spinny",
+   "Snabbit"
+  ],
+  "roles": [
+   "DS",
+   "BA"
+  ],
+  "mysql": "",
+  "ordered": false
+ },
+ {
+  "id": 100,
+  "world": "Data Science SQL Lab",
+  "title": "Correlation: credit score vs default",
+  "diff": "H",
+  "tables": [
+   "loan_applications"
+  ],
+  "prompt": "Compute the **Pearson correlation** between `credit_score` and `defaulted`, ignoring rows with missing credit score. Return `n` and `correlation` (3 decimals). r = (E[xy] − E[x]E[y]) ÷ (sqrt(E[x²] − E[x]²) × sqrt(E[y²] − E[y]²)).",
+  "hints": [
+   "Filter NULL scores first, then compute averages of x, y, xy, x², y².",
+   "Use 1.0 * to force decimals.",
+   "WITH s AS (SELECT COUNT(*) n, AVG(1.0*x) ax, AVG(1.0*y) ay, AVG(1.0*x*y) axy, AVG(1.0*x*x) axx, AVG(1.0*y*y) ayy ...)"
+  ],
+  "sol": "OTogZVMCTC8gVAV5UUw9NjhoMCVMLTwhYydZRkdTNX5TH0BkU1QNUzA6KVtFA0NRRk4QBkgXGBgxABdCARRFTjInDRIJQE4yImpbQEJeU14NFxQKDwYYWRYVRU4yJw0SCEBkU1QNUzA6KVtFA0NRRk4QBkgXGBgxABdCARRMRFMQSBUQGQIHEUlaUS09UxVVCl1mTlNUDTInK0ZCWh1TW0wNARFJGgUzHRAbXxZRRk4QBkgXGBgxABdCARRFTjInDRIJFEJ5VA1TUS04NFwcXUFMRFMQSBUQGQIHEUlTW0wKFhJMBh0YCxddDTIiTA8KDSdTUSo8PDkNHx4NACwVXQMdBQ0SAEQcHx9OJDxoITRMDQERSRoFMx0QG18WUSU9UzpiJ1EiOz84J1p7Pys/MW4nUQJCUyZiJj8oRlsVVQpRQU4SDA1ZUQ0XWlQCU1k/PyEgBRIJFE5eVEwLUUZOEgwEU1tMPSImeVsQFRdTWQ0SCExEUxVUWlhATkBdDTIiTA0cBl8WHQ0aGhtDeTc+IT5UXkg=",
+  "explain": "A negative r means higher scores go with fewer defaults, as expected, but here it is weak (about −0.08), so credit score alone is a poor predictor in this sample. Correlation with a 0/1 variable is the point-biserial correlation. Remind interviewers that correlation is not causation and only captures linear relationships.",
+  "mysql": "Same formula in MySQL. PostgreSQL has CORR(x, y) built in.",
+  "checks": "Turning a formula into SQL + statistical interpretation.",
+  "jd": [
+   "Grab",
+   "Carousell",
+   "Spinny",
+   "Temple"
+  ],
+  "roles": [
+   "DS"
+  ],
+  "ordered": false
+ }
+]

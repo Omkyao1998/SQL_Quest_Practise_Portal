@@ -1,0 +1,268 @@
+{
+ "worlds": [
+  {
+   "key": "basics",
+   "name": "Basics Camp",
+   "icon": "🏕️",
+   "desc": "SELECT, WHERE, ORDER BY, LIKE, NULL, CASE"
+  },
+  {
+   "key": "agg",
+   "name": "Aggregation Arena",
+   "icon": "📊",
+   "desc": "GROUP BY, HAVING, COUNT, pivots, rates"
+  },
+  {
+   "key": "joins",
+   "name": "Join Junction",
+   "icon": "🔗",
+   "desc": "INNER/LEFT/SELF/CROSS/FULL joins, anti-joins"
+  },
+  {
+   "key": "sub",
+   "name": "Subquery & CTE Cave",
+   "icon": "🕳️",
+   "desc": "Nth highest, correlated subqueries, EXISTS, recursion"
+  },
+  {
+   "key": "win",
+   "name": "Window Wizardry",
+   "icon": "🪄",
+   "desc": "RANK, ROW_NUMBER, LAG, running totals, streaks"
+  },
+  {
+   "key": "clean",
+   "name": "Dates, Strings & Cleaning",
+   "icon": "🧹",
+   "desc": "Date maths, text cleanup, date spines"
+  },
+  {
+   "key": "biz",
+   "name": "Business Case Room",
+   "icon": "💼",
+   "desc": "AOV, funnels, retention, A/B, ROAS, Pareto"
+  },
+  {
+   "key": "ds",
+   "name": "Data Science SQL Lab",
+   "icon": "🔬",
+   "desc": "Median, imputation, z-scores, z-tests, correlation"
+  }
+ ],
+ "tableDocs": {
+  "employees": {
+   "domain": "HR (classic interview tables)",
+   "desc": "One row per employee. `manager_id` points to another `emp_id` (self-reference). `salary` can be NULL; `dept_id` can be NULL."
+  },
+  "departments": {
+   "domain": "HR (classic interview tables)",
+   "desc": "Departments. One department has no employees."
+  },
+  "customers": {
+   "domain": "ShopKart · e-commerce",
+   "desc": "Customers of an online fashion and electronics store. Some never ordered."
+  },
+  "products": {
+   "domain": "ShopKart · e-commerce",
+   "desc": "Catalogue with `price` (selling price) and `cost`. Prices in ₹."
+  },
+  "orders": {
+   "domain": "ShopKart · e-commerce",
+   "desc": "One row per order (all of 2025). `status`: delivered / cancelled / returned. `payment_mode`: UPI, Card, COD, NetBanking, Wallet."
+  },
+  "order_items": {
+   "domain": "ShopKart · e-commerce",
+   "desc": "Line items. Gross = quantity × unit_price. Net = gross × (1 − discount_pct/100)."
+  },
+  "restaurants": {
+   "domain": "FoodDash · food delivery",
+   "desc": "Restaurant partners with city, cuisine and rating."
+  },
+  "food_orders": {
+   "domain": "FoodDash · food delivery",
+   "desc": "Orders Jan to Mar 2025. `order_time` / `delivered_time` are datetimes; delivered_time is NULL for cancelled orders."
+  },
+  "ad_campaigns": {
+   "domain": "FoodDash · food delivery",
+   "desc": "Restaurant ad campaigns: spend, impressions, clicks, attributed orders and revenue."
+  },
+  "app_users": {
+   "domain": "TradeUp · stock-trading app",
+   "desc": "Users who signed up (Jan to May 2025) with platform and acquisition channel."
+  },
+  "app_events": {
+   "domain": "TradeUp · stock-trading app",
+   "desc": "Event log: app_open, kyc_started, kyc_completed, first_deposit, first_trade. One row per event."
+  },
+  "trades": {
+   "domain": "TradeUp · stock-trading app",
+   "desc": "Trades with side BUY/SELL, quantity and price."
+  },
+  "stock_prices": {
+   "domain": "TradeUp · stock-trading app",
+   "desc": "Daily closing prices for RELIANCE, TCS, INFY (Jan 2025)."
+  },
+  "experiment_users": {
+   "domain": "TradeUp · stock-trading app",
+   "desc": "A/B test: users split into control/treatment; `converted` is 0/1."
+  },
+  "hubs": {
+   "domain": "ShipFast · logistics",
+   "desc": "Delivery hubs with city and zone."
+  },
+  "riders": {
+   "domain": "ShipFast · logistics",
+   "desc": "Delivery riders, their hub and vehicle type."
+  },
+  "shipments": {
+   "domain": "ShipFast · logistics",
+   "desc": "Shipments Jan to Mar 2025. `status`: delivered / rto (return to origin) / in_transit. `cost` in ₹; `cod_amount` > 0 means cash on delivery."
+  },
+  "zone_targets": {
+   "domain": "ShipFast · logistics",
+   "desc": "Target cost per shipment for each zone."
+  },
+  "raw_leads": {
+   "domain": "CRM · messy data",
+   "desc": "Raw marketing leads with messy names, emails, phones and duplicates. Made for cleaning practice."
+  },
+  "loan_applications": {
+   "domain": "LendSmart · data science",
+   "desc": "Loan applications with income, credit score (some NULL) and `defaulted` (0/1) target."
+  }
+ },
+ "dialect": [
+  [
+   "Year-month text",
+   "strftime('%Y-%m', d)",
+   "DATE_FORMAT(d, '%Y-%m')"
+  ],
+  [
+   "Hour / weekday",
+   "strftime('%H', t), strftime('%w', d)  (0 = Sunday)",
+   "HOUR(t), DAYOFWEEK(d)  (1 = Sunday)"
+  ],
+  [
+   "Days between dates",
+   "julianday(a) - julianday(b)",
+   "DATEDIFF(a, b)"
+  ],
+  [
+   "Minutes between timestamps",
+   "(julianday(a) - julianday(b)) * 1440",
+   "TIMESTAMPDIFF(MINUTE, b, a)"
+  ],
+  [
+   "Add days",
+   "date(d, '+7 day')",
+   "d + INTERVAL 7 DAY  /  DATE_ADD(d, INTERVAL 7 DAY)"
+  ],
+  [
+   "Integer ÷ integer",
+   "7/2 = 3 (integer division!)",
+   "7/2 = 3.5000 (7 DIV 2 = 3)"
+  ],
+  [
+   "Last N characters",
+   "SUBSTR(s, -10)",
+   "RIGHT(s, 10)"
+  ],
+  [
+   "Find substring",
+   "INSTR(s, '@')",
+   "LOCATE('@', s) or INSTR(s, '@')"
+  ],
+  [
+   "Concatenate",
+   "a || ' ' || b",
+   "CONCAT(a, ' ', b)"
+  ],
+  [
+   "Null replacement",
+   "COALESCE(x, 0) / IFNULL(x, 0)",
+   "COALESCE(x, 0) / IFNULL(x, 0)"
+  ],
+  [
+   "Standard deviation",
+   "SQRT(AVG(x*x) - AVG(x)*AVG(x))",
+   "STDDEV_POP(x)"
+  ],
+  [
+   "FULL OUTER JOIN",
+   "Supported",
+   "Not supported: LEFT JOIN UNION RIGHT JOIN"
+  ],
+  [
+   "Top N rows",
+   "LIMIT 5 OFFSET 10",
+   "LIMIT 5 OFFSET 10  /  LIMIT 10, 5"
+  ],
+  [
+   "String compare",
+   "Case-sensitive with =",
+   "Case-insensitive by default"
+  ]
+ ],
+ "patterns": [
+  [
+   "Top N per group",
+   "'top 3 in each…', 'highest per…'",
+   "DENSE_RANK/ROW_NUMBER in a CTE, filter ≤ N",
+   "Q60, Q72"
+  ],
+  [
+   "Nth highest",
+   "'second/third highest'",
+   "DISTINCT + LIMIT 1 OFFSET N−1, or DENSE_RANK = N",
+   "Q46, Q47"
+  ],
+  [
+   "Anti-join",
+   "'never', 'without', 'not in'",
+   "NOT EXISTS or LEFT JOIN … IS NULL",
+   "Q33, Q34, Q56"
+  ],
+  [
+   "Duplicates",
+   "'duplicate', 'more than once'",
+   "GROUP BY key HAVING COUNT(*) > 1; ROW_NUMBER to dedup",
+   "Q28, Q75"
+  ],
+  [
+   "Pivot",
+   "'one column per status/month'",
+   "SUM(CASE WHEN … THEN 1 ELSE 0 END)",
+   "Q23, Q30"
+  ],
+  [
+   "Rate / share",
+   "'% of', 'rate', 'conversion'",
+   "100.0 × conditional count ÷ total; SUM() OVER ()",
+   "Q24, Q65"
+  ],
+  [
+   "Running total",
+   "'cumulative', 'till date', 'MTD'",
+   "SUM(x) OVER (ORDER BY d)",
+   "Q61, Q73"
+  ],
+  [
+   "Compare with previous",
+   "'growth', 'change vs last', 'gap'",
+   "LAG / LEAD",
+   "Q62, Q63, Q74"
+  ],
+  [
+   "Consecutive streaks",
+   "'N days in a row'",
+   "date − ROW_NUMBER() as group key",
+   "Q69"
+  ],
+  [
+   "Fill missing rows",
+   "'include zero days/combos'",
+   "Recursive date spine or CROSS JOIN + LEFT JOIN",
+   "Q43, Q83"
+  ]
+ ]
+}

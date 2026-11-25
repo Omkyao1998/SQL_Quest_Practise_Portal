@@ -9,6 +9,7 @@ Practice SQL the way it is asked in data-role placement interviews and online as
 - **100 SQL questions** in 8 levels: Basics → Aggregation → Joins → Subqueries & CTEs → Window functions → Dates & cleaning → Business cases → Data science SQL
 - **40 DBMS theory MCQs** (keys, normalization, ACID, indexes, joins, warehousing)
 - **OA simulator**: 3 SQL questions + 10 MCQs in 30 minutes
+- **Interview experiences**: rounds, questions asked and tips from 39 real data-role interviews (Mu Sigma, ZS, Fractal, Tiger, Amazon, Flipkart, Swiggy, Meesho, AmEx, Deloitte and more), summarised with links to the originals
 - **Playground** to run any query on the practice tables
 - XP, levels, daily streaks, badges and a class leaderboard
 
@@ -26,7 +27,7 @@ Your progress is saved in your browser. To switch devices, use **Profile → Mov
 
 ## For mentors
 
-See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) for turning on the class leaderboard (Google Sheet + Apps Script) and a suggested 4-week plan. A full list of questions is in [docs/question_index.csv](docs/question_index.csv).
+See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) for turning on the class leaderboard (Google Sheet + Apps Script) and a suggested 4-week plan. A full list of questions is in [docs/question_index.csv](docs/question_index.csv). To add or change questions and experiences, see [docs/UPDATING.md](docs/UPDATING.md).
 
 ---
 

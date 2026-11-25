@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%A7%A9%3C/text%3E%3C/svg%3E">
+<title>SQL Quest · Placement SQL Practice</title>
+<script>
+/* ===================== MENTOR CONFIG =====================
+   LEADERBOARD_URL: paste your Google Apps Script web-app URL (ends with /exec).
+   Leave it empty ("") to run without a class leaderboard.            */
+window.SQLQ_CONFIG = {
+  LEADERBOARD_URL: "{{LEADERBOARD_URL}}"
+};
+/* ========================================================= */
+</script>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#1d2333;--muted:#6b7280;--line:#e5e7ef;--brand:#5b4bdb;--brand2:#7c6ff0;--good:#0f9d6b;--bad:#d64545;--warn:#c27c0e;--easy:#0f9d6b;--med:#c27c0e;--hard:#d64545;--code:#f1f2f8}
+*{box-sizing:border-box}html,body{margin:0}body{font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;background:var(--bg);color:var(--ink)}
+a{color:var(--brand);text-decoration:none}h1{font-size:24px;margin:.2em 0 .5em}h2{font-size:18px;margin:1.4em 0 .6em}h3{font-size:15px;margin:1em 0 .4em}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}code{background:var(--code);padding:1px 5px;border-radius:4px}
+header{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:10px 18px;flex-wrap:wrap}
+.brand{font-weight:800;font-size:18px;color:var(--ink)}.brand span{color:var(--brand)}
+#hdr-stats{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lvl{font-weight:700;font-size:13px;background:#efecff;color:var(--brand);padding:4px 10px;border-radius:20px}
+.xpbar{position:relative;width:170px;height:22px;background:#eceef5;border-radius:12px;overflow:hidden}.xpbar div{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));transition:width .6s}.xpbar span{position:absolute;inset:0;text-align:center;font-size:12px;font-weight:700;line-height:22px;color:#1d2333;mix-blend-mode:normal}
+.streak{font-weight:700}.linkbtn{background:none;border:0;color:var(--brand);cursor:pointer;font:inherit;padding:0}
+.layout{display:flex;min-height:calc(100vh - 56px)}nav#nav{width:200px;flex-shrink:0;padding:16px 10px;border-right:1px solid var(--line);background:var(--card)}
+nav#nav a{display:block;padding:8px 12px;border-radius:8px;color:var(--ink);margin-bottom:2px}nav#nav a:hover{background:#f1f0fb}nav#nav a.active{background:#efecff;color:var(--brand);font-weight:700}
+#engine{font-size:11px;margin:14px 12px;color:var(--muted)}#engine.ok:before{content:"● ";color:var(--good)}#engine.bad{color:var(--bad)}
+main#main{flex:1;padding:22px 26px 60px;max-width:1400px;min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.row{display:flex;align-items:center}.between{justify-content:space-between}.gap{gap:10px}.wrap{flex-wrap:wrap}.mt{margin-top:12px}.mb{margin-bottom:12px}
+.muted{color:var(--muted)}.small{font-size:12.5px}.good{color:var(--good)}
+.btn{display:inline-block;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-weight:600}
+.btn:hover{border-color:var(--brand)}.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}.btn.primary:hover{background:#4a3bc7}
+.btn.small{padding:5px 10px;font-size:13px}.btn.warn{border-color:#f0c98a;background:#fff8ec;color:#8a5600}.btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+.pill{padding:4px 10px;border-radius:20px;background:#e8f7f0;font-weight:700}
+.chip{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:10px;background:#eef0f6;color:#4b5563}
+.chip.dE{background:#e5f6ee;color:var(--easy)}.chip.dM{background:#fdf2e2;color:var(--med)}.chip.dH{background:#fde8e8;color:var(--hard)}.jdchip{background:#efecff;color:var(--brand)}
+.hero{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.hero h1{font-size:26px}
+.bigbar,.minibar{height:10px;background:#eceef5;border-radius:6px;overflow:hidden;margin:8px 0}.bigbar{height:14px;max-width:480px}
+.bigbar div,.minibar div{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2))}.minibar.good div{background:var(--good)}
+.stats{display:grid;grid-template-columns:repeat(2,130px);gap:10px}.stats div{background:#f7f7fc;border-radius:10px;padding:10px 12px}.stats b{display:block;font-size:22px}.stats span{font-size:12px;color:var(--muted)}
+.grid{display:grid;gap:12px}.worlds{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}.jd{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}.badges{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.world{color:var(--ink);transition:transform .15s}.world:hover,.jdc:hover{transform:translateY(-2px);border-color:var(--brand2)}.jdc{color:var(--ink)}
+.wicon{font-size:28px}.wname{font-weight:800;margin:4px 0}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}select,input,textarea{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.qlist{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.qrow{display:grid;grid-template-columns:28px 46px 1fr 76px 170px 200px 60px;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);color:var(--ink)}
+.qrow:hover{background:#faf9ff}.qid{font-weight:700;color:var(--muted)}.qt{font-weight:600}.qjd{color:var(--brand)}.qxp{text-align:right;font-weight:700}
+.status{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px}.status.ok{background:var(--good);border-color:var(--good);color:#fff}.status.rev{border-color:var(--warn)}.status.tried{border-color:var(--warn);color:var(--warn)}
+.qgrid{display:grid;grid-template-columns:minmax(320px,5fr) 7fr;gap:16px;align-items:start}
+.qtitle{font-size:21px}.prompt{font-size:15.5px;margin:8px 0 14px}.meta>div{margin:4px 0;font-size:13.5px}.tables{margin:12px 0}
+.tbtn{border:1px solid var(--line);background:#f8f8fd;border-radius:8px;padding:4px 10px;margin:3px 4px 3px 0;cursor:pointer;font:inherit;font-size:13px}.tbtn:hover{border-color:var(--brand)}
+.hint{background:#fffbea;border:1px solid #f4e3a3;border-radius:8px;padding:8px 12px;margin:6px 0}
+.editor textarea{width:100%;min-height:230px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;line-height:1.5;background:#1e1f2e;color:#e6e6f0;border:0;border-radius:12px;padding:14px;tab-size:2;outline:none}
+.editor textarea:focus{box-shadow:0 0 0 3px #cfc8ff}
+.output{margin-top:12px;overflow:auto}.tablewrap{overflow:auto;max-height:420px}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid var(--line);padding:6px 10px;text-align:left;white-space:nowrap}th{background:#f7f7fc;position:sticky;top:0}td.null{color:#a0a4b3;font-style:italic}
+.fb{border-radius:10px;padding:10px 14px;margin-top:12px}.fb.good{background:#e6f6ef;color:#0b6b49}.fb.bad{background:#fdecec;color:#9d2c2c}
+.learn{border-top:1px dashed var(--line);margin-top:14px}.learn pre{background:var(--code);padding:12px;border-radius:8px;white-space:pre-wrap}
+.mcqnav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}.dot{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ink);background:#fff}
+.dot.ok{background:var(--good);color:#fff;border-color:var(--good)}.dot.bad{background:#fdecec;border-color:#f3b4b4}.dot.cur{outline:2px solid var(--brand)}
+.opts{display:grid;gap:8px;margin:12px 0}.opt{text-align:left;border:1px solid var(--line);background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font:inherit}.opt:hover:not(:disabled){border-color:var(--brand)}
+.opt.right{background:#e6f6ef;border-color:var(--good)}.opt.wrong{background:#fdecec;border-color:var(--bad)}.opt.picked{background:#efecff;border-color:var(--brand)}.opt:disabled{cursor:default;color:var(--ink)}
+.oabar{position:sticky;top:58px;z-index:5}.tab{border:1px solid var(--line);background:#fff;padding:6px 12px;border-radius:8px;cursor:pointer;font:inherit;font-weight:600}.tab.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.timer{font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
+.badge{text-align:center;opacity:.45;filter:grayscale(1)}.badge.got{opacity:1;filter:none;border-color:#e8d27a;background:#fffdf3}.bicon{font-size:34px}
+.lb tr.me td{background:#efecff;font-weight:700}
+.tgroup{margin:4px 0}
+.topicbars{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:4px 18px;margin-top:8px}.tbar{display:grid;grid-template-columns:150px 1fr 26px;gap:8px;align-items:center;color:var(--ink);font-size:13px}.tbar b{text-align:right}
+.exps{display:grid;gap:10px}.exp{margin:0;padding:0}.exp summary{list-style:none;cursor:pointer;padding:14px 18px}.exp summary::-webkit-details-marker{display:none}.exp[open] summary{border-bottom:1px solid var(--line)}
+.exp .eco{font-size:16px}.exp.read{opacity:.85}.expbody{padding:4px 18px 16px}.expbody li{margin:3px 0}.right{text-align:right}.tchip{background:#f1f0fb;color:#4b4a7a;font-weight:600}.chip.good{background:#e5f6ee;color:var(--good)}
+#modal{position:fixed;inset:0;background:rgba(20,20,40,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}#modal.open{display:flex}
+#modal .box{background:#fff;border-radius:14px;max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:22px 24px;position:relative}
+#modal label{display:block;margin:10px 0;font-weight:600;font-size:14px}#modal label input{display:block;width:100%;margin-top:4px;font-weight:400}#modal textarea{width:100%;margin:6px 0}
+#modal-close{position:absolute;right:12px;top:10px;border:0;background:none;font-size:22px;cursor:pointer;color:var(--muted)}.err{color:var(--bad);min-height:20px;font-size:13px}
+#toasts{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;flex-direction:column;gap:8px}
+.toast{background:#1d2333;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transform:translateY(10px);transition:.3s;max-width:340px;font-size:14px}.toast.show{opacity:1;transform:none}.toast.good{background:var(--good)}.toast.bad{background:var(--bad)}.toast.gold{background:#8a6a00}
+.celebrate{position:fixed;inset:0;pointer-events:none;z-index:70;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.celebrate>div{background:#fff;border:2px solid var(--brand2);border-radius:16px;padding:18px 30px;font-size:22px;font-weight:800;box-shadow:0 10px 40px rgba(91,75,219,.25);animation:pop .5s ease;text-align:center}.celebrate b{display:block;color:var(--brand);font-size:30px}
+.celebrate i{position:absolute;top:-10px;width:9px;height:14px;border-radius:2px;animation:fall 1.6s ease-in forwards}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}@keyframes fall{to{transform:translateY(105vh) rotate(540deg)}}
+@media (max-width:1000px){.qgrid{grid-template-columns:1fr}.qrow{grid-template-columns:26px 44px 1fr 70px 56px}.qworld,.qjd{display:none}}
+@media (max-width:760px){.layout{flex-direction:column}nav#nav{width:auto;display:flex;overflow-x:auto;padding:6px;border-right:0;border-bottom:1px solid var(--line)}nav#nav a{white-space:nowrap}#engine{display:none}main#main{padding:14px}.xpbar{width:110px}}
+</style>
+</head>
+<body>
+<header><div class="brand">SQL <span>Quest</span> <span class="muted small" style="font-weight:500">· Data-role placement prep</span></div><div id="hdr-stats"></div></header>
+<div class="layout">
+<nav id="nav">
+  <a href="#/home">🏠 Home</a><a href="#/list">🧩 Practice (100)</a><a href="#/mcq">📘 DBMS Quiz (40)</a><a href="#/oa">⏱ OA Simulator</a>
+  <a href="#/exp">🗣 Interview Experiences</a><a href="#/sandbox">🧪 Playground</a><a href="#/badges">🏅 Badges</a><a href="#/board">🏆 Leaderboard</a><a href="#/guide">📄 Cheat sheet</a>
+  <div id="engine">Loading SQL engine…</div>
+</nav>
+<main id="main"></main>
+</div>
+<div id="modal"><div class="box"><button id="modal-close" aria-label="Close">×</button><div id="modal-body"></div></div></div>
+<div id="toasts"></div>
+<script type="text/plain" id="sqljs-src">{{SQLJS}}</script>
+<script type="text/plain" id="wasm-b64">{{WASM}}</script>
+<script>window.SQLQ_DATA = {{DATA}};</script>
+<script>{{APP}}</script>
+</body>
+</html>

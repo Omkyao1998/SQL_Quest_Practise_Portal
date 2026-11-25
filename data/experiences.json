@@ -1,0 +1,1767 @@
+[
+ {
+  "company": "Tiger Analytics",
+  "category": "Analytics firm",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Fresher (campus)",
+  "year": "2023",
+  "location": "India",
+  "outcome": "5 students selected overall; author's own result not stated",
+  "difficulty": "Moderate to hard",
+  "source": {
+   "name": "GeeksforGeeks",
+   "url": "https://www.geeksforgeeks.org/?p=1118860"
+  },
+  "rounds": [
+   {
+    "name": "Online test (iMocha, ~90 min)",
+    "detail": "Aptitude/maths, CS fundamentals MCQs and 2 coding problems. About 50 of 220 students cleared it."
+   },
+   {
+    "name": "Technical 1",
+    "detail": "A medium coding problem, a SQL question and a probability problem, plus project discussion."
+   },
+   {
+    "name": "Technical 2",
+    "detail": "Easy coding, then the hardest part: probability, a polynomial coefficient question and classic puzzles."
+   },
+   {
+    "name": "HR",
+    "detail": "Resume walk-through, positions of responsibility, why data analysis, location preference."
+   }
+  ],
+  "asked": [
+   "SQL: average salary for each department",
+   "Find the k points closest to the origin (with follow-ups on complexity)",
+   "Bayes' theorem: fair vs biased coin",
+   "Probability that 3 random points on a circle lie in one semicircle",
+   "Measure 4 litres using 3 L and 5 L jugs"
+  ],
+  "tips": [
+   "Think out loud while solving",
+   "Probability and statistics carried as much weight as coding",
+   "Keep a couple of questions ready for the interviewer"
+  ],
+  "topics": [
+   "sql",
+   "dsa",
+   "stats",
+   "puzzle",
+   "aptitude",
+   "hr"
+  ],
+  "practice": [
+   "agg",
+   "ds"
+  ],
+  "jdBank": false,
+  "id": 1
+ },
+ {
+  "company": "Mu Sigma",
+  "category": "Analytics firm",
+  "role": "Trainee Decision Scientist",
+  "roleType": "DS",
+  "level": "Fresher (campus)",
+  "year": "2023",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "Moderate",
+  "source": {
+   "name": "GeeksforGeeks",
+   "url": "https://www.geeksforgeeks.org/?p=1051052"
+  },
+  "rounds": [
+   {
+    "name": "Pre-placement talk + online test",
+    "detail": "Held virtually right after the talk, camera on. C output-prediction questions and medium aptitude."
+   },
+   {
+    "name": "Group discussion",
+    "detail": "Virtual GD on common current-affairs/business topics. Elimination round."
+   },
+   {
+    "name": "Personal interview",
+    "detail": "One-on-one, centred on the resume: projects, skills and hobbies."
+   }
+  ],
+  "asked": [
+   "Predict the output of C code snippets",
+   "Group discussion on a general topic",
+   "Questions on every skill and hobby listed on the resume"
+  ],
+  "tips": [
+   "Eligibility was 70%+ aggregate, open to all B.Tech branches",
+   "Prepare aptitude well; most people drop at the test",
+   "Know your resume line by line"
+  ],
+  "topics": [
+   "aptitude",
+   "hr"
+  ],
+  "practice": [],
+  "jdBank": false,
+  "id": 2
+ },
+ {
+  "company": "Mu Sigma",
+  "category": "Analytics firm",
+  "role": "Decision Scientist",
+  "roleType": "DS",
+  "level": "Not stated",
+  "year": "",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.ca/Interview/Mu-Sigma-Interview-E253258-RVW18750488.htm"
+  },
+  "rounds": [
+   {
+    "name": "MuApt aptitude test",
+    "detail": "Aptitude with some interesting puzzles."
+   },
+   {
+    "name": "Video synthesis",
+    "detail": "Watch an 8-10 minute video, then synthesise it (draw insights, not just summarise)."
+   },
+   {
+    "name": "Case study",
+    "detail": "Share insights and recommendations after 10-15 minutes of preparation."
+   },
+   {
+    "name": "HR",
+    "detail": "Resume questions plus 'why analytics' and 'why Mu Sigma'."
+   }
+  ],
+  "asked": [
+   "Case: Amazon's market-entry strategy for India",
+   "Why analytics?",
+   "Why Mu Sigma?"
+  ],
+  "tips": [
+   "Practise turning information into 3-4 insights + a recommendation, not a summary"
+  ],
+  "topics": [
+   "aptitude",
+   "puzzle",
+   "case",
+   "hr"
+  ],
+  "practice": [
+   "biz"
+  ],
+  "jdBank": false,
+  "id": 3
+ },
+ {
+  "company": "Mu Sigma",
+  "category": "Analytics firm",
+  "role": "Decision Scientist",
+  "roleType": "DS",
+  "level": "Fresher (campus)",
+  "year": "2026",
+  "location": "Bengaluru",
+  "outcome": "Offer declined",
+  "difficulty": "Medium to difficult",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.co.in/Interview/Mu-Sigma-Interview-E253258-RVW105048668.htm"
+  },
+  "rounds": [
+   {
+    "name": "Assessment",
+    "detail": "Lots of maths and formula-based questions plus English."
+   },
+   {
+    "name": "Practical round",
+    "detail": "Three Python and three SQL problems to solve hands-on."
+   }
+  ],
+  "asked": [
+   "3 hands-on SQL problems",
+   "3 hands-on Python problems"
+  ],
+  "tips": [
+   "Rated medium to difficult; revise maths formulas, not just SQL"
+  ],
+  "topics": [
+   "aptitude",
+   "sql",
+   "python"
+  ],
+  "practice": [
+   "agg",
+   "joins",
+   "sub"
+  ],
+  "jdBank": false,
+  "id": 4
+ },
+ {
+  "company": "Fractal Analytics",
+  "category": "Analytics firm",
+  "role": "Imagineer (Trainee Data Scientist)",
+  "roleType": "DS",
+  "level": "Fresher (campus)",
+  "year": "2021",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "Moderate",
+  "source": {
+   "name": "GeeksforGeeks",
+   "url": "https://www.geeksforgeeks.org/?p=581612"
+  },
+  "rounds": [
+   {
+    "name": "Aptitude (75 min)",
+    "detail": "70 questions: data analysis, reasoning, quant and verbal."
+   },
+   {
+    "name": "Technical test (90 min)",
+    "detail": "4 SQL questions (mostly joins) and 4 Python-or-R questions on NumPy/Pandas, with test cases."
+   },
+   {
+    "name": "Technical interview 1 and 2 (~20 min each)",
+    "detail": "Mostly about the candidate's internship project and other projects."
+   },
+   {
+    "name": "HR",
+    "detail": "Strengths/weaknesses, teamwork, leadership, deadlines, achievements and failures."
+   }
+  ],
+  "asked": [
+   "SQL questions built around joins",
+   "Pandas/NumPy data manipulation",
+   "Walk through your internship project end to end"
+  ],
+  "tips": [
+   "Practise easy-to-moderate SQL joins",
+   "Learn Pandas and NumPy properly",
+   "Prepare common HR answers and an opening introduction"
+  ],
+  "topics": [
+   "aptitude",
+   "sql",
+   "python",
+   "hr"
+  ],
+  "practice": [
+   "joins",
+   "agg"
+  ],
+  "jdBank": false,
+  "id": 5
+ },
+ {
+  "company": "Fractal Analytics",
+  "category": "Analytics firm",
+  "role": "Analytics Consultant",
+  "roleType": "DA",
+  "level": "Not stated",
+  "year": "2023",
+  "location": "Gurugram",
+  "outcome": "No offer",
+  "difficulty": "Difficult",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.co.in/Interview/Fractal-Interview-E270403-RVW32194514.htm"
+  },
+  "rounds": [
+   {
+    "name": "Technical discussion",
+    "detail": "SQL, Python DSA and a business case."
+   }
+  ],
+  "asked": [
+   "SQL window functions",
+   "SQL self join",
+   "Python DSA question",
+   "Case study set in a food-delivery (Zomato) context"
+  ],
+  "tips": [
+   "Rated difficult; window functions and self joins came up directly"
+  ],
+  "topics": [
+   "sql",
+   "python",
+   "dsa",
+   "case"
+  ],
+  "practice": [
+   "win",
+   "joins",
+   "biz"
+  ],
+  "jdBank": false,
+  "id": 6
+ },
+ {
+  "company": "ZS Associates",
+  "category": "Analytics firm",
+  "role": "Business Technology Solutions Associate",
+  "roleType": "BA",
+  "level": "Fresher (campus, intern + FTE)",
+  "year": "2021",
+  "location": "India",
+  "outcome": "Selected",
+  "difficulty": "Moderate",
+  "source": {
+   "name": "GeeksforGeeks",
+   "url": "https://www.geeksforgeeks.org/?p=741536"
+  },
+  "rounds": [
+   {
+    "name": "Aptitude",
+    "detail": "DI, quant, logical and verbal. Most eliminations happen here."
+   },
+   {
+    "name": "Problem-Solving Deep Dive",
+    "detail": "A business case with MCQs; the right answer depends on details in the case."
+   },
+   {
+    "name": "AI video interview",
+    "detail": "Two recorded answers: a behavioural question and a guesstimate."
+   },
+   {
+    "name": "Case debrief",
+    "detail": "Write SQL queries for a case on paper, upload them, then defend the approach. Also resume, DBMS and puzzles."
+   },
+   {
+    "name": "Evidence-based + fit interview",
+    "detail": "Resume, behavioural questions, guesstimates and more puzzles."
+   }
+  ],
+  "asked": [
+   "Guesstimate: how many tennis balls fit in an aeroplane?",
+   "Handling a conflict so the other person sees your view",
+   "Cut a round cake into 8 equal pieces with 3 cuts",
+   "Egg-dropping puzzle (approach only)",
+   "100 people in a circle with a gun (derive the formula)"
+  ],
+  "tips": [
+   "Practise a wide set of puzzles",
+   "Always explain the approach behind a guesstimate or case",
+   "Stay calm; the panel is supportive"
+  ],
+  "topics": [
+   "aptitude",
+   "case",
+   "sql",
+   "guesstimate",
+   "puzzle",
+   "hr"
+  ],
+  "practice": [
+   "joins",
+   "agg",
+   "biz"
+  ],
+  "jdBank": false,
+  "id": 7
+ },
+ {
+  "company": "LatentView Analytics",
+  "category": "Analytics firm",
+  "role": "Role not specified",
+  "roleType": "DA",
+  "level": "Fresher (campus)",
+  "year": "2023",
+  "location": "Manipal (campus)",
+  "outcome": "Not stated",
+  "difficulty": "Moderate to difficult",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.sg/Interview/LatentView-Analytics-Interview-E435479-RVW92883592.htm"
+  },
+  "rounds": [
+   {
+    "name": "Coding round",
+    "detail": "One online coding round."
+   },
+   {
+    "name": "Technical 1 and 2 (in person)",
+    "detail": "Basic Excel, SQL, data analytics and Python."
+   },
+   {
+    "name": "HR",
+    "detail": "Final fit round."
+   }
+  ],
+  "asked": [
+   "Basic Excel functions",
+   "SQL queries",
+   "Data-analytics fundamentals",
+   "Python basics"
+  ],
+  "tips": [
+   "Whole process finished in one long day; moderate to difficult"
+  ],
+  "topics": [
+   "excel",
+   "sql",
+   "python",
+   "hr"
+  ],
+  "practice": [
+   "basics",
+   "agg"
+  ],
+  "jdBank": false,
+  "id": 8
+ },
+ {
+  "company": "LatentView Analytics",
+  "category": "Analytics firm",
+  "role": "Role not specified",
+  "roleType": "DA",
+  "level": "Not stated (referral)",
+  "year": "",
+  "location": "Bengaluru",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.ca/Interview/LatentView-Analytics-Interview-E435479-RVW96272984.htm"
+  },
+  "rounds": [
+   {
+    "name": "Technical 1 and 2",
+    "detail": "SQL, Python and deep dives into projects."
+   },
+   {
+    "name": "Techno-managerial",
+    "detail": "With an associate director."
+   },
+   {
+    "name": "HR",
+    "detail": "Final round."
+   }
+  ],
+  "asked": [
+   "A hard SQL question combining several joins and window functions in one query"
+  ],
+  "tips": [
+   "Expect one tough multi-step SQL query; practise joins + window functions together"
+  ],
+  "topics": [
+   "sql",
+   "python",
+   "hr"
+  ],
+  "practice": [
+   "joins",
+   "win"
+  ],
+  "jdBank": false,
+  "id": 9
+ },
+ {
+  "company": "LatentView Analytics",
+  "category": "Analytics firm",
+  "role": "Data engineering role",
+  "roleType": "DE",
+  "level": "Recruiter drive",
+  "year": "2025",
+  "location": "Chennai",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.com.au/Interview/LatentView-Analytics-Interview-E435479-RVW98616832.htm"
+  },
+  "rounds": [
+   {
+    "name": "Technical rounds (2)",
+    "detail": "Project architecture, DE tools, SQL and PySpark."
+   },
+   {
+    "name": "HR",
+    "detail": "Final round."
+   }
+  ],
+  "asked": [
+   "Explain your project's architecture",
+   "Deep dive into data-engineering tools you've used",
+   "A SQL query",
+   "PySpark commands"
+  ],
+  "tips": [
+   "Rounds stayed within the candidate's own tech stack"
+  ],
+  "topics": [
+   "sql",
+   "python",
+   "datamodel",
+   "hr"
+  ],
+  "practice": [
+   "win",
+   "clean"
+  ],
+  "jdBank": false,
+  "id": 10
+ },
+ {
+  "company": "EXL Service",
+  "category": "Analytics firm",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Not stated",
+  "year": "2025",
+  "location": "India",
+  "outcome": "Offer declined",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.ca/Interview/EXL-Service-Interview-E37901-RVW98111633.htm"
+  },
+  "rounds": [
+   {
+    "name": "Technical",
+    "detail": "Basic SQL and Python."
+   }
+  ],
+  "asked": [
+   "Basic SQL joins",
+   "Python list comprehension",
+   "Writing a Python function with def"
+  ],
+  "tips": [
+   "Basics are enough to clear; be clear on joins"
+  ],
+  "topics": [
+   "sql",
+   "python"
+  ],
+  "practice": [
+   "joins"
+  ],
+  "jdBank": false,
+  "id": 11
+ },
+ {
+  "company": "EXL Service",
+  "category": "Analytics firm",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Off-campus (Naukri)",
+  "year": "",
+  "location": "Noida",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.ie/Interview/EXL-Service-Interview-E37901-RVW88532034.htm"
+  },
+  "rounds": [
+   {
+    "name": "HR call",
+    "detail": "Applied on Naukri; HR called for details."
+   },
+   {
+    "name": "In-person interview",
+    "detail": "Resume, projects, SQL and Python."
+   }
+  ],
+  "asked": [
+   "Write a Python function that returns True if a value is in a list",
+   "Projects on your resume",
+   "SQL questions"
+  ],
+  "tips": [
+   "Job portals like Naukri do lead to interviews; keep the resume SQL/Python-heavy"
+  ],
+  "topics": [
+   "sql",
+   "python",
+   "hr"
+  ],
+  "practice": [
+   "basics"
+  ],
+  "jdBank": false,
+  "id": 12
+ },
+ {
+  "company": "EXL Service",
+  "category": "Analytics firm",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Fresher (campus)",
+  "year": "2021",
+  "location": "Gurugram",
+  "outcome": "No offer",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.com/Interview/EXL-Service-Interview-E37901-RVW85351914.htm"
+  },
+  "rounds": [
+   {
+    "name": "Two interview rounds",
+    "detail": "Guesstimates, problem-solving, a case study and data-analyst skills."
+   },
+   {
+    "name": "HR",
+    "detail": "Final round."
+   }
+  ],
+  "asked": [
+   "Guesstimate questions",
+   "A case study",
+   "OOP concepts in C++"
+  ],
+  "tips": [
+   "Prepare guesstimates; they are common in analytics-firm rounds"
+  ],
+  "topics": [
+   "guesstimate",
+   "case",
+   "hr"
+  ],
+  "practice": [
+   "biz"
+  ],
+  "jdBank": false,
+  "id": 13
+ },
+ {
+  "company": "Abzooba",
+  "category": "Analytics firm",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Fresher (campus)",
+  "year": "2023",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "Moderate",
+  "source": {
+   "name": "GeeksforGeeks",
+   "url": "https://www.geeksforgeeks.org/?p=1118132"
+  },
+  "rounds": [
+   {
+    "name": "Qualification test (HackerRank)",
+    "detail": "Two Python coding questions, SQL queries and aptitude MCQs. About 20 of 170 shortlisted."
+   },
+   {
+    "name": "Technical 1",
+    "detail": "Python, SQL and OOP basics, then every skill on the resume, and project roles."
+   },
+   {
+    "name": "Technical 2",
+    "detail": "Mostly SQL: a complex query, rule-based coding and live coding over screen share."
+   },
+   {
+    "name": "HR",
+    "detail": "Introduction, hobbies, relocation and situational questions."
+   }
+  ],
+  "asked": [
+   "Why is Java called object-oriented?",
+   "Python data types",
+   "A complex SQL query, explained step by step",
+   "Were you a team member or team lead in your project?"
+  ],
+  "tips": [
+   "Practise SQL on HackerRank before the test",
+   "Be ready to explain the logic of your code, not just write it",
+   "Know every skill you list"
+  ],
+  "topics": [
+   "sql",
+   "python",
+   "aptitude",
+   "hr"
+  ],
+  "practice": [
+   "agg",
+   "sub",
+   "win"
+  ],
+  "jdBank": false,
+  "id": 14
+ },
+ {
+  "company": "Tredence",
+  "category": "Analytics firm",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Fresher",
+  "year": "2025",
+  "location": "Pune",
+  "outcome": "Offer declined",
+  "difficulty": "Easy to moderate",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.co.in/Interview/Tredence-Interview-E1141078-RVW98464893.htm"
+  },
+  "rounds": [
+   {
+    "name": "Technical 1 and 2",
+    "detail": "SQL, basic statistics and ML."
+   },
+   {
+    "name": "HR",
+    "detail": "Final round; offer letter took about a month."
+   }
+  ],
+  "asked": [
+   "SQL queries",
+   "Mean vs median vs mode",
+   "Common ML algorithms"
+  ],
+  "tips": [
+   "Easy to moderate for a fresher; revise basic statistics"
+  ],
+  "topics": [
+   "sql",
+   "stats",
+   "ml",
+   "hr"
+  ],
+  "practice": [
+   "agg",
+   "ds"
+  ],
+  "jdBank": false,
+  "id": 15
+ },
+ {
+  "company": "Tredence",
+  "category": "Analytics firm",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Fresher",
+  "year": "",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.co.uk/Interview/Tredence-Interview-E1141078-RVW90745490.htm"
+  },
+  "rounds": [
+   {
+    "name": "Online test",
+    "detail": "Aptitude and coding."
+   },
+   {
+    "name": "Technical 1 and 2",
+    "detail": "Mostly SQL, with AWS cloud and Python."
+   },
+   {
+    "name": "HR",
+    "detail": "Final round."
+   }
+  ],
+  "asked": [
+   "Write a SQL query for a cumulative (running) sum"
+  ],
+  "tips": [
+   "Running totals with window functions are a favourite"
+  ],
+  "topics": [
+   "aptitude",
+   "sql",
+   "python",
+   "hr"
+  ],
+  "practice": [
+   "win"
+  ],
+  "jdBank": false,
+  "id": 16
+ },
+ {
+  "company": "Capgemini",
+  "category": "Service / consulting",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Fresher (campus)",
+  "year": "2024",
+  "location": "Pune",
+  "outcome": "Offer accepted",
+  "difficulty": "Average",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.co.in/Interview/Capgemini-Interview-E3803-RVW98572861.htm"
+  },
+  "rounds": [
+   {
+    "name": "Interview",
+    "detail": "Introduction, ML basics and a coding question."
+   }
+  ],
+  "asked": [
+   "Tell me about yourself",
+   "Explain some machine-learning algorithms",
+   "Write a piece of code"
+  ],
+  "tips": [
+   "Average difficulty; a strong self-introduction matters"
+  ],
+  "topics": [
+   "ml",
+   "python",
+   "hr"
+  ],
+  "practice": [
+   "ds"
+  ],
+  "jdBank": false,
+  "id": 17
+ },
+ {
+  "company": "Deloitte",
+  "category": "Service / consulting",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Not stated",
+  "year": "",
+  "location": "India",
+  "outcome": "No offer",
+  "difficulty": "Difficult",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.ie/Interview/Deloitte-Interview-E10177265-RVW99624793.htm"
+  },
+  "rounds": [
+   {
+    "name": "Technical",
+    "detail": "SQL theory and queries plus DAX in Power BI."
+   }
+  ],
+  "asked": [
+   "Difference between LEFT JOIN and INNER JOIN",
+   "UNION vs UNION ALL",
+   "What are SQL operators?",
+   "DAX: calculate net sales from MRP and discount",
+   "DAX: count unique customers"
+  ],
+  "tips": [
+   "For BI roles, revise DAX measures alongside SQL"
+  ],
+  "topics": [
+   "sql",
+   "powerbi"
+  ],
+  "practice": [
+   "joins",
+   "basics"
+  ],
+  "jdBank": false,
+  "id": 18
+ },
+ {
+  "company": "Deloitte",
+  "category": "Service / consulting",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Fresher (campus)",
+  "year": "2025",
+  "location": "India",
+  "outcome": "Rejected",
+  "difficulty": "",
+  "source": {
+   "name": "Coding Ninjas (Code360)",
+   "url": "https://www.naukri.com/code360/interview-experiences/deloitte/deloitte-interview-experience-on-campus-apr-2025"
+  },
+  "rounds": [
+   {
+    "name": "Technical",
+    "detail": "Data analysis plus machine-learning questions."
+   },
+   {
+    "name": "Second round",
+    "detail": "Not reached."
+   }
+  ],
+  "asked": [
+   "Machine-learning concept questions",
+   "Questions expecting a strong ML project"
+  ],
+  "tips": [
+   "The candidate prepared Python, SQL, Excel, Tableau and Power BI, but was rejected for weak ML depth",
+   "Have at least one solid end-to-end project"
+  ],
+  "topics": [
+   "ml",
+   "sql",
+   "python",
+   "excel"
+  ],
+  "practice": [
+   "ds"
+  ],
+  "jdBank": false,
+  "id": 19
+ },
+ {
+  "company": "Deloitte",
+  "category": "Service / consulting",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Not stated",
+  "year": "2023",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "GeeksforGeeks",
+   "url": "https://www.geeksforgeeks.org/?p=1022416"
+  },
+  "rounds": [
+   {
+    "name": "Phone screen (HR)",
+    "detail": "Background, experience and motivation for Deloitte."
+   },
+   {
+    "name": "Technical (senior data analyst)",
+    "detail": "Data manipulation, statistics, SQL and hypothetical scenarios."
+   }
+  ],
+  "asked": [
+   "SQL queries",
+   "Statistical analysis concepts",
+   "Solve a hypothetical business scenario using data"
+  ],
+  "tips": [
+   "Show your analytical thinking out loud on scenario questions"
+  ],
+  "topics": [
+   "sql",
+   "stats",
+   "case",
+   "hr"
+  ],
+  "practice": [
+   "agg",
+   "biz"
+  ],
+  "jdBank": false,
+  "id": 20
+ },
+ {
+  "company": "American Express",
+  "category": "BFSI",
+  "role": "Analyst (internship)",
+  "roleType": "DA",
+  "level": "Intern (campus)",
+  "year": "2018",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "GeeksforGeeks",
+   "url": "https://www.geeksforgeeks.org/?p=217266"
+  },
+  "rounds": [
+   {
+    "name": "Online test",
+    "detail": "50 MCQs (Java, C, C++, SQL, aptitude, logic, verbal) + 2 coding questions. About 30 shortlisted."
+   },
+   {
+    "name": "Interview",
+    "detail": "Why Amex, why an analyst role, past data-science experience, and SQL."
+   }
+  ],
+  "asked": [
+   "Why Amex? Why analyst when your profile is technical?",
+   "SQL self join: list each employee with their manager"
+  ],
+  "tips": [
+   "Eligibility was 6+ CGPA",
+   "Self joins are a classic; practise the employee-manager pattern"
+  ],
+  "topics": [
+   "aptitude",
+   "dsa",
+   "sql",
+   "hr"
+  ],
+  "practice": [
+   "joins"
+  ],
+  "jdBank": false,
+  "id": 21
+ },
+ {
+  "company": "American Express",
+  "category": "BFSI",
+  "role": "EDA/CFR (analytics) - intern + FTE",
+  "roleType": "DA",
+  "level": "Fresher (campus)",
+  "year": "2020",
+  "location": "Vellore (campus)",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "GeeksforGeeks",
+   "url": "https://www.geeksforgeeks.org/?p=479640"
+  },
+  "rounds": [
+   {
+    "name": "Interview",
+    "detail": "Three SQL questions and two IQ puzzles."
+   }
+  ],
+  "asked": [
+   "Two SQL questions on joins",
+   "One more SQL query",
+   "Two logic puzzles"
+  ],
+  "tips": [
+   "Know every type of join cold"
+  ],
+  "topics": [
+   "sql",
+   "puzzle"
+  ],
+  "practice": [
+   "joins"
+  ],
+  "jdBank": false,
+  "id": 22
+ },
+ {
+  "company": "American Express",
+  "category": "BFSI",
+  "role": "Global Services MIS & Advanced Analytics",
+  "roleType": "BI",
+  "level": "Fresher (campus)",
+  "year": "2025",
+  "location": "Campus",
+  "outcome": "No offer",
+  "difficulty": "Easy",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.co.in/Interview/American-Express-Interview-E35-RVW99905753.htm"
+  },
+  "rounds": [
+   {
+    "name": "Resume shortlist",
+    "detail": "Shortlisted directly on the resume."
+   },
+   {
+    "name": "Interview",
+    "detail": "One SQL question; mostly resume projects and internships."
+   }
+  ],
+  "asked": [
+   "Introduce yourself",
+   "Rate yourself in Python, SQL and Power BI",
+   "One SQL question"
+  ],
+  "tips": [
+   "If you rate yourself 8/10 in a tool, expect to be tested on it"
+  ],
+  "topics": [
+   "sql",
+   "powerbi",
+   "hr"
+  ],
+  "practice": [
+   "basics"
+  ],
+  "jdBank": false,
+  "id": 23
+ },
+ {
+  "company": "American Express",
+  "category": "BFSI",
+  "role": "Analytics / Data Science",
+  "roleType": "DS",
+  "level": "Not stated",
+  "year": "",
+  "location": "Gurugram",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.sg/Interview/American-Express-Interview-E35-RVW28335003.htm"
+  },
+  "rounds": [
+   {
+    "name": "Interview",
+    "detail": "SQL, ML fundamentals and a business case, plus puzzles and guesstimates."
+   }
+  ],
+  "asked": [
+   "Boosting and handling class imbalance",
+   "Business case: fraud detection",
+   "Puzzles and guesstimates"
+  ],
+  "tips": [
+   "Logical thinking was valued more than complex coding"
+  ],
+  "topics": [
+   "sql",
+   "ml",
+   "case",
+   "puzzle",
+   "guesstimate"
+  ],
+  "practice": [
+   "ds",
+   "biz"
+  ],
+  "jdBank": false,
+  "id": 24
+ },
+ {
+  "company": "Amazon",
+  "category": "Product company",
+  "role": "Business Intelligence Engineer Intern",
+  "roleType": "BI",
+  "level": "Intern (campus)",
+  "year": "",
+  "location": "Bengaluru",
+  "outcome": "Offer",
+  "difficulty": "Moderate",
+  "source": {
+   "name": "LeetCode Discuss",
+   "url": "https://leetcode.com/discuss/post/8428219/amazon-bie-intern-interview-experience-b-4oi9/"
+  },
+  "rounds": [
+   {
+    "name": "Resume shortlist",
+    "detail": "Data/analytics work (SQL, pipelines, dashboards) on the resume helped."
+   },
+   {
+    "name": "Online assessment",
+    "detail": "CS-fundamentals MCQs and one DSA problem."
+   },
+   {
+    "name": "Technical 1",
+    "detail": "Medium SQL (joins, GROUP BY/HAVING, window functions, subqueries), data modelling, DBMS and Python basics."
+   },
+   {
+    "name": "Technical 2",
+    "detail": "Timed SQL sprint, dashboard concepts, normalization, a long project deep dive and Leadership Principles."
+   }
+  ],
+  "asked": [
+   "6 SQL queries in 15 minutes",
+   "Fact vs dimension tables; star vs snowflake schema",
+   "Design a warehouse for a business problem",
+   "Keys, indexing, normalization vs denormalization, ACID",
+   "Why use a window function instead of a self join here?"
+  ],
+  "tips": [
+   "Make core SQL syntax automatic; speed matters",
+   "Prepare 3-4 STAR project stories mapped to Leadership Principles",
+   "Learn DBMS theory well enough to explain with examples"
+  ],
+  "topics": [
+   "sql",
+   "datamodel",
+   "python",
+   "dsa",
+   "hr"
+  ],
+  "practice": [
+   "win",
+   "sub",
+   "joins"
+  ],
+  "jdBank": false,
+  "id": 25
+ },
+ {
+  "company": "Amazon",
+  "category": "Product company",
+  "role": "Data Analyst Intern",
+  "roleType": "DA",
+  "level": "Intern",
+  "year": "2025",
+  "location": "Hyderabad",
+  "outcome": "Offer declined",
+  "difficulty": "Fairly easy",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.com/Interview/Amazon-Interview-E6036-RVW92855092.htm"
+  },
+  "rounds": [
+   {
+    "name": "Interview",
+    "detail": "Direct SQL and Python questions on analytics, ETL, cleaning, warehousing and visualisation."
+   }
+  ],
+  "asked": [
+   "Analytics case: a product isn't getting the downloads that were predicted. What would you look at?"
+  ],
+  "tips": [
+   "Have a metric framework ready for 'why is X lower than expected?'"
+  ],
+  "topics": [
+   "sql",
+   "python",
+   "case",
+   "powerbi"
+  ],
+  "practice": [
+   "biz",
+   "clean"
+  ],
+  "jdBank": false,
+  "id": 26
+ },
+ {
+  "company": "Flipkart",
+  "category": "Product company",
+  "role": "Associate Business Analyst",
+  "roleType": "BA",
+  "level": "Fresher (campus)",
+  "year": "",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.com/Interview/Flipkart-Interview-E300494-RVW24063560.htm"
+  },
+  "rounds": [
+   {
+    "name": "Group discussion",
+    "detail": "On an e-commerce topic."
+   },
+   {
+    "name": "Interview 1",
+    "detail": "Expected resume questions, but got a guesstimate and a product case."
+   },
+   {
+    "name": "Interview 2",
+    "detail": "A stress interview."
+   }
+  ],
+  "asked": [
+   "Guesstimate: washing powder used in India per day",
+   "A product case"
+  ],
+  "tips": [
+   "Prepare guesstimates even if a round is labelled 'resume'"
+  ],
+  "topics": [
+   "guesstimate",
+   "case",
+   "hr"
+  ],
+  "practice": [
+   "biz"
+  ],
+  "jdBank": false,
+  "id": 27
+ },
+ {
+  "company": "Flipkart",
+  "category": "Product company",
+  "role": "Business Analyst",
+  "roleType": "BA",
+  "level": "Not stated",
+  "year": "",
+  "location": "India",
+  "outcome": "No offer",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.ca/Interview/Flipkart-Interview-E300494-RVW62905911.htm"
+  },
+  "rounds": [
+   {
+    "name": "4-5 interviews",
+    "detail": "SQL, Excel, Pandas, business understanding and guesstimates."
+   }
+  ],
+  "asked": [
+   "Guesstimate: daily passengers at Delhi airport",
+   "SQL and Excel questions",
+   "Pandas questions"
+  ],
+  "tips": [
+   "Long process; balance tools with business sense"
+  ],
+  "topics": [
+   "sql",
+   "excel",
+   "python",
+   "guesstimate",
+   "case"
+  ],
+  "practice": [
+   "agg",
+   "biz"
+  ],
+  "jdBank": false,
+  "id": 28
+ },
+ {
+  "company": "Flipkart",
+  "category": "Product company",
+  "role": "Business Analyst",
+  "roleType": "BA",
+  "level": "Not stated",
+  "year": "2024",
+  "location": "Bengaluru",
+  "outcome": "No offer",
+  "difficulty": "Difficult",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.com/Interview/Flipkart-Interview-E300494-RVW91086217.htm"
+  },
+  "rounds": [
+   {
+    "name": "Rounds",
+    "detail": "SQL, machine learning, Python, guesstimates and case studies."
+   }
+  ],
+  "asked": [
+   "SQL questions",
+   "ML and Python questions",
+   "Guesstimates",
+   "Case studies"
+  ],
+  "tips": [
+   "Rated difficult; covers both tools and business thinking"
+  ],
+  "topics": [
+   "sql",
+   "ml",
+   "python",
+   "guesstimate",
+   "case"
+  ],
+  "practice": [
+   "biz",
+   "win"
+  ],
+  "jdBank": false,
+  "id": 29
+ },
+ {
+  "company": "Meesho",
+  "category": "Product company",
+  "role": "Business Analyst",
+  "roleType": "BA",
+  "level": "Not stated (onsite)",
+  "year": "",
+  "location": "India",
+  "outcome": "Rejected",
+  "difficulty": "Difficult",
+  "source": {
+   "name": "Aced (formerly Exponent)",
+   "url": "https://www.aced.io/experiences/meesho-business-analyst-interview-0feb62"
+  },
+  "rounds": [
+   {
+    "name": "Online assessment",
+    "detail": "20 MCQs on statistics and aptitude, 7 medium-to-hard SQL questions."
+   },
+   {
+    "name": "Technical",
+    "detail": "A tough SQL problem, project and ML basics, join row-count questions and two RCA cases."
+   },
+   {
+    "name": "Final",
+    "detail": "Statistics: central limit theorem and p-values."
+   }
+  ],
+  "asked": [
+   "SQL using CTEs, DENSE_RANK and aggregation",
+   "How many rows does a LEFT/RIGHT JOIN return here?",
+   "RCA: orders dropped suddenly",
+   "RCA: returns went up",
+   "Explain the central limit theorem and p-values"
+  ],
+  "tips": [
+   "The candidate felt weak on statistics, so revise it",
+   "Expect SQL to be the hardest part"
+  ],
+  "topics": [
+   "sql",
+   "stats",
+   "ml",
+   "case",
+   "aptitude"
+  ],
+  "practice": [
+   "win",
+   "joins",
+   "biz",
+   "ds"
+  ],
+  "jdBank": false,
+  "id": 30
+ },
+ {
+  "company": "PhonePe",
+  "category": "Product company",
+  "role": "Decision Scientist",
+  "roleType": "DS",
+  "level": "Not stated",
+  "year": "",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.com/Interview/PhonePe-Interview-E2289138-RVW91125452.htm"
+  },
+  "rounds": [
+   {
+    "name": "Interview",
+    "detail": "Included a data-modelling design question."
+   }
+  ],
+  "asked": [
+   "Design 5 tables to capture data for a BookMyShow-style ticketing app"
+  ],
+  "tips": [
+   "Practise schema design: entities, keys and relationships"
+  ],
+  "topics": [
+   "datamodel",
+   "sql"
+  ],
+  "practice": [
+   "joins"
+  ],
+  "jdBank": false,
+  "id": 31
+ },
+ {
+  "company": "Zomato",
+  "category": "Product company",
+  "role": "Data Analyst",
+  "roleType": "DA",
+  "level": "Not stated",
+  "year": "",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "Hard",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://fr.glassdoor.ca/Entretien/Zomato-Entretien-E515676-RVW97458209.htm"
+  },
+  "rounds": [
+   {
+    "name": "Technical (40 min)",
+    "detail": "Mainly SQL, ending with a puzzle and a guesstimate."
+   }
+  ],
+  "asked": [
+   "6 SQL questions at LeetCode medium-to-hard level",
+   "A puzzle",
+   "A guesstimate"
+  ],
+  "tips": [
+   "SQL depth matters most here; practise hard window-function problems"
+  ],
+  "topics": [
+   "sql",
+   "puzzle",
+   "guesstimate"
+  ],
+  "practice": [
+   "win",
+   "sub"
+  ],
+  "jdBank": false,
+  "id": 32
+ },
+ {
+  "company": "Zomato (Hyperpure)",
+  "category": "Product company",
+  "role": "Business Analyst",
+  "roleType": "BA",
+  "level": "Experienced (2+ yrs)",
+  "year": "",
+  "location": "Gurugram",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.ca/Interview/Hyperpure-Interview-E3736080-RVW104172358.htm"
+  },
+  "rounds": [
+   {
+    "name": "Round 1 (1 hr+, senior BA)",
+    "detail": "Past work and problems solved, then medium SQL, a guesstimate and join-output questions."
+   },
+   {
+    "name": "Round 2 (same day)",
+    "detail": "With an experienced senior BA."
+   }
+  ],
+  "asked": [
+   "Two medium SQL questions",
+   "Predict the output of different join conditions",
+   "A guesstimate"
+  ],
+  "tips": [
+   "Results can come within hours; be ready for back-to-back rounds"
+  ],
+  "topics": [
+   "sql",
+   "guesstimate",
+   "case"
+  ],
+  "practice": [
+   "joins",
+   "agg"
+  ],
+  "jdBank": false,
+  "id": 33
+ },
+ {
+  "company": "Myntra",
+  "category": "Product company",
+  "role": "Analyst role (not specified)",
+  "roleType": "DA",
+  "level": "Not stated",
+  "year": "",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "Decent",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.com/Interview/Myntra-Interview-E508705-RVW94452338.htm"
+  },
+  "rounds": [
+   {
+    "name": "Technical",
+    "detail": "SQL and Python (Pandas/NumPy joins and aggregations)."
+   }
+  ],
+  "asked": [
+   "SQL: 3-month rolling average of sales",
+   "Cumulative sum",
+   "Orders-and-customers style problems"
+  ],
+  "tips": [
+   "Rolling averages and running totals are worth practising"
+  ],
+  "topics": [
+   "sql",
+   "python"
+  ],
+  "practice": [
+   "win",
+   "agg"
+  ],
+  "jdBank": false,
+  "id": 34
+ },
+ {
+  "company": "Myntra",
+  "category": "Product company",
+  "role": "Analyst role (not specified)",
+  "roleType": "BA",
+  "level": "Off-campus",
+  "year": "2020",
+  "location": "India",
+  "outcome": "No offer (round 3 did not happen)",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.co.uk/Interview/Myntra-Interview-E508705-RVW37026383.htm"
+  },
+  "rounds": [
+   {
+    "name": "Round 1: SQL",
+    "detail": "Order of query execution, FROM vs WHERE, window functions, and queries on sample tables."
+   },
+   {
+    "name": "Round 2: business",
+    "detail": "Sales and estimation questions about Myntra's business."
+   }
+  ],
+  "asked": [
+   "What is the order of query execution?",
+   "Window functions on sample tables",
+   "Estimate Myntra's daily sales",
+   "How does Myntra make money?",
+   "How would you grow sales of women's products?"
+  ],
+  "tips": [
+   "Know the company's business model before the interview"
+  ],
+  "topics": [
+   "sql",
+   "guesstimate",
+   "case"
+  ],
+  "practice": [
+   "win",
+   "biz"
+  ],
+  "jdBank": false,
+  "id": 35
+ },
+ {
+  "company": "Paytm",
+  "category": "Product company",
+  "role": "Business Analyst",
+  "roleType": "BA",
+  "level": "0-2 years",
+  "year": "2022",
+  "location": "India",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "Coding Ninjas (Code360)",
+   "url": "https://www.naukri.com/code360/interview-experiences/paytm-one97-communications-limited/interview-experience-business-analyst-apr-2022-exp-0-2-years"
+  },
+  "rounds": [
+   {
+    "name": "Three rounds",
+    "detail": "Preparation covered SQL Server, Power BI, advanced SQL, window functions and guesstimates."
+   }
+  ],
+  "asked": [
+   "Advanced SQL / window functions",
+   "Power BI",
+   "Guesstimates"
+  ],
+  "tips": [
+   "Practise medium-to-difficult SQL, not just basics"
+  ],
+  "topics": [
+   "sql",
+   "powerbi",
+   "guesstimate"
+  ],
+  "practice": [
+   "win"
+  ],
+  "jdBank": false,
+  "id": 36
+ },
+ {
+  "company": "Swiggy",
+  "category": "Product company",
+  "role": "Business Analyst",
+  "roleType": "BA",
+  "level": "Not stated",
+  "year": "",
+  "location": "Bengaluru",
+  "outcome": "No offer",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.com/Interview/Swiggy-Interview-E952680-RVW88062290.htm"
+  },
+  "rounds": [
+   {
+    "name": "Round 1: HackerRank SQL test",
+    "detail": "7-8 moderate-to-advanced SQL questions with tight timing, one based on a case study."
+   }
+  ],
+  "asked": [
+   "7-8 timed SQL questions",
+   "A case-study-based SQL question"
+  ],
+  "tips": [
+   "Time is short; practise solving SQL under a timer"
+  ],
+  "topics": [
+   "sql",
+   "case"
+  ],
+  "practice": [
+   "win",
+   "biz"
+  ],
+  "jdBank": true,
+  "id": 37
+ },
+ {
+  "company": "Swiggy",
+  "category": "Product company",
+  "role": "Business Analyst",
+  "roleType": "BA",
+  "level": "Various (compiled)",
+  "year": "",
+  "location": "India",
+  "outcome": "Various",
+  "difficulty": "",
+  "source": {
+   "name": "Board Infinity",
+   "url": "https://discuss.boardinfinity.com/t/swiggy-business-analyst-interview-questions-experience-guide/23579"
+  },
+  "rounds": [
+   {
+    "name": "Technical rounds",
+    "detail": "SQL concepts plus case-style queries."
+   },
+   {
+    "name": "Case round",
+    "detail": "Business scenario: metrics, problems and solutions."
+   }
+  ],
+  "asked": [
+   "Rolling sum, RANK, DENSE_RANK and ROW_NUMBER",
+   "Find the highest orders by category",
+   "Identify key metrics for a business scenario"
+  ],
+  "tips": [
+   "Compiled from several candidates; brush up statistics and case frameworks too"
+  ],
+  "topics": [
+   "sql",
+   "case",
+   "stats"
+  ],
+  "practice": [
+   "win",
+   "biz"
+  ],
+  "jdBank": true,
+  "id": 38
+ },
+ {
+  "company": "Grab",
+  "category": "Product company",
+  "role": "Data Scientist (Analytics)",
+  "roleType": "DS",
+  "level": "Not stated",
+  "year": "",
+  "location": "Not stated",
+  "outcome": "Not stated",
+  "difficulty": "",
+  "source": {
+   "name": "Glassdoor",
+   "url": "https://www.glassdoor.com.au/Interview/Grab-Interview-E958580-RVW48856196.htm"
+  },
+  "rounds": [
+   {
+    "name": "Assessment",
+    "detail": "Statistics and ML MCQs, basic SQL and algorithm questions."
+   }
+  ],
+  "asked": [
+   "Statistics MCQs",
+   "ML MCQs",
+   "Basic SQL",
+   "Algorithm questions"
+  ],
+  "tips": [
+   "Grab's DS track mixes stats/ML theory with SQL; revise both"
+  ],
+  "topics": [
+   "stats",
+   "ml",
+   "sql",
+   "dsa"
+  ],
+  "practice": [
+   "ds",
+   "agg"
+  ],
+  "jdBank": true,
+  "id": 39
+ }
+]
