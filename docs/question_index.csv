@@ -1,0 +1,101 @@
+id,world,title,difficulty,roles,jd_tags,tables,row_order_graded
+1,Basics Camp,Who works in Pune?,Easy,"DA, BA","ZenStatement, Eternz",employees,no
+2,Basics Camp,Budget buys under ₹1000,Easy,"DA, BA",ZenStatement,products,yes
+3,Basics Camp,What do we sell?,Easy,"DA, BA",ZenStatement,products,no
+4,Basics Camp,Top 5 premium products,Easy,"DA, BA","Eternz, ZenStatement",products,yes
+5,Basics Camp,Card and NetBanking deliveries,Easy,"DA, BA","ZenStatement, Upstox",orders,no
+6,Basics Camp,March orders,Easy,"DA, BA","ZenStatement, Tata CLiQ",orders,yes
+7,Basics Camp,Names starting with A,Easy,"DA, BA",ZenStatement,customers,no
+8,Basics Camp,Missing salaries,Easy,"DA, BA","Eternz, Tata CLiQ",employees,no
+9,Basics Camp,Recent tech and analytics hires,Easy,"DA, BA",ZenStatement,employees,yes
+10,Basics Camp,Price bands with CASE,Easy,"DA, BA, BI","ZenStatement, Tata CLiQ",products,no
+11,Basics Camp,Product margins (integer trap),Medium,"DA, BA, BI","Tata CLiQ, Shadowfax",products,yes
+12,Basics Camp,Org chart sort,Easy,"DA, BA",ZenStatement,employees,yes
+13,Basics Camp,Highly rated restaurants,Easy,"DA, BA",Swiggy,restaurants,yes
+14,Basics Camp,Failed COD shipments,Easy,"DA, BA",Shadowfax,shipments,no
+15,Basics Camp,Orders 3 to 5 (pagination),Medium,"DA, BA",ZenStatement,orders,yes
+16,Aggregation Arena,Orders by status,Easy,"DA, BA","ZenStatement, Eternz, Tata CLiQ",orders,no
+17,Aggregation Arena,Average salary by department,Easy,"DA, BA","ZenStatement, Eternz",employees,no
+18,Aggregation Arena,COUNT(*) vs COUNT(column),Easy,"DA, BA, DE","Eternz, Tata CLiQ, Upstox",employees,no
+19,Aggregation Arena,Biggest baskets,Medium,"DA, BA","Tata CLiQ, Eternz",order_items,yes
+20,Aggregation Arena,Loyal customers (HAVING),Medium,"DA, BA","ZenStatement, Tata CLiQ",orders,yes
+21,Aggregation Arena,Busy restaurants,Medium,"DA, BA","Swiggy, Snabbit",food_orders,yes
+22,Aggregation Arena,Orders per month,Medium,"DA, BA, BI","Tata CLiQ, Upstox, ZenStatement",orders,yes
+23,Aggregation Arena,Pivot: status by payment mode,Medium,"DA, BA, BI","Swiggy, Tata CLiQ, Shadowfax",orders,no
+24,Aggregation Arena,Which payment mode cancels most?,Medium,"DA, BA","Tata CLiQ, Snabbit, Grab",orders,yes
+25,Aggregation Arena,Hub delivery scorecard,Medium,"DA, BA, BI",Shadowfax,shipments,no
+26,Aggregation Arena,Distance stats by status,Easy,"DA, DS","Shadowfax, Snabbit",shipments,no
+27,Aggregation Arena,Orders vs unique customers,Easy,"DA, BA","Swiggy, ShareChat",food_orders,no
+28,Aggregation Arena,Duplicate phone numbers,Easy,"DA, DE","Eternz, Tata CLiQ",raw_leads,no
+29,Aggregation Arena,Ad campaign efficiency,Medium,"BA, DA",Swiggy,ad_campaigns,yes
+30,Aggregation Arena,Buy vs sell value per stock,Medium,"DA, BA",Upstox,trades,no
+31,Join Junction,Employees with department names,Easy,"DA, BA","ZenStatement, Eternz, Tata CLiQ","employees, departments",no
+32,Join Junction,Nobody left behind (LEFT JOIN),Easy,"DA, BA","ZenStatement, Tata CLiQ","employees, departments",no
+33,Join Junction,Empty departments,Easy,"DA, BA, DE","Tata CLiQ, Upstox","employees, departments",no
+34,Join Junction,"Signed up, never ordered",Medium,"DA, BA","Tata CLiQ, Snabbit, ShareChat","customers, orders",no
+35,Join Junction,Who is my manager? (self join),Medium,"DA, BA, DE","Upstox, Tata CLiQ",employees,no
+36,Join Junction,Earning more than the boss,Medium,"DA, BA","Tata CLiQ, Upstox",employees,no
+37,Join Junction,Net revenue by category,Medium,"DA, BA, BI","Tata CLiQ, Eternz","orders, order_items, products",yes
+38,Join Junction,Dead stock,Easy,"DA, BA",Tata CLiQ,"products, order_items",no
+39,Join Junction,City performance,Medium,"DA, BA","Tata CLiQ, Snabbit","customers, orders",no
+40,Join Junction,Restaurant leaderboard,Easy,"DA, BA",Swiggy,"restaurants, food_orders",yes
+41,Join Junction,Hubs with high RTO,Medium,"DA, BA, BI",Shadowfax,"hubs, shipments",yes
+42,Join Junction,Star riders,Medium,"DA, BA",Shadowfax,"riders, hubs, shipments",yes
+43,Join Junction,Fill the gaps (CROSS JOIN),Hard,"BI, DA, BA","Shadowfax, Grab","hubs, riders",no
+44,Join Junction,Hubs vs cost target,Medium,"BA, DA",Shadowfax,"hubs, shipments, zone_targets",no
+45,Join Junction,Restaurant cities vs hub cities (FULL OUTER JOIN),Hard,"DA, BA, DE","Grab, Upstox","restaurants, hubs",no
+46,Subquery & CTE Cave,Second highest salary,Easy,"DA, BA, DE, DS","Tata CLiQ, Upstox, Eternz",employees,no
+47,Subquery & CTE Cave,Third highest salary,Medium,"DA, BA, DE, DS","Tata CLiQ, Upstox",employees,no
+48,Subquery & CTE Cave,Above company average,Easy,"DA, BA","ZenStatement, Tata CLiQ",employees,no
+49,Subquery & CTE Cave,Above department average,Medium,"DA, BA, DS","Tata CLiQ, Upstox",employees,no
+50,Subquery & CTE Cave,Top earner in each department,Medium,"DA, BA, DE","Tata CLiQ, Upstox","employees, departments",no
+51,Subquery & CTE Cave,Above-average spenders (CTE),Medium,"DA, BA","Tata CLiQ, Snabbit","orders, order_items",no
+52,Subquery & CTE Cave,Electronics buyers (EXISTS),Medium,"DA, BA",Tata CLiQ,"customers, orders, order_items, products",no
+53,Subquery & CTE Cave,Footwear AND Apparel buyers,Medium,"DA, BA","Tata CLiQ, Snabbit","orders, order_items, products",no
+54,Subquery & CTE Cave,Popular products,Medium,"DA, BA",Tata CLiQ,"order_items, orders, products",yes
+55,Subquery & CTE Cave,Orders bigger than usual,Hard,"DA, BA, DS","Tata CLiQ, Grab","orders, order_items",no
+56,Subquery & CTE Cave,"KYC done, money not deposited",Medium,"DA, BA","Upstox, Snabbit, ShareChat, Sarvam AI",app_events,no
+57,Subquery & CTE Cave,Org levels (recursive CTE),Hard,"DA, DE","Grab, Tata CLiQ",employees,yes
+58,Window Wizardry,Number within department (ROW_NUMBER),Easy,"DA, BA, DS, DE","Tata CLiQ, Upstox",employees,yes
+59,Window Wizardry,RANK vs DENSE_RANK vs ROW_NUMBER,Easy,"DA, BA, DS, DE","Tata CLiQ, Upstox, Grab",employees,yes
+60,Window Wizardry,Top 2 salaries per department,Medium,"DA, BA, DS, DE","Tata CLiQ, Upstox, Grab",employees,yes
+61,Window Wizardry,Running revenue in January,Medium,"DA, BA, BI","Tata CLiQ, Upstox","orders, order_items",yes
+62,Window Wizardry,Month-over-month growth,Medium,"DA, BA, BI","Tata CLiQ, Upstox, Grab","orders, order_items",yes
+63,Window Wizardry,Days between orders,Medium,"DA, BA, DS","Tata CLiQ, Snabbit",orders,yes
+64,Window Wizardry,3-day moving average,Medium,"DA, DS","Upstox, Grab",stock_prices,yes
+65,Window Wizardry,Category share of revenue,Medium,"DA, BA, BI","Tata CLiQ, Swiggy","orders, order_items, products",yes
+66,Window Wizardry,Spend quartiles (NTILE),Medium,"DA, BA, DS",Tata CLiQ,"orders, order_items",yes
+67,Window Wizardry,Gap to department top,Easy,"DA, BA","Tata CLiQ, Upstox",employees,yes
+68,Window Wizardry,Each trader's first trade,Medium,"DA, BA, DE","Upstox, Grab",trades,no
+69,Window Wizardry,Login streaks (gaps & islands),Hard,"DA, DS, DE","Grab, Upstox, ShareChat",app_events,yes
+70,Window Wizardry,Came back within 30 days,Medium,"DA, BA","Tata CLiQ, Snabbit, Swiggy",orders,no
+71,Window Wizardry,City-wise restaurant ranking,Easy,"DA, BA, BI",Swiggy,"restaurants, food_orders",yes
+72,Window Wizardry,Best-seller in each category,Medium,"DA, BA",Tata CLiQ,"order_items, products",yes
+73,Window Wizardry,Cumulative app users,Easy,"DA, BA, BI","Upstox, ShareChat, Sarvam AI",app_users,yes
+74,Window Wizardry,Sharp price drops,Medium,"DA, DS","Upstox, Grab",stock_prices,yes
+75,Window Wizardry,Keep the latest lead per phone,Medium,"DA, DE","Tata CLiQ, Eternz",raw_leads,no
+76,"Dates, Strings & Cleaning",Tidy up leads,Easy,"DA, DE","Eternz, Tata CLiQ, Upstox",raw_leads,no
+77,"Dates, Strings & Cleaning",Standardise phone numbers,Medium,"DA, DE","Eternz, Upstox",raw_leads,no
+78,"Dates, Strings & Cleaning",Broken emails,Medium,"DA, DE",Eternz,raw_leads,no
+79,"Dates, Strings & Cleaning",Average delivery time,Medium,"DA, BA","Swiggy, Snabbit","food_orders, restaurants",yes
+80,"Dates, Strings & Cleaning",Peak ordering hours,Easy,"DA, BA, BI","Swiggy, Snabbit",food_orders,yes
+81,"Dates, Strings & Cleaning",Weekday pattern,Medium,"DA, BI","Tata CLiQ, Swiggy",orders,yes
+82,"Dates, Strings & Cleaning",SLA breaches,Easy,"DA, BA",Shadowfax,shipments,yes
+83,"Dates, Strings & Cleaning",Every day counts (date spine),Hard,"BI, DA, DE","Grab, Swiggy",food_orders,yes
+84,Business Case Room,Monthly AOV,Medium,"DA, BA, BI","Tata CLiQ, Snabbit","orders, order_items",yes
+85,Business Case Room,Onboarding funnel,Hard,"DA, BA","Snabbit, Grab, ShareChat, Upstox, Sarvam AI",app_events,yes
+86,Business Case Room,Day-7 retention by signup cohort,Hard,"DA, BA, DS","Tata CLiQ, Grab, ShareChat, Upstox","app_users, app_events",yes
+87,Business Case Room,Repeat purchase rate,Medium,"DA, BA","Tata CLiQ, Snabbit, Swiggy",orders,no
+88,Business Case Room,A/B test readout,Medium,"BA, DA, DS","Swiggy, Grab",experiment_users,no
+89,Business Case Room,Restaurant ad ROI,Medium,"BA, DA",Swiggy,"ad_campaigns, restaurants",yes
+90,Business Case Room,Order spikes vs 7-day average,Hard,"DA, DS","Grab, Swiggy",food_orders,yes
+91,Business Case Room,Pareto: who drives 80% of revenue?,Hard,"DA, BA","Tata CLiQ, Swiggy","orders, order_items",no
+92,Business Case Room,Frequently bought together,Hard,"DA, DS",Tata CLiQ,"order_items, products",yes
+93,Business Case Room,New vs returning customer orders,Hard,"DA, BA","Tata CLiQ, Snabbit, Swiggy",orders,yes
+94,Data Science SQL Lab,Median income without MEDIAN(),Hard,"DS, DA","Grab, Carousell, Spinny, Temple",loan_applications,no
+95,Data Science SQL Lab,Impute missing credit scores,Medium,DS,"Grab, Spinny, Snabbit, Carousell",loan_applications,no
+96,Data Science SQL Lab,Default rate by income band,Medium,"DS, DA","Grab, Spinny, Upstox",loan_applications,yes
+97,Data Science SQL Lab,Income outliers (z-score),Hard,DS,"Grab, Carousell, Spinny",loan_applications,yes
+98,Data Science SQL Lab,Deterministic train/test split,Medium,DS,"Spinny, Grab, Carousell",loan_applications,yes
+99,Data Science SQL Lab,Is the A/B lift significant? (z-test),Hard,"DS, BA","Swiggy, Grab, Spinny, Snabbit",experiment_users,no
+100,Data Science SQL Lab,Correlation: credit score vs default,Hard,DS,"Grab, Carousell, Spinny, Temple",loan_applications,no
