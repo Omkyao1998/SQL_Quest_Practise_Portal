@@ -15,7 +15,7 @@ You need: a Google account, and (for AI marking) a free Gemini API key.
    ```js
    const SETUP_ADMIN = { username: "omkar", name: "Omkar Gokhale", password: "ChangeMe@123" };
    ```
-   This is your first faculty (admin) login. Use a temporary password; you'll change it inside the portal later.
+   This is your first admin login, created only if the Faculty tab has no admin yet. Use a temporary password; the portal makes you change it at first login.
 5. Click 💾 **Save**.
 
 ## Step 2: Run setup once (2 min)
@@ -63,10 +63,14 @@ then `python3 tools/build.py` and push.
 
 ## Step 6: First login and roster (5 min)
 
-1. Open the portal → **Faculty** tab → log in with your SETUP_ADMIN username/password.
-2. **🔑 Team & password**: change your password, then add other faculty (each gets their own login and sees all students).
-3. **👥 Roster & PINs**: paste students as `roll, name, batch` (one per line; you can copy three columns from Excel).
-4. Tell students: *"Open the link, choose Student, type your roll number and pick a 4–6 digit PIN. That becomes your PIN."*
+1. Open the portal → **Faculty / Admin** → log in with your admin username and temporary password. You'll be asked to set your own password straight away.
+2. You land on the **🛡️ Admin panel**:
+   - **Manage faculty**: add faculty (or more admins). Each gets a temporary password they must change at first login. You can also edit, reset passwords, disable or delete accounts.
+   - **Manage students**: paste students as `roll, name, batch` (one per line; you can copy three columns from Excel). Edit, move batch, disable, reset PIN or delete, one at a time or in bulk.
+   - **Activity log**: who added, changed or removed what.
+3. Tell students: *"Open the link, choose Student, type your roll number and pick a 4–6 digit PIN. That becomes your PIN."*
+
+**Roles:** *Faculty* see all students, analytics, the review queue and the MCQ manager, and can reset a forgotten PIN. *Admins* can do all that plus the Admin panel. There must always be at least one active admin, and an admin can't remove their own admin access.
 
 ---
 
@@ -78,9 +82,12 @@ then `python3 tools/build.py` and push.
 | One student's full detail (questions, their SQL, hints, solutions seen, scenario answers) | click a student |
 | Find the questions the class is stuck on | 📈 Question analytics |
 | Check or change AI marks | ✅ Review answers |
-| Add students, reset a forgotten PIN | 👥 Roster & PINs |
+| Add, edit, move, disable or delete students | 🛡️ Admin → Manage students (admins) |
+| Reset a forgotten PIN | 🔢 Student PINs (any faculty) |
 | Add your own MCQs (DBMS, Big Data or DE) | ➕ MCQ manager |
-| Add faculty, change password | 🔑 Team & password |
+| Add or manage faculty and admins | 🛡️ Admin → Manage faculty (admins) |
+| Change my own password | 🔑 My password |
+| Check AI key, marking queue, demo data | 🛡️ Admin home → System check |
 
 The Google Sheet is the raw data. You can sort or filter it, but don't rename the tabs or the header row.
 
@@ -93,8 +100,9 @@ Paste the new `Code.gs`, then **Deploy → Manage deployments → ✏ Edit → V
 - **"Who has access" doesn't offer "Anyone"** (common on college Google Workspace accounts, where admins allow only "Anyone within <college>"): students' browsers then can't reach the backend. Ask your Workspace admin to allow external access for Apps Script web apps, or create the Sheet and script with a personal Gmail account instead. Nothing else changes.
 
 - **Answers stay "Waiting for AI"**: check that `GEMINI_API_KEY` is set. Busy periods (many students submitting together) are queued and retried every 5 minutes. If a brand-new key keeps failing with quota errors, Google may require a billing account on that Google Cloud project before the free tier works, so check AI Studio's usage page.
-- **"Please log in again"**: tokens last 14 days; just log in again.
-- **A student forgot their PIN**: Roster & PINs → Reset PIN. They choose a new one at their next login. Their progress is kept.
+- **"Please log in again"**: tokens last 14 days; just log in again. Disabling a student or faculty account, or changing someone's role, takes effect on their very next action.
+- **Locked out of every admin account**: in the Faculty tab, set someone's `role` to `admin` and `status` to `active`. To reset a password by hand, delete that row and run `setup` with SETUP_ADMIN filled in (it only runs when no admin exists).
+- **A student forgot their PIN**: Student PINs → Reset PIN. They choose a new one at their next login. Their progress is kept.
 - **Limits**: Apps Script handles a few hundred students comfortably. The free Gemini tier has per-minute limits, which is why marking can queue during a busy class.
 - **Privacy**: names, roll numbers and answers live only in your Google Sheet. Scenario answers are sent to Google's Gemini API for marking.
 - **Honest limits**: XP is calculated in the browser, so a determined student could fake it. Scenario model answers are in the page source. Use marks as practice signals; run formal assessments in a proctored setting.

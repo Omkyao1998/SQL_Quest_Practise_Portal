@@ -314,14 +314,14 @@ function viewLogin(role) {
   main().innerHTML = `<div class="loginwrap"><div class="card loginbox">
     <a class="linkbtn small" href="#/welcome">← Back</a>
     <div class="brand big">SQL <span>Quest</span></div><p class="muted">Placement practice for data roles: SQL, DBMS, Big Data and interview prep.</p>
-    <div class="tabs2"><button class="tab ${fac ? "" : "on"}" data-lt="s">🎓 Student</button><button class="tab ${fac ? "on" : ""}" data-lt="f">👩‍🏫 Faculty</button></div>
+    <div class="tabs2"><button class="tab ${fac ? "" : "on"}" data-lt="s">🎓 Student</button><button class="tab ${fac ? "on" : ""}" data-lt="f">👩‍🏫 Faculty / Admin</button></div>
     <div id="lg-s" ${fac ? "hidden" : ""}><label>Roll number<input id="lg-roll" autocomplete="username" maxlength="30"></label>
       <label>PIN<input id="lg-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="6"></label>
       <p class="small muted">First time here? Type a new 4 to 6 digit PIN. It becomes your PIN, so remember it. Forgot it later? Your faculty can reset it.</p>
       <button class="btn primary wide" id="lg-sgo">Log in</button></div>
-    <div id="lg-f" ${fac ? "" : "hidden"}><label>Username<input id="lg-user" autocomplete="username" maxlength="30"></label>
+    <div id="lg-f" ${fac ? "" : "hidden"}><p class="small muted">Faculty and admins log in here with the username and password from the portal admin.</p><label>Username<input id="lg-user" autocomplete="username" maxlength="30"></label>
       <label>Password<input id="lg-pass" type="password" autocomplete="current-password"></label>
-      <button class="btn primary wide" id="lg-fgo">Log in as faculty</button></div>
+      <button class="btn primary wide" id="lg-fgo">Log in</button></div>
     <div class="err" id="lg-err"></div></div></div>`;
   main().querySelectorAll("[data-lt]").forEach(b => b.onclick = () => {
     main().querySelectorAll("[data-lt]").forEach(x => x.classList.toggle("on", x === b));
@@ -339,7 +339,11 @@ function viewLogin(role) {
       if (j.first) toast("PIN set. Welcome to SQL Quest! 🎉", "good");
       await afterLogin(); checkBadges(); LB.push();
       location.hash = "#/home";
-    } else { await afterLogin(); location.hash = "#/f/overview"; }
+    } else {
+      SESSION.mustChange = !!j.mustChange; try { localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION)); } catch (e) { }
+      await afterLogin(); location.hash = j.role === "admin" ? "#/admin" : "#/f/overview";
+      if (j.mustChange) TEMP_PW = payload.password;
+    }
     route();
   };
   $("#lg-sgo").onclick = () => go("studentLogin", { roll: $("#lg-roll").value, pin: $("#lg-pin").value }, $("#lg-sgo"));
@@ -349,7 +353,7 @@ function viewLogin(role) {
 }
 
 function accountModal() {
-  if (isFaculty()) { location.hash = "#/f/team"; return; }
+  if (isFaculty()) { location.hash = "#/f/team"; return; }  // faculty and admins
   const p = S.profile || {};
   openModal(`<h2>My account</h2><p><b>${esc(p.name)}</b><br><span class="muted">Roll ${esc(p.roll)} · Batch ${esc(p.batch || "-")}</span></p>
     <p class="small muted">Your progress is saved to your class account, so you can log in from any device.</p>
@@ -382,17 +386,17 @@ function viewWelcome() {
     <h1>Placement practice for data roles</h1>
     <p>Practise the SQL, DBMS, Big Data and interview skills that companies test for <b>Data Analyst, Business Analyst, BI, Data Science and Data Engineering</b> roles, step by step and in a game-like way.</p>
     <div class="row gap wrap mt">${signedIn
-      ? `<a class="btn primary big" href="${isFaculty() ? "#/f/overview" : "#/home"}">Go to my dashboard →</a>`
-      : `<button class="btn primary big" id="wl-student">🎓 I'm a Student</button><button class="btn big" id="wl-faculty">👩‍🏫 I'm Faculty</button>`}</div>
+      ? `<a class="btn primary big" href="${isAdmin() ? "#/admin" : isFaculty() ? "#/f/overview" : "#/home"}">Go to my dashboard →</a>`
+      : `<button class="btn primary big" id="wl-student">🎓 I'm a Student</button><button class="btn big" id="wl-faculty">👩‍🏫 Faculty / Admin</button>`}</div>
   </section>
   <h2>What's inside</h2>
   <div class="grid features">${feats.map(f => `<div class="card feat"><div class="ficon">${f[0]}</div><b>${esc(f[1])}</b><p class="small muted">${esc(f[2])}</p></div>`).join("")}</div>
   <h2>How to get started</h2>
   <div class="grid2"><div class="card"><h3>🎓 Students</h3><ol>${online
-      ? `<li>Your faculty adds your roll number to the class list.</li><li>Click <b>I'm a Student</b>, type your roll number and choose a 4 to 6 digit PIN the first time. That becomes your PIN.</li><li>Practise a little every day, earn XP and climb the leaderboard. Your progress is saved to your account on any device.</li>`
+      ? `<li>Your admin adds your roll number to the class list.</li><li>Click <b>I'm a Student</b>, type your roll number and choose a 4 to 6 digit PIN the first time. That becomes your PIN.</li><li>Practise a little every day, earn XP and climb the leaderboard. Your progress is saved to your account on any device.</li>`
       : `<li>Click <b>I'm a Student</b> and enter your name.</li><li>Start with World 1 in SQL Practice and work your way up.</li><li>Your progress is saved in this browser.</li>`}</ol></div>
-    <div class="card"><h3>👩‍🏫 Faculty</h3><ol>${online
-      ? `<li>Click <b>I'm Faculty</b> and log in with the username and password your admin gave you.</li><li>Add students to the roster (paste roll, name, batch).</li><li>Track progress, find weak topics, review scenario marks and add your own MCQs.</li>`
+    <div class="card"><h3>👩‍🏫 Faculty & admins</h3><ol>${online
+      ? `<li>Click <b>Faculty / Admin</b> and log in with the username and password your admin gave you. Change the temporary password when asked.</li><li>Track progress, find weak topics, review scenario marks, reset forgotten PINs and add your own MCQs.</li><li><b>Admins</b> also get the Admin panel: add, edit, move or remove students and faculty accounts.</li>`
       : `<li>Faculty logins need a one-time setup of the class backend (a Google Sheet, about 20 minutes).</li><li>After that, faculty can track every student and review AI marks.</li>`}</ol></div></div>
   <p class="small muted mt">All practice data is fictional. Company names on questions show where a skill appears in job descriptions, not that the company asked that exact question.</p></div>`;
   if ($("#wl-student")) $("#wl-student").onclick = () => { if (online) location.hash = "#/login/student"; else profileModal(true); };
@@ -411,11 +415,12 @@ function viewFacultyOff() {
 function renderNav() {
   const stu = [["#/home", "🏠 My Dashboard"], ["#/list", "🧩 SQL Practice (100)"], ["#/mcq", "📘 MCQ Quiz"], ["#/scenario", "✍️ Scenario Questions"], ["#/learn", "📚 Big Data & DE"],
     ["#/oa", "⏱ OA Simulator"], ["#/exp", "🗣 Interview Experiences"], ["#/sandbox", "🧪 Playground"], ["#/badges", "🏅 Badges"], ["#/board", "🏆 Leaderboard"], ["#/guide", "📄 Cheat sheet"], ["#/welcome", "ℹ️ About SQL Quest"]];
-  const fac = [["#/f/overview", "📋 Students"], ["#/f/questions", "📈 Question analytics"], ["#/f/review", "✅ Review answers"], ["#/f/roster", "👥 Roster & PINs"],
-    ["#/f/mcq", "➕ MCQ manager"], ["#/board", "🏆 Leaderboard"], ["#/f/team", "🔑 Team & password"]];
+  const fac = [["#/f/overview", "📋 Students"], ["#/f/questions", "📈 Question analytics"], ["#/f/review", "✅ Review answers"], ["#/f/roster", "🔢 Student PINs"],
+    ["#/f/mcq", "➕ MCQ manager"], ["#/board", "🏆 Leaderboard"], ["#/f/team", "🔑 My password"]];
+  const adm = [["#/admin", "🛡️ Admin home"], ["#/admin/students", "🎓 Manage students"], ["#/admin/faculty", "👩‍🏫 Manage faculty"], ["#/admin/log", "🧾 Activity log"]];
   const content = [["#/list", "🧩 SQL Practice"], ["#/mcq", "📘 MCQ Quiz"], ["#/scenario", "✍️ Scenario Questions"], ["#/learn", "📚 Big Data & DE"], ["#/exp", "🗣 Interview Experiences"], ["#/guide", "📄 Cheat sheet"], ["#/welcome", "ℹ️ About SQL Quest"]];
   const link = ([h, t]) => `<a href="${h}">${t}</a>`;
-  $("#nav").innerHTML = (isFaculty() ? `<div class="navhead">Faculty</div>${fac.map(link).join("")}<div class="navhead">Student content</div>${content.map(link).join("")}` : stu.map(link).join("")) +
+  $("#nav").innerHTML = (isFaculty() ? (isAdmin() ? `<div class="navhead">Admin</div>${adm.map(link).join("")}` : "") + `<div class="navhead">Faculty</div>${fac.map(link).join("")}<div class="navhead">Student content</div>${content.map(link).join("")}` : stu.map(link).join("")) +
     `<div id="engine" class="${Engine && ENGINE_OK === true ? "ok" : ""}">${ENGINE_MSG}</div>`;
 }
 let ENGINE_OK = null, ENGINE_MSG = "Loading SQL engine…";
@@ -685,22 +690,16 @@ async function viewFacReview(params) {
   });
 }
 async function viewFacRoster() {
-  main().innerHTML = `<h1>👥 Roster & PINs</h1>
-  <div class="card"><h3>Add or update students</h3><p class="small muted">Paste one student per line: <code>roll, name, batch</code>. You can copy three columns straight from Excel or Google Sheets. Existing roll numbers get their name/batch updated; their PIN and progress are kept.</p>
-    <textarea id="ro-in" rows="8" placeholder="NST2027001, Riya Desai, 2027-A&#10;NST2027002, Arjun Mehta, 2027-A"></textarea><button class="btn primary mt" id="ro-go">Add to roster</button><div id="ro-msg"></div></div>
-  <div class="card"><h3>Students on the roster</h3><div id="ro-list">Loading…</div></div>`;
-  $("#ro-go").onclick = async () => {
-    const rows = $("#ro-in").value.split(/\n/).map(l => l.split(/\t|,/).map(x => x.trim())).filter(c => c[0]).map(c => ({ roll: c[0], name: c[1] || "", batch: c[2] || "" }));
-    const j = await Api.call("rosterAdd", { rows });
-    $("#ro-msg").innerHTML = j.ok ? `<div class="fb good">Added ${j.added}, updated ${j.updated}. Students can now log in with their roll number and choose a PIN.</div>` : `<div class="fb bad">${esc(j.error)}</div>`;
-    if (j.ok) { $("#ro-in").value = ""; FAC.rows = null; list(); }
-  };
+  main().innerHTML = `<h1>🔢 Student PINs</h1><p class="muted">A student forgot their PIN? Reset it here. They choose a new PIN the next time they log in.${isAdmin() ? ` To add, edit or remove students, use <a href="#/admin/students">Manage students</a>.` : " To add or remove students, ask the portal admin."}</p>
+  <div class="card"><input type="search" id="ro-s" placeholder="Search name or roll"><div id="ro-list" class="mt">Loading…</div></div>`;
   const list = async () => {
     let rows; try { rows = await facRows(); } catch (e) { $("#ro-list").innerHTML = esc(e.message); return; }
+    const q = ($("#ro-s").value || "").toLowerCase(), shown = rows.filter(r => !q || (r.name + " " + r.roll).toLowerCase().includes(q));
     $("#ro-list").innerHTML = `<p class="small muted">${rows.length} students · ${rows.filter(r => r.activated).length} have set a PIN</p><div class="tablewrap"><table><thead><tr><th>Roll</th><th>Name</th><th>Batch</th><th>PIN set</th><th></th></tr></thead><tbody>
-      ${rows.map(r => `<tr><td>${esc(r.roll)}</td><td>${esc(r.name)}</td><td>${esc(r.batch)}</td><td>${r.activated ? "✔" : "-"}</td><td><button class="btn small" data-reset="${esc(r.roll)}">Reset PIN</button></td></tr>`).join("")}</tbody></table></div>`;
+      ${shown.map(r => `<tr><td>${esc(r.roll)}</td><td>${esc(r.name)}</td><td>${esc(r.batch)}</td><td>${r.activated ? "✔" : "-"}</td><td><button class="btn small" data-reset="${esc(r.roll)}">Reset PIN</button></td></tr>`).join("")}</tbody></table></div>`;
     $("#ro-list").querySelectorAll("[data-reset]").forEach(b => b.onclick = async function () { if (this.dataset.c !== "1") { this.dataset.c = "1"; this.textContent = "Confirm?"; return; } const r = await Api.call("resetPin", { roll: b.dataset.reset }); toast(r.ok ? "PIN reset ✔" : esc(r.error), r.ok ? "good" : "bad"); FAC.rows = null; list(); });
   };
+  $("#ro-s").oninput = list;
   list();
 }
 async function viewFacMCQ(params) {
@@ -726,18 +725,178 @@ async function viewFacMCQ(params) {
   };
 }
 async function viewFacTeam() {
-  main().innerHTML = `<h1>🔑 Team & password</h1>
-  <div class="card"><h3>Change my password</h3><div class="row gap wrap"><input type="password" id="ft-old" placeholder="Current password"><input type="password" id="ft-new" placeholder="New password (8+ characters)"><button class="btn" id="ft-chg">Update</button></div><div id="ft-msg"></div>
+  main().innerHTML = `<h1>🔑 My password</h1>
+  <div class="card"><p><b>${esc(SESSION.profile.name)}</b><br><span class="muted">Username ${esc(SESSION.profile.username)} · ${isAdmin() ? "Admin" : "Faculty"}</span></p>
+    <h3>Change my password</h3><div class="row gap wrap"><input type="password" id="ft-old" placeholder="Current password"><input type="password" id="ft-new" placeholder="New password (8+ characters)"><button class="btn" id="ft-chg">Update</button></div><div id="ft-msg"></div>
     <button class="btn warn mt" id="ft-out">Log out</button></div>
-  ${isAdmin() ? `<div class="card"><h3>Faculty accounts</h3><div id="ft-list">Loading…</div>
-    <h3>Add a faculty member</h3><div class="row gap wrap"><input id="fa-user" placeholder="username"><input id="fa-name" placeholder="Full name"><input id="fa-pass" type="password" placeholder="Temporary password (8+)">
-    <select id="fa-role"><option value="faculty">Faculty</option><option value="admin">Admin</option></select><button class="btn primary" id="fa-go">Add</button></div><div id="fa-msg"></div></div>` : ""}`;
-  $("#ft-chg").onclick = async () => { const r = await Api.call("changePassword", { oldPassword: $("#ft-old").value, newPassword: $("#ft-new").value }); $("#ft-msg").innerHTML = `<div class="fb ${r.ok ? "good" : "bad"}">${r.ok ? "Password updated ✔" : esc(r.error)}</div>`; };
+  ${isAdmin() ? `<p class="muted">Faculty accounts are managed in <a href="#/admin/faculty">Manage faculty</a>.</p>` : ""}`;
+  $("#ft-chg").onclick = async () => { const r = await Api.call("changePassword", { oldPassword: $("#ft-old").value, newPassword: $("#ft-new").value }); $("#ft-msg").innerHTML = `<div class="fb ${r.ok ? "good" : "bad"}">${r.ok ? "Password updated ✔" : esc(r.error)}</div>`; if (r.ok) setMustChange(false); };
   $("#ft-out").onclick = () => logout();
-  if (!isAdmin()) return;
-  const list = async () => { const j = await Api.call("facultyList"); $("#ft-list").innerHTML = j.ok ? `<table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Last login</th></tr></thead><tbody>${j.rows.map(r => `<tr><td>${esc(r.username)}</td><td>${esc(r.name)}</td><td>${esc(r.role)}</td><td>${r.lastLogin ? new Date(r.lastLogin).toLocaleString() : "never"}</td></tr>`).join("")}</tbody></table>` : esc(j.error); };
-  $("#fa-go").onclick = async () => { const r = await Api.call("facultyAdd", { username: $("#fa-user").value, name: $("#fa-name").value, password: $("#fa-pass").value, role: $("#fa-role").value }); $("#fa-msg").innerHTML = `<div class="fb ${r.ok ? "good" : "bad"}">${r.ok ? "Added ✔ Share the username and temporary password with them, and ask them to change it." : esc(r.error)}</div>`; if (r.ok) list(); };
+}
+function setMustChange(v) { if (!SESSION) return; SESSION.mustChange = v; try { localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION)); } catch (e) { } }
+let TEMP_PW = "";
+function forcePasswordModal(oldPw) {
+  oldPw = oldPw || TEMP_PW;
+  openModal(`<h2>🔐 Set your own password</h2><p class="muted">You logged in with a temporary password. Choose a new one that only you know (8 or more characters).</p>
+    ${oldPw ? "" : `<label>Current (temporary) password<input type="password" id="mp-old"></label>`}
+    <label>New password<input type="password" id="mp-new" autocomplete="new-password"></label><label>Type it again<input type="password" id="mp-new2" autocomplete="new-password"></label>
+    <div class="err" id="mp-err"></div><div class="row gap"><button class="btn primary" id="mp-go">Save password</button><button class="btn" id="mp-out">Log out</button></div>`, true);
+  $("#mp-out").onclick = () => { $("#modal").dataset.locked = ""; closeModal(); logout(); };
+  $("#mp-go").onclick = async () => {
+    const n = $("#mp-new").value;
+    if (n !== $("#mp-new2").value) { $("#mp-err").textContent = "The two passwords don't match"; return; }
+    const r = await Api.call("changePassword", { oldPassword: oldPw || $("#mp-old").value, newPassword: n });
+    if (!r.ok) { $("#mp-err").textContent = r.error; return; }
+    TEMP_PW = ""; setMustChange(false); $("#modal").dataset.locked = ""; closeModal(); toast("Password saved ✔", "good");
+  };
+}
+function tempPassword() { const c = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789", a = new Uint32Array(10); crypto.getRandomValues(a); return "SQ-" + Array.from(a, x => c[x % c.length]).join("") + "!"; }
+
+// ---------- admin panel ----------
+function adminTabs(on) {
+  const t = [["", "🛡️ Home"], ["students", "🎓 Students"], ["faculty", "👩‍🏫 Faculty"], ["log", "🧾 Activity log"]];
+  return `<div class="row gap wrap mb">${t.map(([k, l]) => `<a class="tab ${k === on ? "on" : ""}" href="#/admin${k ? "/" + k : ""}">${l}</a>`).join("")}</div>`;
+}
+async function viewAdminHome() {
+  main().innerHTML = `<h1>🛡️ Admin panel</h1>${adminTabs("")}<div id="ah">Loading…</div>`;
+  const j = await Api.call("adminSummary"); if (!j.ok) { $("#ah").innerHTML = `<div class="fb bad">${esc(j.error)}</div>`; return; }
+  const st = j.students, fa = j.faculty, sb = j.subs, chk = (good, txt, fix) => `<li>${good ? "✅" : "⚠️"} ${txt}${good || !fix ? "" : ` <span class="small muted">${fix}</span>`}</li>`;
+  $("#ah").innerHTML = `<div class="stats4">
+    <a class="card" href="#/admin/students"><b>${st.total}</b><span>students on roster</span></a><div class="card"><b>${st.loggedIn}</b><span>have logged in</span></div>
+    <div class="card"><b>${st.week}</b><span>active in last 7 days</span></div><a class="card" href="#/admin/faculty"><b>${fa.total}</b><span>faculty & admin accounts</span></a>
+    <a class="card" href="#/f/review"><b>${sb.toReview + sb.pending + sb.errors}</b><span>scenario answers to review</span></a></div>
+  <div class="grid2"><div class="card"><h3>Quick actions</h3><div class="row gap wrap"><a class="btn primary" href="#/admin/students?add=1">➕ Add students</a><a class="btn primary" href="#/admin/faculty?add=1">➕ Add faculty</a>
+    <a class="btn" href="#/f/overview">📋 Student progress</a><a class="btn" href="#/admin/log">🧾 Activity log</a></div>
+    <p class="small muted mt">Batches: ${st.batches.length ? st.batches.map(b => `<span class="chip">${esc(b)}</span>`).join(" ") : "none yet"}</p></div>
+  <div class="card"><h3>System check</h3><ul class="plain">
+    ${chk(j.ai, "AI marking key " + (j.ai ? "is set (model " + esc(j.model) + ")" : "is missing"), "Add GEMINI_API_KEY in Apps Script → Project Settings → Script properties.")}
+    ${chk(j.trigger, "Automatic re-marking every 5 minutes " + (j.trigger ? "is on" : "is off"), "Run the setup function once in Apps Script.")}
+    ${chk(!sb.errors, sb.errors ? sb.errors + " answers failed AI marking" : "No AI marking errors", "Open Review answers and press Re-mark, or mark them yourself.")}
+    ${chk(!sb.pending, sb.pending ? sb.pending + " answers waiting for AI marking" : "No answers waiting for AI", "They are retried every 5 minutes.")}
+    ${chk(!fa.mustChange, fa.mustChange ? fa.mustChange + " account(s) still on a temporary password" : "Everyone has set their own password")}
+    ${chk(!st.demo, st.demo ? st.demo + " demo students are still in the sheet" : "No demo data", "When testing is done, run clearDemo in Apps Script.")}
+    ${chk(st.disabled === 0, st.disabled ? st.disabled + " student accounts are disabled" : "No disabled students")}
+  </ul><p class="small muted">Backend version ${esc(j.version)}. Reminder: keep the Google Sheet's sharing set to Restricted once real students are added.</p></div></div>`;
+}
+let ADM = { rows: null, sel: {} };
+async function viewAdminStudents(params) {
+  main().innerHTML = `<h1>🎓 Manage students</h1>${adminTabs("students")}
+  <details class="card" id="as-addbox" ${params.get("add") ? "open" : ""}><summary><b>➕ Add or update students</b></summary>
+    <p class="small muted">Paste one student per line: <code>roll, name, batch</code> (you can copy 3 columns straight from Excel or Google Sheets). Existing roll numbers get their name and batch updated; PIN and progress are kept.</p>
+    <textarea id="as-in" rows="6" placeholder="NST2027001, Riya Desai, 2027-A&#10;NST2027002, Arjun Mehta, 2027-A"></textarea><button class="btn primary mt" id="as-add">Add to roster</button><div id="as-msg"></div></details>
+  <div class="card"><div class="filters"><select id="as-batch"><option value="">All batches</option></select><select id="as-st"><option value="">All statuses</option><option value="active">Active</option><option value="disabled">Disabled</option><option value="nopin">Never logged in</option></select>
+    <input type="search" id="as-s" placeholder="Search name or roll"><button class="btn" id="as-csv">⬇ Export CSV</button></div>
+    <div class="bulkbar row gap wrap" id="as-bulk"></div><div id="as-list">Loading…</div></div>`;
+  ADM.sel = {};
+  const load = async () => { const j = await Api.call("adminStudents"); if (!j.ok) { $("#as-list").innerHTML = `<div class="fb bad">${esc(j.error)}</div>`; return false; } ADM.rows = j.rows; FAC.rows = null; return true; };
+  const filtered = () => { const b = $("#as-batch").value, st = $("#as-st").value, q = $("#as-s").value.toLowerCase();
+    return ADM.rows.filter(r => (!b || r.batch === b) && (!st || (st === "nopin" ? !r.activated : r.status === st)) && (!q || (r.name + " " + r.roll).toLowerCase().includes(q))); };
+  const bulk = () => {
+    const n = Object.keys(ADM.sel).length;
+    $("#as-bulk").innerHTML = n ? `<b>${n} selected:</b><button class="btn small" data-op="enable">Enable</button><button class="btn small" data-op="disable">Disable</button><button class="btn small" data-op="resetPin">Reset PIN</button>
+      <input id="as-nb" placeholder="New batch" class="small" style="max-width:130px"><button class="btn small" data-op="batch">Move to batch</button><button class="btn small warn" data-op="delete">Delete</button><button class="linkbtn small" id="as-clear">Clear selection</button>` : `<span class="small muted">Tick students to enable, disable, reset PINs, move batch or delete in one go.</span>`;
+    if (!n) return;
+    $("#as-clear").onclick = () => { ADM.sel = {}; draw(); };
+    $("#as-bulk").querySelectorAll("[data-op]").forEach(b => b.onclick = () => runBulk(b.dataset.op, Object.keys(ADM.sel)));
+  };
+  const runBulk = async (op, rolls) => {
+    if (op === "delete" && !(await confirmDelete(rolls.length + " student" + (rolls.length > 1 ? "s" : ""), "Their progress, scenario answers and login are removed for good. Their activity log stays."))) return;
+    if (op === "resetPin" && !confirm2("Reset PIN for " + rolls.length + " student(s)? They choose a new PIN at their next login.")) return;
+    const r = await Api.call("studentsBulk", { rolls, op, batch: ($("#as-nb") || {}).value });
+    toast(r.ok ? "Done for " + r.count + " student(s) ✔" : esc(r.error), r.ok ? "good" : "bad");
+    if (r.ok) { ADM.sel = {}; if (await load()) draw(); }
+  };
+  const draw = () => {
+    const batches = Array.from(new Set(ADM.rows.map(r => r.batch))).filter(Boolean).sort(), cur = $("#as-batch").value;
+    $("#as-batch").innerHTML = `<option value="">All batches</option>` + batches.map(b => `<option ${b === cur ? "selected" : ""}>${esc(b)}</option>`).join("");
+    const list = filtered(), allOn = list.length && list.every(r => ADM.sel[r.roll]);
+    $("#as-list").innerHTML = `<p class="small muted">${ADM.rows.length} students · showing ${list.length}</p><div class="tablewrap"><table><thead><tr><th><input type="checkbox" id="as-all" ${allOn ? "checked" : ""} title="Select all shown"></th><th>Roll</th><th>Name</th><th>Batch</th><th>Status</th><th>PIN set</th><th>XP</th><th>Last active</th><th></th></tr></thead><tbody>
+    ${list.map(r => `<tr><td><input type="checkbox" data-sel="${esc(r.roll)}" ${ADM.sel[r.roll] ? "checked" : ""}></td><td>${esc(r.roll)}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.batch)}</td>
+      <td>${r.status === "disabled" ? `<span class="chip">disabled</span>` : "active"}</td><td>${r.activated ? "✔" : "-"}</td><td>${r.xp}</td><td>${ago(r.lastActive)}</td>
+      <td class="nowrap"><button class="btn small" data-edit="${esc(r.roll)}">Edit</button> <button class="btn small" data-tog="${esc(r.roll)}">${r.status === "disabled" ? "Enable" : "Disable"}</button> <button class="btn small" data-pin="${esc(r.roll)}">Reset PIN</button> <button class="btn small warn" data-del="${esc(r.roll)}">Delete</button></td></tr>`).join("")}</tbody></table></div>`;
+    $("#as-all").onchange = e => { list.forEach(r => { if (e.target.checked) ADM.sel[r.roll] = 1; else delete ADM.sel[r.roll]; }); draw(); };
+    $("#as-list").querySelectorAll("[data-sel]").forEach(c => c.onchange = () => { if (c.checked) ADM.sel[c.dataset.sel] = 1; else delete ADM.sel[c.dataset.sel]; bulk(); });
+    $("#as-list").querySelectorAll("[data-tog]").forEach(b => b.onclick = () => { const r = ADM.rows.find(x => x.roll === b.dataset.tog); runBulk(r.status === "disabled" ? "enable" : "disable", [r.roll]); });
+    $("#as-list").querySelectorAll("[data-pin]").forEach(b => b.onclick = () => runBulk("resetPin", [b.dataset.pin]));
+    $("#as-list").querySelectorAll("[data-del]").forEach(b => b.onclick = () => runBulk("delete", [b.dataset.del]));
+    $("#as-list").querySelectorAll("[data-edit]").forEach(b => b.onclick = () => {
+      const r = ADM.rows.find(x => x.roll === b.dataset.edit);
+      openModal(`<h2>Edit student</h2><p class="muted">Roll ${esc(r.roll)} (roll numbers can't be changed; delete and re-add instead)</p><label>Name<input id="se-name" value="${esc(r.name)}" maxlength="60"></label><label>Batch<input id="se-batch" value="${esc(r.batch)}" maxlength="30"></label>
+        <div class="err" id="se-err"></div><div class="row gap"><button class="btn primary" id="se-go">Save</button><button class="btn" id="se-x">Cancel</button></div>`);
+      $("#se-x").onclick = closeModal;
+      $("#se-go").onclick = async () => { const j = await Api.call("studentUpdate", { roll: r.roll, name: $("#se-name").value, batch: $("#se-batch").value }); if (!j.ok) { $("#se-err").textContent = j.error; return; } closeModal(); toast("Saved ✔", "good"); if (await load()) draw(); };
+    });
+    bulk();
+  };
+  $("#as-add").onclick = async () => {
+    const rows = $("#as-in").value.split(/\n/).map(l => l.split(/\t|,/).map(x => x.trim())).filter(c => c[0]).map(c => ({ roll: c[0], name: c[1] || "", batch: c[2] || "" }));
+    const j = await Api.call("rosterAdd", { rows });
+    $("#as-msg").innerHTML = j.ok ? `<div class="fb good">Added ${j.added}, updated ${j.updated}. Students can now log in with their roll number and choose a PIN.</div>` : `<div class="fb bad">${esc(j.error)}</div>`;
+    if (j.ok) { $("#as-in").value = ""; if (await load()) draw(); }
+  };
+  ["as-batch", "as-st"].forEach(id => $("#" + id).onchange = draw); $("#as-s").oninput = draw;
+  $("#as-csv").onclick = () => downloadCSV("sql-quest-roster.csv", [["roll", "name", "batch", "status", "pin_set", "xp", "solved", "last_active", "created"]].concat(filtered().map(r => [r.roll, r.name, r.batch, r.status, r.activated ? "yes" : "no", r.xp, r.solved, r.lastActive, r.created])));
+  if (await load()) draw();
+}
+function confirm2(msg) { return window.confirm(msg); }
+function confirmDelete(what, note) {
+  return new Promise(res => {
+    openModal(`<h2>Delete ${esc(what)}?</h2><p>${esc(note)}</p><p><b>This can't be undone.</b> Type <code>DELETE</code> to confirm.</p><input id="cd-in" autocomplete="off">
+      <div class="row gap mt"><button class="btn warn" id="cd-go" disabled>Delete</button><button class="btn" id="cd-x">Cancel</button></div>`);
+    $("#cd-in").oninput = () => $("#cd-go").disabled = $("#cd-in").value.trim() !== "DELETE";
+    $("#cd-x").onclick = () => { closeModal(); res(false); };
+    $("#cd-go").onclick = () => { closeModal(); res(true); };
+  });
+}
+async function viewAdminFaculty(params) {
+  main().innerHTML = `<h1>👩‍🏫 Manage faculty</h1>${adminTabs("faculty")}
+  <details class="card" ${params.get("add") ? "open" : ""}><summary><b>➕ Add a faculty member or admin</b></summary>
+    <div class="row gap wrap mt"><input id="fa-user" placeholder="username (e.g. priya.k)"><input id="fa-name" placeholder="Full name"><input id="fa-pass" placeholder="Temporary password"><button class="btn small" id="fa-gen">Generate</button>
+    <select id="fa-role"><option value="faculty">Faculty</option><option value="admin">Admin</option></select><button class="btn primary" id="fa-go">Add</button></div>
+    <p class="small muted">They must change the temporary password at first login. <b>Admin</b> = everything faculty can do, plus this admin panel.</p><div id="fa-msg"></div></details>
+  <div class="card"><div id="af-list">Loading…</div></div>`;
+  $("#fa-gen").onclick = () => $("#fa-pass").value = tempPassword();
+  const me = SESSION.profile.username;
+  const list = async () => {
+    const j = await Api.call("facultyList"); if (!j.ok) { $("#af-list").innerHTML = `<div class="fb bad">${esc(j.error)}</div>`; return; }
+    $("#af-list").innerHTML = `<div class="tablewrap"><table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Status</th><th>Last login</th><th></th></tr></thead><tbody>
+    ${j.rows.map(r => `<tr><td>${esc(r.username)}${r.username === me ? ` <span class="chip">you</span>` : ""}</td><td>${esc(r.name)}</td><td>${r.role === "admin" ? "🛡️ Admin" : "Faculty"}</td>
+      <td>${r.status === "disabled" ? `<span class="chip">disabled</span>` : "active"}${r.mustChange ? ` <span class="chip">temp password</span>` : ""}</td><td>${r.lastLogin ? new Date(r.lastLogin).toLocaleString() : "never"}</td>
+      <td class="nowrap">${r.username === me ? `<a class="btn small" href="#/f/team">My password</a>` : `<button class="btn small" data-edit="${esc(r.username)}">Edit</button> <button class="btn small" data-pw="${esc(r.username)}">Reset password</button> <button class="btn small" data-tog="${esc(r.username)}">${r.status === "disabled" ? "Enable" : "Disable"}</button> <button class="btn small warn" data-del="${esc(r.username)}">Delete</button>`}</td></tr>`).join("")}</tbody></table></div>`;
+    const row = u => j.rows.find(r => r.username === u);
+    const upd = async (u, patch) => { const r = await Api.call("facultyUpdate", Object.assign({ username: u }, patch)); toast(r.ok ? "Saved ✔" : esc(r.error), r.ok ? "good" : "bad"); if (r.ok) list(); return r; };
+    $("#af-list").querySelectorAll("[data-tog]").forEach(b => b.onclick = () => upd(b.dataset.tog, { status: row(b.dataset.tog).status === "disabled" ? "active" : "disabled" }));
+    $("#af-list").querySelectorAll("[data-del]").forEach(b => b.onclick = async () => { if (!(await confirmDelete("the account " + b.dataset.del, "They will no longer be able to log in. Marks they gave stay."))) return; const r = await Api.call("facultyRemove", { username: b.dataset.del }); toast(r.ok ? "Deleted ✔" : esc(r.error), r.ok ? "good" : "bad"); if (r.ok) list(); });
+    $("#af-list").querySelectorAll("[data-pw]").forEach(b => b.onclick = () => {
+      const pw = tempPassword();
+      openModal(`<h2>Reset password: ${esc(b.dataset.pw)}</h2><label>New temporary password<input id="rp-pw" value="${esc(pw)}"></label><p class="small muted">Share it with them privately. They must change it at their next login.</p>
+        <div class="err" id="rp-err"></div><div class="row gap"><button class="btn primary" id="rp-go">Reset</button><button class="btn" id="rp-x">Cancel</button></div>`);
+      $("#rp-x").onclick = closeModal;
+      $("#rp-go").onclick = async () => { const r = await Api.call("facultyResetPassword", { username: b.dataset.pw, password: $("#rp-pw").value }); if (!r.ok) { $("#rp-err").textContent = r.error; return; } closeModal(); toast("Password reset ✔", "good"); list(); };
+    });
+    $("#af-list").querySelectorAll("[data-edit]").forEach(b => b.onclick = () => {
+      const r = row(b.dataset.edit);
+      openModal(`<h2>Edit ${esc(r.username)}</h2><label>Name<input id="fe-name" value="${esc(r.name)}" maxlength="60"></label><label>Role<select id="fe-role"><option value="faculty" ${r.role === "faculty" ? "selected" : ""}>Faculty</option><option value="admin" ${r.role === "admin" ? "selected" : ""}>Admin</option></select></label>
+        <div class="err" id="fe-err"></div><div class="row gap"><button class="btn primary" id="fe-go">Save</button><button class="btn" id="fe-x">Cancel</button></div>`);
+      $("#fe-x").onclick = closeModal;
+      $("#fe-go").onclick = async () => { const x = await Api.call("facultyUpdate", { username: r.username, name: $("#fe-name").value, role: $("#fe-role").value }); if (!x.ok) { $("#fe-err").textContent = x.error; return; } closeModal(); toast("Saved ✔", "good"); list(); };
+    });
+  };
+  $("#fa-go").onclick = async () => {
+    const u = $("#fa-user").value.trim().toLowerCase(), pw = $("#fa-pass").value;
+    const r = await Api.call("facultyAdd", { username: u, name: $("#fa-name").value, password: pw, role: $("#fa-role").value });
+    $("#fa-msg").innerHTML = r.ok ? `<div class="fb good">Added ✔ Share these details privately: username <b>${esc(u)}</b>, temporary password <b>${esc(pw)}</b>, link <b>${esc(location.href.split("#")[0])}</b></div>` : `<div class="fb bad">${esc(r.error)}</div>`;
+    if (r.ok) { ["fa-user", "fa-name", "fa-pass"].forEach(id => $("#" + id).value = ""); list(); }
+  };
   list();
+}
+async function viewAdminLog(params) {
+  main().innerHTML = `<h1>🧾 Activity log</h1>${adminTabs("log")}<div class="card"><div class="filters"><select id="al-t"><option value="">All activity</option><option value="admin">Admin actions</option><option value="pin_reset">PIN resets</option><option value="other">Student activity</option></select><input type="search" id="al-s" placeholder="Search who or what"></div><div id="al-list">Loading…</div></div>`;
+  const j = await Api.call("adminLog"); if (!j.ok) { $("#al-list").innerHTML = `<div class="fb bad">${esc(j.error)}</div>`; return; }
+  const draw = () => { const t = $("#al-t").value, q = $("#al-s").value.toLowerCase();
+    const rows = j.rows.filter(r => (!t || (t === "other" ? r.type !== "admin" && r.type !== "pin_reset" : r.type === t)) && (!q || (r.who + " " + r.detail).toLowerCase().includes(q)));
+    $("#al-list").innerHTML = rows.length ? `<p class="small muted">Latest ${j.rows.length} entries</p><div class="tablewrap"><table><thead><tr><th>When</th><th>Who</th><th>What</th><th>Details</th></tr></thead><tbody>${rows.map(r => `<tr><td class="nowrap small">${r.ts ? new Date(r.ts).toLocaleString() : ""}</td><td>${esc(r.who)}</td><td>${esc(r.type)}</td><td class="small">${esc(r.detail)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="muted">Nothing here yet.</p>`; };
+  $("#al-t").onchange = draw; $("#al-s").oninput = draw; draw();
 }
 
 // ---------- layout ----------
@@ -745,7 +904,7 @@ function renderHeader() {
   renderNav();
   if (needLogin()) { $("#hdr-stats").innerHTML = ""; return; }
   if (isFaculty()) {
-    $("#hdr-stats").innerHTML = `<div class="lvl">👩‍🏫 Faculty${isAdmin() ? " · admin" : ""}</div><button class="linkbtn" id="btn-profile">${esc(SESSION.profile.name || SESSION.profile.username)}</button><button class="btn small" id="btn-logout">Log out</button>`;
+    $("#hdr-stats").innerHTML = `<div class="lvl">${isAdmin() ? "🛡️ Admin" : "👩‍🏫 Faculty"}</div><button class="linkbtn" id="btn-profile">${esc(SESSION.profile.name || SESSION.profile.username)}</button><button class="btn small" id="btn-logout">Log out</button>`;
     $("#btn-profile").onclick = () => location.hash = "#/f/team"; $("#btn-logout").onclick = () => logout();
     markNav(); return;
   }
@@ -760,7 +919,7 @@ function renderHeader() {
 }
 function markNav() {
   const h = location.hash.split("?")[0] || "#/home";
-  document.querySelectorAll("#nav a").forEach(a => { const href = a.getAttribute("href"); a.classList.toggle("active", h === href || (href !== "#/home" && h.startsWith(href + "/")) || (h === "#/q" && href === "#/list") || (h.startsWith("#/q/") && href === "#/list")); });
+  document.querySelectorAll("#nav a").forEach(a => { const href = a.getAttribute("href"); a.classList.toggle("active", h === href || (href !== "#/home" && href !== "#/admin" && h.startsWith(href + "/")) || (h === "#/q" && href === "#/list") || (h.startsWith("#/q/") && href === "#/list")); });
 }
 
 function profileModal(force) {
@@ -1149,12 +1308,20 @@ function route() {
   if (needLogin()) { renderHeader(); return parts[0] === "login" ? viewLogin(parts[1] === "faculty" ? "f" : "s") : viewWelcome(); }
   if (parts[0] === "login") {
     if (!Api.enabled() && parts[1] === "faculty") { renderHeader(); return viewFacultyOff(); }
-    location.hash = isFaculty() ? "#/f/overview" : "#/home"; return;
+    location.hash = isAdmin() ? "#/admin" : isFaculty() ? "#/f/overview" : "#/home"; return;
   }
   if (!Api.enabled() && !(S.profile && S.profile.name)) { renderHeader(); return viewWelcome(); }
   document.body.classList.remove("loggedout");
   if (parts[0] === "f" && !isFaculty()) { location.hash = "#/home"; return; }
-  if (isFaculty() && (!parts[0] || parts[0] === "home")) { location.hash = "#/f/overview"; return; }
+  if (parts[0] === "admin" && !isAdmin()) { location.hash = isFaculty() ? "#/f/overview" : "#/home"; return; }
+  if (isFaculty() && SESSION.mustChange && !$("#modal").classList.contains("open")) setTimeout(() => forcePasswordModal(), 50);
+  if (isFaculty() && (!parts[0] || parts[0] === "home")) { location.hash = isAdmin() ? "#/admin" : "#/f/overview"; return; }
+  if (parts[0] === "admin") {
+    if (parts[1] === "students") viewAdminStudents(params);
+    else if (parts[1] === "faculty") viewAdminFaculty(params);
+    else if (parts[1] === "log") viewAdminLog(params);
+    else viewAdminHome();
+  } else
   if (parts[0] === "f") {
     const v = parts[1];
     if (v === "student") viewFacStudent(decodeURIComponent(parts[2] || ""));
@@ -1190,7 +1357,7 @@ Engine.ready().then(r => {
 });
 if (SESSION) {
   // refresh progress from the server on every visit (another device may have added progress)
-  Api.call("me").then(j => { if (j.ok && j.role === "student") { S = mergeState(S, j.state); S.profile = j.profile; save(); afterLogin().then(() => { checkBadges(); save(); route(); LB.push(); }); } else if (j.ok) afterLogin(); });
+  Api.call("me").then(j => { if (j.ok && j.role === "student") { S = mergeState(S, j.state); S.profile = j.profile; save(); afterLogin().then(() => { checkBadges(); save(); route(); LB.push(); }); } else if (j.ok) { SESSION.role = j.role; SESSION.profile = j.profile; setMustChange(!!j.mustChange); afterLogin(); route(); } });
 }
 if (!SESSION) { checkBadges(); save(); }
 window.__SQLQ = { S: () => S, Engine, QS, compare, expected, decode, session: () => SESSION };

@@ -27,7 +27,7 @@ async def main():
         pg = await b.new_page(viewport={"width": 1300, "height": 900})
         errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
         await pg.goto(url); await pg.wait_for_selector("#wl-student")
-        check("I'm Faculty" in await pg.inner_text("main"), "welcome page shows student and faculty buttons")
+        check("Faculty / Admin" in await pg.inner_text("main"), "welcome page shows student and faculty/admin buttons")
         await pg.click("#wl-faculty"); await pg.wait_for_selector(".loginbox h2")
         check("isn't switched on" in await pg.inner_text("main"), "faculty button explains setup when no backend")
         await pg.goto(url + "#/welcome"); await pg.click("#wl-student")

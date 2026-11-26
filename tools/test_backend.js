@@ -95,5 +95,52 @@ ok(/Removed \d+ demo rows/.test(cm) && call(demo, { action: "facultyLogin", user
 const adm3 = call(demo, { action: "facultyLogin", username: "omkar", password: "ChangeMe@123" });
 ok(call(demo, { action: "overview", token: adm3.token }).rows.length === 0, "no demo students remain");
 
+// ---- admin panel ----
+const A = makeContext();
+const crypto = require("crypto");
+const boot = "pub:" + crypto.createHash("sha256").update("fac:portal.admin:Test-Boot-Pass-1|sqlquest-bootstrap").digest("base64");
+A.__sheets.Faculty.rows.push(["portal.admin", "Portal Admin", boot, "admin", "", "", "active", ""]);
+ok(!call(A, { action: "facultyLogin", username: "portal.admin", password: "wrong-pass" }).ok, "bootstrap admin: wrong password rejected");
+const pa = call(A, { action: "facultyLogin", username: "portal.admin", password: "Test-Boot-Pass-1" });
+ok(pa.ok && pa.role === "admin" && pa.mustChange === true, "bootstrap admin logs in and is asked to change password");
+ok(A.__sheets.Faculty.rows.find(r => r[0] === "portal.admin")[2].indexOf("pub:") !== 0, "bootstrap hash replaced by a secret hash after first login");
+ok(call(A, { action: "facultyLogin", username: "portal.admin", password: "Test-Boot-Pass-1" }).ok, "same password still works after upgrade");
+ok(!call(A, { action: "changePassword", token: pa.token, oldPassword: "Test-Boot-Pass-1", newPassword: "Test-Boot-Pass-1" }).ok, "new password must differ");
+ok(call(A, { action: "changePassword", token: pa.token, oldPassword: "Test-Boot-Pass-1", newPassword: "Brand-New-Pass-2" }).ok
+  && call(A, { action: "facultyLogin", username: "portal.admin", password: "Brand-New-Pass-2" }).mustChange === false, "password change clears the must-change flag");
+const sm = call(A, { action: "adminSummary", token: pa.token });
+ok(sm.ok && sm.faculty.admins === 2 && sm.version === "2.1", "admin summary works");
+ok(call(A, { action: "rosterAdd", token: pa.token, rows: [{ roll: "R1", name: "Asha", batch: "A" }, { roll: "R2", name: "Ben", batch: "A" }, { roll: "R3", name: "Chirag", batch: "B" }] }).added === 3, "admin adds students");
+ok(call(A, { action: "facultyAdd", token: pa.token, username: "fac.one", name: "Faculty One", password: "FacOne@123" }).ok, "admin adds faculty");
+const f1 = call(A, { action: "facultyLogin", username: "fac.one", password: "FacOne@123" });
+ok(f1.ok && f1.mustChange === true, "new faculty must change temporary password");
+ok(!call(A, { action: "rosterAdd", token: f1.token, rows: [{ roll: "R9", name: "X" }] }).ok && !call(A, { action: "adminSummary", token: f1.token }).ok, "faculty cannot use admin actions");
+ok(call(A, { action: "resetPin", token: f1.token, roll: "R1" }).ok, "faculty can still reset a PIN");
+ok(call(A, { action: "studentUpdate", token: pa.token, roll: "R1", name: "Asha Rao", batch: "C" }).ok && call(A, { action: "adminStudents", token: pa.token }).rows.find(r => r.roll === "R1").batch === "C", "admin edits a student");
+call(A, { action: "studentLogin", roll: "R2", pin: "4321" });
+ok(call(A, { action: "studentsBulk", token: pa.token, rolls: ["R2", "R3"], op: "batch", batch: "2027-Z" }).count === 2, "bulk move to batch");
+const r2 = call(A, { action: "studentLogin", roll: "R2", pin: "4321" });
+ok(call(A, { action: "studentsBulk", token: pa.token, rolls: ["R2"], op: "disable" }).ok && !call(A, { action: "saveState", token: r2.token, state: {}, summary: {} }).ok && !call(A, { action: "studentLogin", roll: "R2", pin: "4321" }).ok, "disabled student is logged out and blocked");
+ok(call(A, { action: "studentsBulk", token: pa.token, rolls: ["R2"], op: "enable" }).ok && call(A, { action: "studentLogin", roll: "R2", pin: "4321" }).ok, "re-enabled student can log in");
+ok(call(A, { action: "studentsBulk", token: pa.token, rolls: ["R3"], op: "delete" }).count === 1 && call(A, { action: "adminStudents", token: pa.token }).rows.length === 2, "admin deletes a student");
+ok(call(A, { action: "facultyUpdate", token: pa.token, username: "fac.one", role: "admin" }).ok && call(A, { action: "adminSummary", token: f1.token }).ok, "promotion to admin applies to an existing session");
+ok(call(A, { action: "facultyUpdate", token: pa.token, username: "fac.one", role: "faculty" }).ok && !call(A, { action: "adminSummary", token: f1.token }).ok, "demotion applies at once");
+ok(call(A, { action: "facultyUpdate", token: pa.token, username: "fac.one", status: "disabled" }).ok && !call(A, { action: "overview", token: f1.token }).ok && /disabled/.test(call(A, { action: "facultyLogin", username: "fac.one", password: "FacOne@123" }).error), "disabled faculty blocked");
+ok(call(A, { action: "facultyResetPassword", token: pa.token, username: "fac.one", password: "Reset@1234" }).ok, "admin resets a faculty password");
+ok(!call(A, { action: "facultyUpdate", token: pa.token, username: "portal.admin", role: "faculty" }).ok && !call(A, { action: "facultyRemove", token: pa.token, username: "portal.admin" }).ok, "admin can't demote or delete self");
+ok(call(A, { action: "facultyRemove", token: pa.token, username: "omkar" }).ok, "admin deletes another admin");
+const lg = call(A, { action: "adminLog", token: pa.token });
+ok(lg.ok && lg.rows.some(r => r.type === "admin" && /deleted account omkar/.test(r.detail)), "admin actions are logged");
+const B = makeContext();
+const ob = call(B, { action: "facultyLogin", username: "omkar", password: "ChangeMe@123" });
+call(B, { action: "facultyAdd", token: ob.token, username: "x.admin", name: "X", password: "Xadmin@123", role: "admin" });
+ok(!call(B, { action: "facultyUpdate", token: ob.token, username: "x.admin", status: "disabled" }).ok === false, "can disable one admin while another remains");
+const xb = call(B, { action: "facultyLogin", username: "x.admin", password: "Xadmin@123" });
+ok(!xb.ok, "disabled admin can't log in");
+const C = makeContext();
+C.__sheets.Faculty.rows = [C.__sheets.Faculty.rows[0], ["boss", "Boss", "pub:x", "admin", "", "", "active", ""]];
+C.setup();
+ok(!C.__sheets.Faculty.rows.some(r => r[0] === "omkar"), "setup doesn't create SETUP_ADMIN when an admin already exists");
+
 console.log(fails ? fails + " FAILED" : "ALL PASSED");
 process.exit(fails ? 1 : 0);

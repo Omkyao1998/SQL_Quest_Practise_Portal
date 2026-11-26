@@ -28,7 +28,7 @@ SQL Quest is a static website on GitHub Pages. A real SQL engine (SQLite) runs i
 
 ## Two ways to run it
 
-1. **With the backend (recommended for a class).** Students log in with roll number + PIN; faculty log in with their own username/password. Progress is saved to your Google Sheet, so students can switch devices. Faculty get the dashboard, analytics, review queue, roster and MCQ manager. Setup: [BACKEND_SETUP.md](BACKEND_SETUP.md).
+1. **With the backend (recommended for a class).** Students log in with roll number + PIN; faculty log in with their own username/password. Progress is saved to your Google Sheet, so students can switch devices. Faculty get the dashboard, analytics, review queue, PIN resets and MCQ manager; admins also get an Admin panel to manage student and faculty accounts. Setup: [BACKEND_SETUP.md](BACKEND_SETUP.md).
 2. **Without the backend (local mode).** No login. Progress stays in each student's browser, scenario questions become self-check (model answer only), and there's no leaderboard or faculty view. This happens automatically when `data/config.json` has no `backend_url`.
 
 ## How the gamification works

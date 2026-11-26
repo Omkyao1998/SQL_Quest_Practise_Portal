@@ -4,22 +4,22 @@
  *
  * ONE-TIME SETUP (see docs/BACKEND_SETUP.md for screenshots-level steps):
  *  1. Create a Google Sheet → Extensions → Apps Script → paste this file.
- *  2. Edit SETUP_ADMIN below (your faculty username + a temporary password).
+ *  2. Edit SETUP_ADMIN below (your faculty username + a temporary password). Skipped if the Faculty tab already has an admin.
  *  3. Run the function `setup` once (Run ▶) and allow permissions.
  *  4. Project Settings → Script properties → add GEMINI_API_KEY (from aistudio.google.com).
  *  5. Deploy → New deployment → Web app → Execute as: Me, Who has access: Anyone → copy the /exec URL.
  */
 
-const SETUP_ADMIN = { username: "omkar", name: "Omkar Gokhale", password: "ChangeMe@123" }; // change before running setup()
+const SETUP_ADMIN = { username: "omkar", name: "Omkar Gokhale", password: "ChangeMe@123" }; // used only if no admin exists yet; change before running setup()
 const PORTAL_URL = "https://omkyao1998.github.io/SQL_Quest_Practise_Portal/";            // scenario questions + rubrics are read from here
 const MAX_ATTEMPTS = 3;                       // scenario submissions per question per student
 const TOKEN_DAYS = 14;
-const VERSION = "2.0";
+const VERSION = "2.1";
 
 const SHEETS = {
   Students: ["roll", "name", "batch", "pin_hash", "status", "created", "last_active", "xp", "level", "solved", "easy", "medium", "hard",
     "mcq", "scenario_avg", "scenario_done", "streak", "badges", "oa_best", "hints", "revealed", "exp_read", "state", "qsum"],
-  Faculty: ["username", "name", "pass_hash", "role", "created", "last_login"],
+  Faculty: ["username", "name", "pass_hash", "role", "created", "last_login", "status", "must_change"],
   Submissions: ["id", "ts", "roll", "name", "batch", "qid", "area", "attempt", "answer", "status", "ai_score", "ai_feedback",
     "final_score", "faculty_score", "faculty_comment", "graded_by", "graded_at"],
   CustomMCQ: ["id", "bank", "topic", "q", "a", "b", "c", "d", "ans", "explain", "active", "author", "ts"],
@@ -67,20 +67,28 @@ const ACTIONS = {
 
   facultyLogin(d) {
     const u = String(d.username || "").trim().toLowerCase();
+    const pw = String(d.password || "");
     const t = table_("Faculty"), r = t.find("username", u);
-    if (!r || r.pass_hash !== hash_("fac:" + u + ":" + String(d.password || ""))) throw new Error("Wrong username or password");
-    t.update(r, { last_login: new Date() });
-    return { ok: true, role: r.role || "faculty", token: token_(u, r.role || "faculty"), profile: { username: u, name: r.name, role: r.role || "faculty" } };
+    if (!r) throw new Error("Wrong username or password");
+    const boot = String(r.pass_hash).indexOf("pub:") === 0 && r.pass_hash === "pub:" + bootHash_("fac:" + u + ":" + pw);
+    if (!boot && r.pass_hash !== hash_("fac:" + u + ":" + pw)) throw new Error("Wrong username or password");
+    if (r.status === "disabled") throw new Error("This account is disabled. Please contact the portal admin.");
+    const patch = { last_login: new Date() };
+    if (boot) { patch.pass_hash = hash_("fac:" + u + ":" + pw); patch.must_change = "yes"; }   // first login with a handed-over password
+    t.update(r, patch);
+    const role = r.role === "admin" ? "admin" : "faculty";
+    return { ok: true, role, mustChange: r.must_change === "yes", token: token_(u, role), profile: { username: u, name: r.name, role } };
   },
 
   me(d) {
     const s = auth_(d.token);
     if (s.r === "student") {
-      const r = table_("Students").find("roll", s.u); if (!r) throw new Error("Account not found");
+      const r = table_("Students").find("roll", s.u);
+      if (!r || r.status === "disabled") throw new Error("Your account is not active. Please log in again or contact your faculty.");
       return { ok: true, role: "student", profile: { roll: r.roll, name: r.name, batch: r.batch }, state: readState_(r.state) };
     }
-    const f = table_("Faculty").find("username", s.u); if (!f) throw new Error("Account not found");
-    return { ok: true, role: f.role, profile: { username: f.username, name: f.name, role: f.role } };
+    const f = table_("Faculty").find("username", s.u);
+    return { ok: true, role: s.r, mustChange: f.must_change === "yes", profile: { username: f.username, name: f.name, role: s.r } };
   },
 
   changePin(d) {
@@ -97,7 +105,8 @@ const ACTIONS = {
     if (String(d.newPassword || "").length < 8) throw new Error("Password must be at least 8 characters");
     const t = table_("Faculty"), r = t.find("username", s.u);
     if (r.pass_hash !== hash_("fac:" + s.u + ":" + String(d.oldPassword || ""))) throw new Error("Current password is wrong");
-    t.update(r, { pass_hash: hash_("fac:" + s.u + ":" + d.newPassword) });
+    if (String(d.newPassword) === String(d.oldPassword)) throw new Error("Choose a password different from the current one");
+    t.update(r, { pass_hash: hash_("fac:" + s.u + ":" + d.newPassword), must_change: "" });
     return { ok: true };
   },
 
@@ -108,6 +117,7 @@ const ACTIONS = {
     if (st.length > 400000) throw new Error("Progress data too large");
     return withLock_(() => {
       const t = table_("Students"), r = t.find("roll", s.u);
+      if (!r || r.status === "disabled") throw new Error("Your account is not active. Please log in again or contact your faculty.");
       const n = v => Math.max(0, Math.min(1e6, Number(v) || 0));
       t.update(r, { state: writeState_(st), qsum: JSON.stringify(d.qsum || {}).slice(0, 45000), last_active: new Date(),
         xp: n(sm.xp), level: String(sm.level || "").slice(0, 30), solved: n(sm.solved), easy: n(sm.easy), medium: n(sm.medium), hard: n(sm.hard),
@@ -214,7 +224,7 @@ const ACTIONS = {
     return { ok: true, submission: subOut_(table_("Submissions").find("id", d.id)) };
   },
   rosterAdd(d) {
-    auth_(d.token, "faculty");
+    const a = auth_(d.token, "admin");
     const rows = (d.rows || []).filter(x => normRoll_(x.roll));
     if (!rows.length) throw new Error("No valid rows. Use: roll, name, batch");
     return withLock_(() => {
@@ -224,35 +234,130 @@ const ACTIONS = {
         if (cur) { t.update(cur, { name: clean_(x.name || cur.name, 60), batch: clean_(x.batch || cur.batch, 30) }); updated++; }
         else { t.append({ roll, name: clean_(x.name || roll, 60), batch: clean_(x.batch || "", 30), status: "active", created: new Date() }); added++; }
       });
+      log_(a.u, "admin", "roster upload: " + added + " added, " + updated + " updated");
       return { ok: true, added, updated };
     });
   },
   resetPin(d) {
-    auth_(d.token, "faculty");
+    const a = auth_(d.token, "faculty");
     const t = table_("Students"), r = t.find("roll", normRoll_(d.roll)); if (!r) throw new Error("Student not found");
-    t.update(r, { pin_hash: "" }); log_(r.roll, "pin_reset", "");
+    t.update(r, { pin_hash: "" }); log_(r.roll, "pin_reset", "by " + a.u);
     return { ok: true };
   },
   setStatus(d) {
-    auth_(d.token, "faculty");
+    auth_(d.token, "admin");
     const t = table_("Students"), r = t.find("roll", normRoll_(d.roll)); if (!r) throw new Error("Student not found");
     t.update(r, { status: d.status === "disabled" ? "disabled" : "active" });
     return { ok: true };
   },
+  // ---- admin panel ----
+  adminSummary(d) {
+    auth_(d.token, "admin");
+    const st = table_("Students").all(), fa = table_("Faculty").all(), subs = table_("Submissions").all();
+    const week = Date.now() - 7 * 864e5;
+    return { ok: true, version: VERSION, ai: !!prop_("GEMINI_API_KEY"), model: prop_("GEMINI_MODEL") || "gemini-2.5-flash",
+      trigger: ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === "gradePending"),
+      students: { total: st.length, active: st.filter(r => r.status !== "disabled").length, disabled: st.filter(r => r.status === "disabled").length,
+        loggedIn: st.filter(r => r.pin_hash).length, week: st.filter(r => r.last_active && new Date(r.last_active).getTime() > week).length,
+        demo: st.filter(r => String(r.roll).indexOf("DEMO") === 0).length, batches: Array.from(new Set(st.map(r => String(r.batch)).filter(Boolean))).sort() },
+      faculty: { total: fa.length, admins: fa.filter(r => r.role === "admin" && r.status !== "disabled").length, disabled: fa.filter(r => r.status === "disabled").length,
+        mustChange: fa.filter(r => r.must_change === "yes").length },
+      subs: { total: subs.length, pending: subs.filter(r => r.status === "pending").length, errors: subs.filter(r => r.status === "ai_error").length,
+        toReview: subs.filter(r => r.status === "ai_graded").length } };
+  },
+  adminStudents(d) {
+    auth_(d.token, "admin");
+    return { ok: true, rows: table_("Students").all().map(r => ({ roll: r.roll, name: r.name, batch: r.batch, status: r.status || "active", activated: !!r.pin_hash,
+      created: r.created ? new Date(r.created).toISOString() : "", lastActive: r.last_active ? new Date(r.last_active).toISOString() : "", xp: +r.xp || 0, solved: +r.solved || 0 })) };
+  },
+  studentUpdate(d) {
+    const a = auth_(d.token, "admin");
+    return withLock_(() => {
+      const t = table_("Students"), r = t.find("roll", normRoll_(d.roll)); if (!r) throw new Error("Student not found");
+      const name = clean_(String(d.name || "").trim(), 60); if (name.length < 2) throw new Error("Name is too short");
+      t.update(r, { name, batch: clean_(String(d.batch || "").trim(), 30) });
+      log_(a.u, "admin", "edited student " + r.roll);
+      return { ok: true };
+    });
+  },
+  studentsBulk(d) {
+    const a = auth_(d.token, "admin");
+    const rolls = (d.rolls || []).map(normRoll_).filter(Boolean), op = d.op;
+    if (!rolls.length) throw new Error("Select at least one student");
+    if (["enable", "disable", "resetPin", "batch", "delete"].indexOf(op) < 0) throw new Error("Unknown action");
+    return withLock_(() => {
+      const t = table_("Students"), hit = t.all().filter(r => rolls.indexOf(String(r.roll)) >= 0);
+      if (op === "delete") {
+        const set = hit.map(r => String(r.roll));
+        const n = t.removeWhere(r => set.indexOf(String(r.roll)) >= 0);
+        const sn = table_("Submissions").removeWhere(r => set.indexOf(String(r.roll)) >= 0);
+        log_(a.u, "admin", "deleted students " + set.join(", ") + " (" + sn + " scenario answers)");
+        return { ok: true, count: n };
+      }
+      const batch = clean_(String(d.batch || "").trim(), 30);
+      if (op === "batch" && !batch) throw new Error("Type the new batch name");
+      hit.forEach(r => t.update(r, op === "enable" ? { status: "active" } : op === "disable" ? { status: "disabled" } : op === "resetPin" ? { pin_hash: "" } : { batch }));
+      log_(a.u, "admin", op + " for " + hit.length + " students" + (op === "batch" ? " → " + batch : ""));
+      return { ok: true, count: hit.length };
+    });
+  },
   facultyList(d) {
     auth_(d.token, "admin");
-    return { ok: true, rows: table_("Faculty").all().map(r => ({ username: r.username, name: r.name, role: r.role, lastLogin: r.last_login })) };
+    return { ok: true, rows: table_("Faculty").all().map(r => ({ username: r.username, name: r.name, role: r.role === "admin" ? "admin" : "faculty", status: r.status || "active",
+      mustChange: r.must_change === "yes", created: r.created ? new Date(r.created).toISOString() : "", lastLogin: r.last_login ? new Date(r.last_login).toISOString() : "" })) };
   },
   facultyAdd(d) {
-    auth_(d.token, "admin");
+    const a = auth_(d.token, "admin");
     const u = String(d.username || "").trim().toLowerCase();
     if (!/^[a-z0-9._-]{3,30}$/.test(u)) throw new Error("Username: 3-30 letters/numbers/dot/underscore");
     if (String(d.password || "").length < 8) throw new Error("Password must be at least 8 characters");
     return withLock_(() => {
       const t = table_("Faculty"); if (t.find("username", u)) throw new Error("That username already exists");
-      t.append({ username: u, name: clean_(d.name || u, 60), pass_hash: hash_("fac:" + u + ":" + d.password), role: d.role === "admin" ? "admin" : "faculty", created: new Date() });
+      t.append({ username: u, name: clean_(d.name || u, 60), pass_hash: hash_("fac:" + u + ":" + d.password), role: d.role === "admin" ? "admin" : "faculty", created: new Date(), status: "active", must_change: "yes" });
+      log_(a.u, "admin", "added " + (d.role === "admin" ? "admin " : "faculty ") + u);
       return { ok: true };
     });
+  },
+  facultyUpdate(d) {
+    const a = auth_(d.token, "admin");
+    return withLock_(() => {
+      const t = table_("Faculty"), r = t.find("username", String(d.username || "").toLowerCase()); if (!r) throw new Error("Account not found");
+      const patch = {};
+      if (d.name !== undefined) { const n = clean_(String(d.name).trim(), 60); if (n.length < 2) throw new Error("Name is too short"); patch.name = n; }
+      if (d.role !== undefined) patch.role = d.role === "admin" ? "admin" : "faculty";
+      if (d.status !== undefined) patch.status = d.status === "disabled" ? "disabled" : "active";
+      if (r.username === a.u && (patch.role === "faculty" || patch.status === "disabled")) throw new Error("You can't remove your own admin access. Ask another admin.");
+      keepAnAdmin_(t, r, patch);
+      t.update(r, patch);
+      log_(a.u, "admin", "updated " + r.username + ": " + JSON.stringify(patch));
+      return { ok: true };
+    });
+  },
+  facultyResetPassword(d) {
+    const a = auth_(d.token, "admin");
+    if (String(d.password || "").length < 8) throw new Error("Password must be at least 8 characters");
+    return withLock_(() => {
+      const t = table_("Faculty"), r = t.find("username", String(d.username || "").toLowerCase()); if (!r) throw new Error("Account not found");
+      t.update(r, { pass_hash: hash_("fac:" + r.username + ":" + d.password), must_change: "yes" });
+      log_(a.u, "admin", "reset password for " + r.username);
+      return { ok: true };
+    });
+  },
+  facultyRemove(d) {
+    const a = auth_(d.token, "admin");
+    return withLock_(() => {
+      const t = table_("Faculty"), u = String(d.username || "").toLowerCase(), r = t.find("username", u); if (!r) throw new Error("Account not found");
+      if (u === a.u) throw new Error("You can't delete your own account");
+      keepAnAdmin_(t, r, { status: "disabled" });
+      t.removeWhere(x => x.username === u);
+      log_(a.u, "admin", "deleted account " + u);
+      return { ok: true };
+    });
+  },
+  adminLog(d) {
+    auth_(d.token, "admin");
+    const rows = table_("Log").all().slice(-300).reverse().map(r => ({ ts: r.ts ? new Date(r.ts).toISOString() : "", who: r.roll, type: r.type, detail: String(r.detail).slice(0, 300) }));
+    return { ok: true, rows };
   },
 };
 
@@ -341,12 +446,14 @@ function setup() {
   Object.keys(SHEETS).forEach(n => sheet_(ss, n));
   const p = PropertiesService.getScriptProperties();
   if (!p.getProperty("SECRET")) p.setProperty("SECRET", Utilities.getUuid() + Utilities.getUuid());
+  Object.keys(SHEETS).forEach(n => { const sh = ss.getSheetByName(n); if (sh.getLastColumn() < SHEETS[n].length) sh.getRange(1, 1, 1, SHEETS[n].length).setValues([SHEETS[n]]); });
   const f = table_("Faculty"), u = SETUP_ADMIN.username.toLowerCase();
-  if (!f.find("username", u)) f.append({ username: u, name: SETUP_ADMIN.name, pass_hash: hash_("fac:" + u + ":" + SETUP_ADMIN.password), role: "admin", created: new Date() });
+  const admins = f.all().filter(r => r.role === "admin");
+  if (!admins.length && !f.find("username", u)) f.append({ username: u, name: SETUP_ADMIN.name, pass_hash: hash_("fac:" + u + ":" + SETUP_ADMIN.password), role: "admin", created: new Date(), status: "active", must_change: "yes" });
   if (!ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === "gradePending")) {
     ScriptApp.newTrigger("gradePending").timeBased().everyMinutes(5).create();
   }
-  return "Setup complete. Admin user: " + u;
+  return "Setup complete. Admin user(s): " + table_("Faculty").all().filter(r => r.role === "admin").map(r => r.username).join(", ");
 }
 
 // ---------------- demo data (for testing; remove with clearDemo) ----------------
@@ -368,7 +475,7 @@ function seedDemo() {
   const day = n => Utilities.formatDate(new Date(Date.now() - n * 864e5), "Asia/Kolkata", "yyyy-MM-dd");
   return withLock_(() => {
     const f = table_("Faculty");
-    DEMO_FACULTY.forEach(d => { if (!f.find("username", d.username)) f.append({ username: d.username, name: d.name, pass_hash: hash_("fac:" + d.username + ":" + d.password), role: "faculty", created: new Date() }); });
+    DEMO_FACULTY.forEach(d => { if (!f.find("username", d.username)) f.append({ username: d.username, name: d.name, pass_hash: hash_("fac:" + d.username + ":" + d.password), role: "faculty", created: new Date(), status: "active" }); });
     const t = table_("Students");
     if (!t.all().some(r => String(r.roll).indexOf("DEMO") === 0)) {
       DEMO_NAMES.forEach((n, i) => t.append({ roll: "DEMO" + String(i + 1).padStart(3, "0"), name: n + " (demo)", batch: i < 6 ? "2027-A" : "2027-B", status: "active", created: new Date() }));
@@ -476,12 +583,23 @@ function auth_(tok, need) {
   if (parts.length !== 2 || sign_(parts[0]) !== parts[1]) throw new Error("Please log in again");
   const p = JSON.parse(Utilities.newBlob(Utilities.base64DecodeWebSafe(parts[0])).getDataAsString());
   if (p.exp < Date.now()) throw new Error("Session expired. Please log in again");
+  if (p.r !== "student") {          // faculty/admin: use the current role and status from the sheet, not the one in the token
+    const f = table_("Faculty").find("username", p.u);
+    if (!f || f.status === "disabled") throw new Error("Your account is not active. Please log in again");
+    p.r = f.role === "admin" ? "admin" : "faculty";
+  }
   if (need === "student" && p.r !== "student") throw new Error("Student login required");
   if (need === "faculty" && p.r !== "faculty" && p.r !== "admin") throw new Error("Faculty login required");
   if (need === "admin" && p.r !== "admin") throw new Error("Admin login required");
   return p;
 }
 function sign_(s) { return Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(s, prop_("SECRET") || "")).replace(/=+$/, ""); }
+function bootHash_(s) { return Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s + "|sqlquest-bootstrap")); }  // for accounts written into the sheet before setup; replaced at first login
+function keepAnAdmin_(t, r, patch) {
+  const after = Object.assign({}, r, patch);
+  const admins = t.all().filter(x => x.username !== r.username && x.role === "admin" && x.status !== "disabled").length;
+  if (r.role === "admin" && r.status !== "disabled" && !(after.role === "admin" && after.status !== "disabled") && admins === 0) throw new Error("At least one active admin must remain");
+}
 function hash_(s) { return Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s + "|" + (prop_("SECRET") || ""))); }
 function prop_(k) { return PropertiesService.getScriptProperties().getProperty(k); }
 function withLock_(fn) { const l = LockService.getScriptLock(); l.waitLock(20000); try { return fn(); } finally { l.releaseLock(); } }

@@ -11,7 +11,7 @@ Practice SQL the way it is asked in data-role placement interviews and online as
 - **OA simulator**: 3 SQL questions + 10 MCQs in 30 minutes
 - **Scenario questions**: 24 interview-style written answers, marked out of 10 against a rubric by AI and reviewed by faculty
 - **Big Data & Data Engineering**: 16 short lessons, 22 interview Q&As, and 60 MCQs
-- **Student and faculty logins**: personal dashboards, saved progress on any device, and a faculty dashboard with analytics, review queue, roster and MCQ manager
+- **Student and faculty logins**: personal dashboards, saved progress on any device, and a faculty dashboard with analytics, review queue and MCQ manager, plus an admin panel for managing student and faculty accounts
 - **Interview experiences**: rounds, questions asked and tips from 39 real data-role interviews (Mu Sigma, ZS, Fractal, Tiger, Amazon, Flipkart, Swiggy, Meesho, AmEx, Deloitte and more), summarised with links to the originals
 - **Playground** to run any query on the practice tables
 - XP, levels, daily streaks, badges and a class leaderboard
@@ -23,7 +23,7 @@ Questions are aimed at Data Analyst, Business Analyst, BI Analyst and Data Scien
 ## For students
 
 1. Open the link above (works on laptop and phone; Chrome recommended).
-2. Choose **Student**, type your roll number and pick a 4-6 digit PIN on your first login (your faculty adds you to the roster first).
+2. Choose **Student**, type your roll number and pick a 4-6 digit PIN on your first login (your admin adds you to the roster first).
 3. Go world by world. Try without hints first.
 
 Once your faculty switches on class logins, your progress is saved to your account and works on any device. Until then it stays in your browser.
