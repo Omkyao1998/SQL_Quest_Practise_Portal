@@ -304,20 +304,22 @@ function logout() {
   clearTimeout(syncTimer);
   SESSION = null; try { localStorage.removeItem(SESSION_KEY); } catch (e) { }
   S = blank(); CUSTOM_MCQ = []; MY_SUBS = []; FAC = { rows: null };
-  location.hash = "#/home"; route();
+  location.hash = "#/welcome"; route();
 }
 
 // ---------- login page ----------
-function viewLogin() {
+function viewLogin(role) {
   document.body.classList.add("loggedout");
+  const fac = role === "f";
   main().innerHTML = `<div class="loginwrap"><div class="card loginbox">
+    <a class="linkbtn small" href="#/welcome">← Back</a>
     <div class="brand big">SQL <span>Quest</span></div><p class="muted">Placement practice for data roles: SQL, DBMS, Big Data and interview prep.</p>
-    <div class="tabs2"><button class="tab on" data-lt="s">🎓 Student</button><button class="tab" data-lt="f">👩‍🏫 Faculty</button></div>
-    <div id="lg-s"><label>Roll number<input id="lg-roll" autocomplete="username" maxlength="30"></label>
+    <div class="tabs2"><button class="tab ${fac ? "" : "on"}" data-lt="s">🎓 Student</button><button class="tab ${fac ? "on" : ""}" data-lt="f">👩‍🏫 Faculty</button></div>
+    <div id="lg-s" ${fac ? "hidden" : ""}><label>Roll number<input id="lg-roll" autocomplete="username" maxlength="30"></label>
       <label>PIN<input id="lg-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="6"></label>
       <p class="small muted">First time here? Type a new 4 to 6 digit PIN. It becomes your PIN, so remember it. Forgot it later? Your faculty can reset it.</p>
       <button class="btn primary wide" id="lg-sgo">Log in</button></div>
-    <div id="lg-f" hidden><label>Username<input id="lg-user" autocomplete="username" maxlength="30"></label>
+    <div id="lg-f" ${fac ? "" : "hidden"}><label>Username<input id="lg-user" autocomplete="username" maxlength="30"></label>
       <label>Password<input id="lg-pass" type="password" autocomplete="current-password"></label>
       <button class="btn primary wide" id="lg-fgo">Log in as faculty</button></div>
     <div class="err" id="lg-err"></div></div></div>`;
@@ -359,13 +361,59 @@ function accountModal() {
   $("#ac-pin").onclick = async () => { const j = await Api.call("changePin", { oldPin: $("#ac-old").value, newPin: $("#ac-new").value }); $("#ac-err").textContent = j.ok ? "PIN updated ✔" : j.error; };
 }
 
+
+// ---------- welcome page ----------
+function viewWelcome() {
+  const online = Api.enabled();
+  const signedIn = online ? !!SESSION : !!(S.profile && S.profile.name);
+  document.body.classList.toggle("loggedout", !signedIn);
+  const feats = [
+    ["🧩", "SQL Practice", QS.length + " real interview-style SQL questions in 8 levels, checked instantly by a SQL engine in your browser. Hints and full solutions included."],
+    ["📘", "MCQ Quiz", MCQS.length + " MCQs on DBMS & SQL, Big Data and Data Engineering, the kind asked in online assessments."],
+    ["✍️", "Scenario Questions", SUBJ.length + " interview-style questions you answer in your own words" + (online ? ", marked out of 10 by AI with feedback." : ", with model answers to compare.")],
+    ["📚", "Big Data & DE", LEARN.lessons.length + " short lessons in simple language plus " + LEARN.interview.length + " common interview questions with model answers."],
+    ["⏱", "OA Simulator", "A timed mock online assessment: 3 SQL questions + 10 MCQs in 30 minutes."],
+    ["🗣", "Interview Experiences", EXPS.length + " real interview processes for data roles: rounds, questions asked and tips."],
+    ["🏆", "XP, badges & leaderboard", "Earn XP, keep a daily streak, unlock badges" + (online ? " and see where you stand in your class." : ".")],
+    ["👩‍🏫", "Faculty dashboard", online ? "Faculty track every student, see which questions the class is stuck on, review AI marks and add their own MCQs." : "Faculty tools switch on once the class backend is set up."],
+  ];
+  main().innerHTML = `<div class="welcome">
+  <section class="card whero"><div class="brand big">SQL <span>Quest</span></div>
+    <h1>Placement practice for data roles</h1>
+    <p>Practise the SQL, DBMS, Big Data and interview skills that companies test for <b>Data Analyst, Business Analyst, BI, Data Science and Data Engineering</b> roles, step by step and in a game-like way.</p>
+    <div class="row gap wrap mt">${signedIn
+      ? `<a class="btn primary big" href="${isFaculty() ? "#/f/overview" : "#/home"}">Go to my dashboard →</a>`
+      : `<button class="btn primary big" id="wl-student">🎓 I'm a Student</button><button class="btn big" id="wl-faculty">👩‍🏫 I'm Faculty</button>`}</div>
+  </section>
+  <h2>What's inside</h2>
+  <div class="grid features">${feats.map(f => `<div class="card feat"><div class="ficon">${f[0]}</div><b>${esc(f[1])}</b><p class="small muted">${esc(f[2])}</p></div>`).join("")}</div>
+  <h2>How to get started</h2>
+  <div class="grid2"><div class="card"><h3>🎓 Students</h3><ol>${online
+      ? `<li>Your faculty adds your roll number to the class list.</li><li>Click <b>I'm a Student</b>, type your roll number and choose a 4 to 6 digit PIN the first time. That becomes your PIN.</li><li>Practise a little every day, earn XP and climb the leaderboard. Your progress is saved to your account on any device.</li>`
+      : `<li>Click <b>I'm a Student</b> and enter your name.</li><li>Start with World 1 in SQL Practice and work your way up.</li><li>Your progress is saved in this browser.</li>`}</ol></div>
+    <div class="card"><h3>👩‍🏫 Faculty</h3><ol>${online
+      ? `<li>Click <b>I'm Faculty</b> and log in with the username and password your admin gave you.</li><li>Add students to the roster (paste roll, name, batch).</li><li>Track progress, find weak topics, review scenario marks and add your own MCQs.</li>`
+      : `<li>Faculty logins need a one-time setup of the class backend (a Google Sheet, about 20 minutes).</li><li>After that, faculty can track every student and review AI marks.</li>`}</ol></div></div>
+  <p class="small muted mt">All practice data is fictional. Company names on questions show where a skill appears in job descriptions, not that the company asked that exact question.</p></div>`;
+  if ($("#wl-student")) $("#wl-student").onclick = () => { if (online) location.hash = "#/login/student"; else profileModal(true); };
+  if ($("#wl-faculty")) $("#wl-faculty").onclick = () => location.hash = "#/login/faculty";
+}
+function viewFacultyOff() {
+  document.body.classList.add("loggedout");
+  main().innerHTML = `<div class="loginwrap"><div class="card loginbox"><a class="linkbtn small" href="#/welcome">← Back</a>
+    <h2>👩‍🏫 Faculty login isn't switched on yet</h2>
+    <p>Faculty accounts, student logins and AI marking need the class backend: a Google Sheet with a small script, set up once by the portal admin (about 20 minutes).</p>
+    <p><a href="https://github.com/Omkyao1998/SQL_Quest_Practise_Portal/blob/main/docs/BACKEND_SETUP.md" target="_blank" rel="noopener">Open the setup guide ↗</a></p>
+    <p class="small muted">Until then, you can still explore everything students see: go back and choose "I'm a Student".</p></div></div>`;
+}
+
 // ---------- navigation ----------
 function renderNav() {
   const stu = [["#/home", "🏠 My Dashboard"], ["#/list", "🧩 SQL Practice (100)"], ["#/mcq", "📘 MCQ Quiz"], ["#/scenario", "✍️ Scenario Questions"], ["#/learn", "📚 Big Data & DE"],
-    ["#/oa", "⏱ OA Simulator"], ["#/exp", "🗣 Interview Experiences"], ["#/sandbox", "🧪 Playground"], ["#/badges", "🏅 Badges"], ["#/board", "🏆 Leaderboard"], ["#/guide", "📄 Cheat sheet"]];
+    ["#/oa", "⏱ OA Simulator"], ["#/exp", "🗣 Interview Experiences"], ["#/sandbox", "🧪 Playground"], ["#/badges", "🏅 Badges"], ["#/board", "🏆 Leaderboard"], ["#/guide", "📄 Cheat sheet"], ["#/welcome", "ℹ️ About SQL Quest"]];
   const fac = [["#/f/overview", "📋 Students"], ["#/f/questions", "📈 Question analytics"], ["#/f/review", "✅ Review answers"], ["#/f/roster", "👥 Roster & PINs"],
     ["#/f/mcq", "➕ MCQ manager"], ["#/board", "🏆 Leaderboard"], ["#/f/team", "🔑 Team & password"]];
-  const content = [["#/list", "🧩 SQL Practice"], ["#/mcq", "📘 MCQ Quiz"], ["#/scenario", "✍️ Scenario Questions"], ["#/learn", "📚 Big Data & DE"], ["#/exp", "🗣 Interview Experiences"], ["#/guide", "📄 Cheat sheet"]];
+  const content = [["#/list", "🧩 SQL Practice"], ["#/mcq", "📘 MCQ Quiz"], ["#/scenario", "✍️ Scenario Questions"], ["#/learn", "📚 Big Data & DE"], ["#/exp", "🗣 Interview Experiences"], ["#/guide", "📄 Cheat sheet"], ["#/welcome", "ℹ️ About SQL Quest"]];
   const link = ([h, t]) => `<a href="${h}">${t}</a>`;
   $("#nav").innerHTML = (isFaculty() ? `<div class="navhead">Faculty</div>${fac.map(link).join("")}<div class="navhead">Student content</div>${content.map(link).join("")}` : stu.map(link).join("")) +
     `<div id="engine" class="${Engine && ENGINE_OK === true ? "ok" : ""}">${ENGINE_MSG}</div>`;
@@ -738,7 +786,7 @@ function profileModal(force) {
     if (name.length < 2) return $("#pf-err").textContent = "Please enter your name.";
     if (lb && !roll) return $("#pf-err").textContent = "Roll number is needed for the leaderboard.";
     if (lb && !/^\d{4}$/.test(pin)) return $("#pf-err").textContent = "PIN must be exactly 4 digits.";
-    S.profile = { name, roll, batch, pin, classCode: code }; save(); closeModal(); renderHeader(); LB.push(); route();
+    S.profile = { name, roll, batch, pin, classCode: code }; save(); closeModal(); renderHeader(); LB.push(); if (/^#\/(welcome|login)/.test(location.hash) || !location.hash) location.hash = "#/home"; else route();
   };
   if ($("#pf-cancel")) $("#pf-cancel").onclick = closeModal;
   $("#pf-doimport").onclick = () => {
@@ -1097,7 +1145,13 @@ function route() {
   const parts = path.split("/").filter(Boolean);
   window.scrollTo(0, 0);
   if (!$("#modal").dataset.locked) closeModal();
-  if (needLogin()) { renderHeader(); return viewLogin(); }
+  if (parts[0] === "welcome") { renderHeader(); return viewWelcome(); }
+  if (needLogin()) { renderHeader(); return parts[0] === "login" ? viewLogin(parts[1] === "faculty" ? "f" : "s") : viewWelcome(); }
+  if (parts[0] === "login") {
+    if (!Api.enabled() && parts[1] === "faculty") { renderHeader(); return viewFacultyOff(); }
+    location.hash = isFaculty() ? "#/f/overview" : "#/home"; return;
+  }
+  if (!Api.enabled() && !(S.profile && S.profile.name)) { renderHeader(); return viewWelcome(); }
   document.body.classList.remove("loggedout");
   if (parts[0] === "f" && !isFaculty()) { location.hash = "#/home"; return; }
   if (isFaculty() && (!parts[0] || parts[0] === "home")) { location.hash = "#/f/overview"; return; }
@@ -1134,7 +1188,6 @@ Engine.ready().then(r => {
   ENGINE_OK = !!r.ok; ENGINE_MSG = r.ok ? (r.fallback ? "SQL engine ready (compatibility mode)" : "SQL engine ready") : "Engine error: " + r.error;
   const el = $("#engine"); if (el) { el.textContent = ENGINE_MSG; el.className = r.ok ? "ok" : "bad"; }
 });
-if (!Api.enabled() && (!S.profile || !S.profile.name)) profileModal(true);
 if (SESSION) {
   // refresh progress from the server on every visit (another device may have added progress)
   Api.call("me").then(j => { if (j.ok && j.role === "student") { S = mergeState(S, j.state); S.profile = j.profile; save(); afterLogin().then(() => { checkBadges(); save(); route(); LB.push(); }); } else if (j.ok) afterLogin(); });
