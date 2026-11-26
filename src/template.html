@@ -7,10 +7,10 @@
 <title>SQL Quest · Placement SQL Practice</title>
 <script>
 /* ===================== MENTOR CONFIG =====================
-   LEADERBOARD_URL: paste your Google Apps Script web-app URL (ends with /exec).
-   Leave it empty ("") to run without a class leaderboard.            */
+   BACKEND_URL: your Google Apps Script web-app URL (ends with /exec). Set it in data/config.json and rebuild.
+   Empty = "local mode": no logins, progress stays in the browser.     */
 window.SQLQ_CONFIG = {
-  LEADERBOARD_URL: "{{LEADERBOARD_URL}}"
+  BACKEND_URL: "{{BACKEND_URL}}"
 };
 /* ========================================================= */
 </script>
@@ -69,6 +69,17 @@ table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px
 .badge{text-align:center;opacity:.45;filter:grayscale(1)}.badge.got{opacity:1;filter:none;border-color:#e8d27a;background:#fffdf3}.bicon{font-size:34px}
 .lb tr.me td{background:#efecff;font-weight:700}
 .tgroup{margin:4px 0}
+body.loggedout nav#nav,body.loggedout #hdr-stats{display:none}
+.loginwrap{display:flex;justify-content:center;padding:40px 10px}.loginbox{max-width:420px;width:100%;padding:26px 28px}.loginbox label{display:block;margin:10px 0;font-weight:600;font-size:14px}.loginbox input{display:block;width:100%;margin-top:4px}
+.brand.big{font-size:28px;font-weight:800}.brand.big span{color:var(--brand)}.tabs2{display:flex;gap:8px;margin:14px 0}.btn.wide{width:100%;margin-top:6px}
+.navhead{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:12px 12px 4px}
+.stats4{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:10px 0}.stats4 .card{margin:0;color:var(--ink)}.stats4 b{display:block;font-size:24px}.stats4 span{font-size:12px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.scorebox{display:flex;gap:16px;align-items:flex-start;margin:10px 0}.score{font-size:34px;font-weight:800;color:var(--brand);line-height:1}.score span{font-size:16px;color:var(--muted)}
+table.crit td{white-space:normal;vertical-align:top}.answer{width:100%;min-height:220px;resize:vertical;line-height:1.5}.pre{white-space:pre-wrap}
+.lesson{max-width:860px;font-size:15.5px}.lesson p{line-height:1.65}.example{background:#f4f7ff;border-left:4px solid var(--brand2);padding:10px 14px;border-radius:8px;margin:14px 0}.tip{background:#fffbea;border-left:4px solid #e8c547;padding:10px 14px;border-radius:8px;margin:14px 0}
+tr.click{cursor:pointer}tr.click:hover td{background:#faf9ff}label.inline{display:inline-flex;gap:6px;align-items:center;font-weight:600;font-size:14px}.grow{flex:1;min-width:200px}
+.srow{grid-template-columns:28px 1fr 76px 110px 100px}.world.done{border-color:#bfe6d3;background:#f7fdf9}textarea{width:100%}
 .topicbars{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:4px 18px;margin-top:8px}.tbar{display:grid;grid-template-columns:150px 1fr 26px;gap:8px;align-items:center;color:var(--ink);font-size:13px}.tbar b{text-align:right}
 .exps{display:grid;gap:10px}.exp{margin:0;padding:0}.exp summary{list-style:none;cursor:pointer;padding:14px 18px}.exp summary::-webkit-details-marker{display:none}.exp[open] summary{border-bottom:1px solid var(--line)}
 .exp .eco{font-size:16px}.exp.read{opacity:.85}.expbody{padding:4px 18px 16px}.expbody li{margin:3px 0}.right{text-align:right}.tchip{background:#f1f0fb;color:#4b4a7a;font-weight:600}.chip.good{background:#e5f6ee;color:var(--good)}
@@ -89,11 +100,7 @@ table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px
 <body>
 <header><div class="brand">SQL <span>Quest</span> <span class="muted small" style="font-weight:500">· Data-role placement prep</span></div><div id="hdr-stats"></div></header>
 <div class="layout">
-<nav id="nav">
-  <a href="#/home">🏠 Home</a><a href="#/list">🧩 Practice (100)</a><a href="#/mcq">📘 DBMS Quiz (40)</a><a href="#/oa">⏱ OA Simulator</a>
-  <a href="#/exp">🗣 Interview Experiences</a><a href="#/sandbox">🧪 Playground</a><a href="#/badges">🏅 Badges</a><a href="#/board">🏆 Leaderboard</a><a href="#/guide">📄 Cheat sheet</a>
-  <div id="engine">Loading SQL engine…</div>
-</nav>
+<nav id="nav"></nav>
 <main id="main"></main>
 </div>
 <div id="modal"><div class="box"><button id="modal-close" aria-label="Close">×</button><div id="modal-body"></div></div></div>

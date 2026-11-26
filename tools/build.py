@@ -3,7 +3,7 @@
 Usage (from the repo root):
     python3 tools/build.py
 
-The leaderboard URL is read from data/config.json ("leaderboard_url"), so it survives rebuilds.
+The backend URL is read from data/config.json ("backend_url"), so it survives rebuilds.
 """
 import base64, json, os, sys
 
@@ -19,6 +19,8 @@ def main():
     questions = load("questions.json")
     mcq = load("mcq.json")
     exps = load("experiences.json")
+    subjective = load("subjective.json")
+    learn = load("learn.json")
     cfg = load("config.json") if os.path.exists(P("data", "config.json")) else {}
     with open(P("data", "schema.sql"), encoding="utf-8") as f:
         schema = f.read()
@@ -35,20 +37,20 @@ def main():
             assert e.get(k), f"experience {i}: missing {k}"
 
     data = dict(questions=questions, mcq=mcq, worlds=meta["worlds"], tableDocs=meta["tableDocs"],
-                dialect=meta["dialect"], patterns=meta["patterns"], experiences=exps, schema=schema)
+                dialect=meta["dialect"], patterns=meta["patterns"], experiences=exps, subjective=subjective, learn=learn, schema=schema)
     djson = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     sqljs = open(P("vendor", "sql-wasm.js"), encoding="utf-8").read()
     wasm = base64.b64encode(open(P("vendor", "sql-wasm.wasm"), "rb").read()).decode()
     app = open(P("src", "app.js"), encoding="utf-8").read()
     assert "</script" not in sqljs.lower() and "</script" not in app.lower()
     html = open(P("src", "template.html"), encoding="utf-8").read()
-    html = (html.replace("{{LEADERBOARD_URL}}", cfg.get("leaderboard_url", ""))
+    html = (html.replace("{{BACKEND_URL}}", cfg.get("backend_url") or cfg.get("leaderboard_url", ""))
                 .replace("{{SQLJS}}", sqljs).replace("{{WASM}}", wasm)
                 .replace("{{DATA}}", djson).replace("{{APP}}", app))
     out = sys.argv[1] if len(sys.argv) > 1 else P("index.html")
     with open(out, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"built {os.path.relpath(out, ROOT)}: {len(questions)} questions, {len(mcq)} MCQs, {len(exps)} experiences, {round(len(html)/1024)} KB")
+    print(f"built {os.path.relpath(out, ROOT)}: {len(questions)} questions, {len(mcq)} MCQs, {len(exps)} experiences, {len(subjective)} scenario Qs, {len(learn["lessons"])} lessons, {round(len(html)/1024)} KB")
 
 if __name__ == "__main__":
     main()

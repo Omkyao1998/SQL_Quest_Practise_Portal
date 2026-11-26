@@ -44,7 +44,19 @@ async def main():
         m = await pg.locator(".exp").count(); check(0 < m < total, f"topic filter works ({m} guesstimate cards)")
         await pg.locator(".exp summary").first.click(); await pg.locator("[data-read]").first.click(); await pg.wait_for_timeout(200)
         check(await pg.evaluate("Object.keys(window.__SQLQ.S().expRead).length") == 1, "mark-as-read records progress")
-        for path in ["#/home", "#/list", "#/mcq", "#/oa", "#/sandbox", "#/badges", "#/board", "#/guide"]:
+        await pg.goto(url + "#/scenario/s1"); await pg.wait_for_selector("#sc-ans")
+        await pg.fill("#sc-ans", "First I would check the data pipeline for delays, then split revenue into orders and AOV, then slice by city and payment mode.")
+        await pg.click("#sc-go"); await pg.wait_for_timeout(300)
+        check("Model answer" in await pg.inner_text("main"), "scenario self-check shows model answer in local mode")
+        await pg.goto(url + "#/learn/de3"); await pg.wait_for_selector("#ls-read"); await pg.click("#ls-read"); await pg.wait_for_timeout(200)
+        check(await pg.evaluate("Object.keys(window.__SQLQ.S().lessonRead).length") == 1, "lesson mark-as-read records progress")
+        await pg.goto(url + "#/learn?tab=interview"); await pg.wait_for_selector(".exp")
+        check(await pg.locator(".exp").count() == await pg.evaluate("window.SQLQ_DATA.learn.interview.length"), "interview Q&A list renders")
+        for bank in ["dbms", "bigdata", "de"]:
+            await pg.goto(url + f"#/mcq?bank={bank}"); await pg.wait_for_selector(".mcq h2")
+        n_dots = await pg.locator(".mcqnav .dot").count()
+        check(n_dots == await pg.evaluate("window.SQLQ_DATA.mcq.filter(m => m.bank === 'de').length"), "MCQ banks switch (DE bank shows its questions)")
+        for path in ["#/home", "#/list", "#/mcq", "#/oa", "#/sandbox", "#/badges", "#/board", "#/guide", "#/scenario", "#/learn"]:
             await pg.goto(url + path); await pg.wait_for_timeout(250)
         check(not errs, f"no page errors {errs}")
         await b.close()

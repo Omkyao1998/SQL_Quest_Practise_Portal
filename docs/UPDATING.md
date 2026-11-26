@@ -5,11 +5,14 @@
 | What you want to change | File |
 |---|---|
 | Practice questions (SQL) | `data/questions.json` (use `tools/qtool.py`, because solutions are stored encoded) |
-| DBMS MCQs | `data/mcq.json` |
+| MCQs (DBMS, Big Data, DE) | `data/mcq.json`: each has `id` (m1, m2…; never reuse), `bank` (dbms/bigdata/de), `topic`, `q`, `opts`[4], `ans` (0-3), `explain`. Faculty can also add MCQs from the dashboard (stored in the Google Sheet). |
+| Scenario questions + rubrics | `data/subjective.json`: `id`, `area`, `title`, `diff`, `prompt`, `rubric` [{point, marks}] adding up to 10, `model` answer. The backend reads this file from the live site to mark answers, so push before students use a new question. |
+| Big Data / DE lessons and interview Q&A | `data/learn.json` (`lessons`, `interview`) |
 | Interview experiences | `data/experiences.json` |
 | Practice tables and rows | `data/schema.sql` |
 | Worlds, table descriptions, cheat-sheet tables | `data/meta.json` |
-| Leaderboard URL | `data/config.json` → `leaderboard_url` |
+| Backend URL (Apps Script /exec) | `data/config.json` → `backend_url` |
+| Backend logic (logins, marking, faculty APIs) | `backend/Code.gs`; after changing it, paste it into Apps Script and deploy a **new version** |
 | Page behaviour and look | `src/app.js`, `src/template.html` |
 
 ## Routine
@@ -18,7 +21,9 @@
 python3 tools/qtool.py add new_questions.json   # or: edit 12 patch.json / add-exp new_exp.json
 python3 tools/qtool.py check                    # every reference solution must return rows
 python3 tools/build.py                          # regenerates index.html
-python3 tools/test_portal.py                    # browser test; must print ALL PASSED
+python3 tools/test_portal.py                    # browser test (local mode); must print ALL PASSED
+node tools/test_backend.js                      # backend logic against a local Apps Script stand-in
+python3 tools/test_portal_backend.py            # full browser test: logins, sync, marking, faculty pages
 git add -A && git commit -m "..." && git push   # GitHub Pages republishes in about a minute
 ```
 

@@ -1,0 +1,530 @@
+{
+ "lessons": [
+  {
+   "id": "bd1",
+   "track": "Big Data",
+   "title": "What 'Big Data' actually means",
+   "mins": 5,
+   "sections": [
+    "Big Data is data that is too big, too fast or too messy for one normal database server to handle comfortably. People describe it with the **3 Vs**: **Volume** (how much), **Velocity** (how fast it arrives) and **Variety** (how many formats). Two more are often added: **Veracity** (can we trust it?) and **Value** (is it worth storing?).",
+    "Data comes in three shapes. **Structured**: rows and columns, like an orders table. **Semi-structured**: has keys but no fixed table, like JSON app events. **Unstructured**: images, audio, PDFs, chat text.",
+    "When one machine is not enough, you have two options. **Scale up** means buying a bigger server, which gets expensive fast and has a ceiling. **Scale out** means adding many ordinary machines that share the work. Almost every Big Data tool (Hadoop, Spark, Kafka, BigQuery) is built to scale out."
+   ],
+   "example": "A food-delivery app records every tap, GPS ping and payment. That's millions of JSON events per hour (velocity + variety) and terabytes a month (volume). A single MySQL server would struggle, so the events go to a distributed system instead.",
+   "terms": [
+    "3 Vs",
+    "Structured / semi-structured / unstructured",
+    "Scale up vs scale out"
+   ],
+   "tip": "If asked 'What is Big Data?', don't just list the Vs. Give a real example like UPI transactions or app clickstream, and say why one server can't cope.",
+   "mcqTopics": [
+    "Big Data basics"
+   ]
+  },
+  {
+   "id": "bd2",
+   "track": "Big Data",
+   "title": "Distributed storage: HDFS in plain words",
+   "mins": 6,
+   "sections": [
+    "HDFS (Hadoop Distributed File System) stores huge files across many machines. A file is cut into **blocks** (128 MB by default), and each block is copied to **3 machines** (replication factor 3). If one machine dies, the data is still safe on the other two.",
+    "There are two kinds of machines. The **NameNode** is the index: it knows which blocks make up each file and where they live. **DataNodes** hold the actual blocks. If the NameNode is lost, nobody knows where anything is, which is why production clusters run a standby NameNode.",
+    "**YARN** is the cluster's resource manager. It decides which job gets how much CPU and memory on which machine.",
+    "Today many companies use cloud object storage (Amazon S3, Azure ADLS, Google GCS) instead of HDFS, but the ideas are the same: split, spread and replicate."
+   ],
+   "example": "A 1 GB log file becomes 8 blocks of 128 MB. With replication 3, the cluster stores 24 block copies spread over different DataNodes. A Spark job can then read all 8 blocks in parallel on 8 machines.",
+   "terms": [
+    "Block",
+    "Replication factor",
+    "NameNode",
+    "DataNode",
+    "YARN"
+   ],
+   "tip": "A favourite follow-up: 'What happens if a DataNode fails?' Answer: the NameNode notices the missing heartbeats and re-copies the affected blocks from the remaining replicas to restore 3 copies.",
+   "mcqTopics": [
+    "Hadoop"
+   ]
+  },
+  {
+   "id": "bd3",
+   "track": "Big Data",
+   "title": "MapReduce: the idea behind distributed processing",
+   "mins": 5,
+   "sections": [
+    "MapReduce processes data where it lives, in three steps. **Map**: each machine reads its own blocks and turns every record into key-value pairs. **Shuffle**: pairs with the same key are moved to the same machine. **Reduce**: each machine combines the values for its keys.",
+    "The shuffle is the expensive part, because data travels over the network and is written to disk. Much of Big Data performance tuning is really 'shuffle less'.",
+    "Classic MapReduce writes to disk after every stage, which is slow for multi-step or iterative work like ML. That is the main reason Spark, which keeps data in memory, replaced it for most processing."
+   ],
+   "example": "Word count. Map turns 'data is big data' into (data,1) (is,1) (big,1) (data,1). Shuffle sends both (data,1) pairs to the same reducer. Reduce outputs (data,2), (is,1), (big,1). This is the same thing `SELECT word, COUNT(*) ... GROUP BY word` does in SQL.",
+   "terms": [
+    "Map",
+    "Shuffle",
+    "Reduce",
+    "Key-value pair"
+   ],
+   "tip": "Link it to SQL: GROUP BY is a map + shuffle + reduce. Interviewers like candidates who connect new ideas to ones they already know.",
+   "mcqTopics": [
+    "MapReduce"
+   ]
+  },
+  {
+   "id": "bd4",
+   "track": "Big Data",
+   "title": "Spark basics: driver, executors and lazy evaluation",
+   "mins": 7,
+   "sections": [
+    "Apache Spark is the most common engine for processing big datasets. A Spark application has one **driver**, which plans the work, and many **executors** on worker machines, which do the work in parallel on **partitions** (chunks) of the data.",
+    "You mostly work with **DataFrames**: tables spread across the cluster, with SQL-like operations (`select`, `filter`, `groupBy`, `join`). PySpark lets you write this in Python.",
+    "Spark is **lazy**. **Transformations** (`filter`, `select`, `withColumn`, `join`) only build a plan. Nothing runs until you call an **action** (`count`, `show`, `collect`, `write`). Spark then optimises the whole plan with the Catalyst optimiser and runs it.",
+    "**Narrow** transformations (`filter`, `map`) work inside each partition. **Wide** transformations (`groupBy`, `join`, `distinct`) need a **shuffle** across machines, which is slower."
+   ],
+   "example": "df = spark.read.parquet('orders/')  →  df2 = df.filter(df.status == 'delivered')  →  df2.groupBy('city').sum('amount').show(). The first two lines only build the plan. show() is the action that triggers the job, and the groupBy causes one shuffle.",
+   "terms": [
+    "Driver / executor",
+    "Partition",
+    "Transformation vs action",
+    "Lazy evaluation",
+    "Narrow vs wide"
+   ],
+   "tip": "If asked 'What is lazy evaluation and why is it useful?', say: Spark sees the whole plan first, so it can drop unused columns, push filters down and combine steps before running anything.",
+   "mcqTopics": [
+    "Spark"
+   ]
+  },
+  {
+   "id": "bd5",
+   "track": "Big Data",
+   "title": "Making Spark jobs fast: shuffles, skew, caching",
+   "mins": 6,
+   "sections": [
+    "Most slow Spark jobs come down to a few things. **Too much shuffle**: filter and select columns early so less data moves. **Data skew**: one key (say, city = 'Mumbai') has far more rows than the rest, so one task runs forever while the others sit idle. Fix it with **salting** (add a random suffix to the hot key), broadcast joins or Spark's Adaptive Query Execution.",
+    "**Broadcast join**: when one table is small (a few MB, like a city lookup), send a full copy to every executor so the big table doesn't need to shuffle.",
+    "**Caching**: if you reuse the same DataFrame in several actions, `df.cache()` keeps it in memory instead of recomputing it.",
+    "**Partitions**: too few means little parallelism; too many tiny ones adds overhead. `repartition(n)` reshuffles to n partitions; `coalesce(n)` reduces partitions without a full shuffle."
+   ],
+   "example": "Joining 500 M orders with a 30-row cities table: use broadcast(cities) so only the small table is copied, instead of shuffling 500 M rows.",
+   "terms": [
+    "Data skew",
+    "Salting",
+    "Broadcast join",
+    "cache()",
+    "repartition vs coalesce"
+   ],
+   "tip": "'How would you debug a slow Spark job?' Check the Spark UI for stages with a big shuffle or one straggler task (skew), then apply the fix that matches.",
+   "mcqTopics": [
+    "Spark"
+   ]
+  },
+  {
+   "id": "bd6",
+   "track": "Big Data",
+   "title": "Streaming and Kafka",
+   "mins": 6,
+   "sections": [
+    "**Batch** processing handles data in chunks on a schedule (every night, every hour). **Streaming** processes events continuously, within seconds. Choose streaming only when the business needs fast reactions: fraud alerts, live delivery tracking, surge pricing.",
+    "**Apache Kafka** is a distributed log for events. **Producers** write events to **topics**. Topics are split into **partitions** for parallelism, and order is kept within each partition. **Consumers** read at their own pace and track their position with **offsets**, so a consumer can restart and continue where it left off.",
+    "Stream processors (Spark Structured Streaming, Flink, Kafka Streams) read from Kafka, transform the data (filter, join, aggregate per time window) and write results out.",
+    "Delivery guarantees: **at-most-once** (may lose events), **at-least-once** (may duplicate), **exactly-once** (each event counted once). In practice, teams use at-least-once with idempotent writes."
+   ],
+   "example": "Every card swipe becomes a Kafka event. A streaming job checks 'more than 3 swipes in 2 minutes from different cities' and raises a fraud alert within seconds. The same events also land in the data lake for nightly batch reports.",
+   "terms": [
+    "Batch vs streaming",
+    "Topic / partition / offset",
+    "Producer / consumer",
+    "Delivery guarantees"
+   ],
+   "tip": "Don't say 'streaming is always better'. Strong answers explain the cost: streaming is more complex and expensive, so use batch unless low latency truly adds business value.",
+   "mcqTopics": [
+    "Streaming"
+   ]
+  },
+  {
+   "id": "bd7",
+   "track": "Big Data",
+   "title": "File formats: CSV, JSON, Parquet, Avro",
+   "mins": 5,
+   "sections": [
+    "**CSV/JSON** are text, easy to read and widely supported, but large and slow to query. They have no reliable types and no compression by default.",
+    "**Parquet** (and ORC) are **columnar**: values of each column are stored together and compressed. A query that needs 3 of 50 columns reads only those 3, which is much less data and much faster. Parquet is the default for analytics in lakes and warehouses.",
+    "**Avro** is **row-based** with an embedded schema. It's good for writing records one by one and for streaming (popular with Kafka), and it handles schema changes well.",
+    "Rule of thumb: Avro for moving events around, Parquet for storing data you will analyse."
+   ],
+   "example": "The same 10 GB of CSV orders data might become about 1.5 GB as Parquet. `SELECT city, SUM(amount)` then reads only 2 columns instead of all 30.",
+   "terms": [
+    "Columnar vs row-based",
+    "Compression",
+    "Schema",
+    "Parquet / Avro"
+   ],
+   "tip": "Asked why Parquet? Say: columnar storage, compression, column pruning, predicate pushdown and preserved data types.",
+   "mcqTopics": [
+    "Formats"
+   ]
+  },
+  {
+   "id": "bd8",
+   "track": "Big Data",
+   "title": "Data lake, warehouse, lakehouse and the cloud",
+   "mins": 6,
+   "sections": [
+    "A **data warehouse** (BigQuery, Snowflake, Redshift, Synapse) stores cleaned, modelled data ready for SQL and dashboards. A **data lake** (S3, ADLS, GCS) stores raw data in any format cheaply. You decide the structure when you read it ('schema on read').",
+    "Lakes are cheap and flexible but can turn into a 'data swamp' with no quality or transactions. A **lakehouse** (Delta Lake, Apache Iceberg, Hudi) adds ACID transactions, schema enforcement and time travel on top of lake files, giving warehouse-like reliability at lake prices.",
+    "Cloud vocabulary to know: **object storage** (S3/ADLS/GCS), **serverless warehouse** (BigQuery: no servers to manage, pay per query), and **managed Spark** (Databricks, EMR, Dataproc).",
+    "In Indian product companies, a common setup is: app databases → ingestion → S3/GCS lake → Spark/dbt transforms → warehouse → Power BI/Tableau/Looker."
+   ],
+   "example": "Raw JSON events from the app land in s3://company-lake/raw/events/. A nightly job cleans them into Parquet in /silver/, then builds daily_orders_by_city in the warehouse for the BI dashboard.",
+   "terms": [
+    "Data lake vs warehouse",
+    "Schema on read vs write",
+    "Lakehouse",
+    "Object storage",
+    "Serverless"
+   ],
+   "tip": "Common question: 'Data lake vs data warehouse?' Use a table in your head: data type, schema, users, cost, query speed. Then give one example of each.",
+   "mcqTopics": [
+    "Storage",
+    "Cloud"
+   ]
+  },
+  {
+   "id": "de1",
+   "track": "Data Engineering",
+   "title": "What a data engineer actually does",
+   "mins": 5,
+   "sections": [
+    "Data engineers build and run the **pipelines** that move data from where it's created (app databases, APIs, logs, files) to where it's used (warehouses, dashboards, ML models), and make sure it arrives **on time, complete and correct**.",
+    "A typical pipeline: **ingest** (pull from sources) → **store raw** (lake) → **transform** (clean, join, model) → **serve** (warehouse tables, APIs) → **monitor** (alerts on failures and data quality).",
+    "Core skills: SQL (by far the most used), Python, one cloud platform, a processing engine (Spark), orchestration (Airflow), data modelling and good habits: testing, version control and documentation.",
+    "Analysts ask 'what happened and why?'. Engineers make sure the data needed to answer that is reliable."
+   ],
+   "example": "Every morning at 6 AM, an Airflow DAG pulls yesterday's orders from MySQL, lands them in S3, cleans and deduplicates them with Spark, loads fact_orders into Snowflake and checks that row counts are within 10% of last week. The sales dashboard refreshes at 8 AM.",
+   "terms": [
+    "Pipeline",
+    "Ingest / transform / serve",
+    "Monitoring"
+   ],
+   "tip": "For fresher DE roles, interviewers mostly test strong SQL plus your understanding of a pipeline you built. Have one project you can draw end to end.",
+   "mcqTopics": [
+    "ETL/ELT"
+   ]
+  },
+  {
+   "id": "de2",
+   "track": "Data Engineering",
+   "title": "ETL vs ELT",
+   "mins": 5,
+   "sections": [
+    "**ETL** (Extract, Transform, Load): data is transformed on a separate processing server before it's loaded into the warehouse. This was common when warehouse compute was expensive.",
+    "**ELT** (Extract, Load, Transform): raw data is loaded into the warehouse first and transformed there with SQL. Cloud warehouses like BigQuery and Snowflake have cheap, scalable compute, so ELT is now the default. **dbt** is the popular tool for the 'T'.",
+    "ELT keeps raw data available, so you can re-transform when logic changes. ETL can still make sense when data must be masked or reduced before it enters the warehouse (e.g. removing PII)."
+   ],
+   "example": "ELT: Fivetran copies raw Razorpay payment tables into Snowflake, then dbt models build clean fct_payments and dim_merchants tables with tests.",
+   "terms": [
+    "Extract / Transform / Load",
+    "dbt",
+    "PII masking"
+   ],
+   "tip": "Say why the industry moved: cheaper elastic warehouse compute, keeping raw history, and SQL-first transformation that analysts can also maintain.",
+   "mcqTopics": [
+    "ETL/ELT",
+    "Tools"
+   ]
+  },
+  {
+   "id": "de3",
+   "track": "Data Engineering",
+   "title": "Full loads, incremental loads and CDC",
+   "mins": 6,
+   "sections": [
+    "A **full load** copies the whole table every run. It's simple, but slow and wasteful for big tables.",
+    "An **incremental load** copies only new or changed rows since the last run, using a **watermark** such as `updated_at > last_max_updated_at`. You save the new watermark after a successful run.",
+    "**CDC (Change Data Capture)** reads the source database's change log to capture every insert, update and delete as events (tools: Debezium, AWS DMS). It even catches deletes, which watermarks miss.",
+    "Load into the target with **MERGE/UPSERT** on the business key, so re-running a day does not create duplicates. This property is called **idempotency**, and it makes retries and backfills safe."
+   ],
+   "example": "Incremental SQL idea: SELECT * FROM orders WHERE updated_at > '2025-03-01 06:00:00'. Then MERGE into the warehouse on order_id: update the row if it exists, insert it if it doesn't.",
+   "terms": [
+    "Full vs incremental",
+    "Watermark",
+    "CDC",
+    "MERGE / UPSERT",
+    "Idempotent"
+   ],
+   "tip": "A classic question: 'Your incremental pipeline ran twice for the same day. What happens?' A good answer: with MERGE on the key it's idempotent, so nothing breaks. With plain INSERT you'd get duplicates.",
+   "mcqTopics": [
+    "ETL/ELT"
+   ]
+  },
+  {
+   "id": "de4",
+   "track": "Data Engineering",
+   "title": "Modelling a warehouse: facts, dimensions, SCDs",
+   "mins": 7,
+   "sections": [
+    "**Star schema**: one central **fact table** of measurable events (order lines with amount and quantity) surrounded by **dimension tables** describing them (customer, product, date, store). It means fewer joins and is easy for BI tools.",
+    "First decide the **grain**: what exactly one fact row represents (one order line? one order per day?). Wrong grain is the most common modelling mistake.",
+    "Dimensions change over time. **SCD Type 1** overwrites the old value (no history). **SCD Type 2** adds a new row with `valid_from`, `valid_to` and `is_current`, so you keep history. **SCD Type 3** keeps just the previous value in an extra column.",
+    "Warehouses use **surrogate keys** (customer_sk = 1, 2, 3...) in dimensions so that SCD2 versions of the same customer get different keys."
+   ],
+   "example": "A customer moves from Pune to Bengaluru. With SCD2, the old row gets valid_to = 2025-06-30 and is_current = 0, and a new row gets city = Bengaluru and is_current = 1. Sales before July still report under Pune.",
+   "terms": [
+    "Fact / dimension",
+    "Grain",
+    "SCD 1 / 2 / 3",
+    "Surrogate key",
+    "Star vs snowflake"
+   ],
+   "tip": "You may be asked to design a schema live, e.g. for a ride-hailing app. Start with the grain, then the facts, then the dimensions, and say which dimensions need SCD2.",
+   "mcqTopics": [
+    "Modelling"
+   ]
+  },
+  {
+   "id": "de5",
+   "track": "Data Engineering",
+   "title": "Orchestration with Airflow",
+   "mins": 5,
+   "sections": [
+    "Pipelines have steps that must run in order and on schedule. **Orchestrators** handle this; **Apache Airflow** is the most common one.",
+    "In Airflow you define a **DAG** (Directed Acyclic Graph) in Python: tasks plus the dependencies between them (extract >> transform >> load). 'Acyclic' means no loops.",
+    "Airflow gives you schedules (e.g. daily at 6 AM), **retries** with delays, alerts on failure, **backfills** (re-running past dates) and a UI showing what ran, what failed and why.",
+    "Airflow orchestrates; it shouldn't do the heavy processing itself. The tasks call Spark, dbt or SQL in the warehouse."
+   ],
+   "example": "DAG daily_sales: extract_orders → load_raw → dbt_run → dbt_test → refresh_dashboard. If dbt_test fails, the dashboard refresh doesn't run and the team gets a Slack alert.",
+   "terms": [
+    "DAG",
+    "Task / dependency",
+    "Schedule",
+    "Retry",
+    "Backfill"
+   ],
+   "tip": "'Why not just cron?' Answer: Airflow adds dependencies, retries, backfills, alerting, history and a UI. Cron only triggers scripts.",
+   "mcqTopics": [
+    "Orchestration"
+   ]
+  },
+  {
+   "id": "de6",
+   "track": "Data Engineering",
+   "title": "Data quality and testing",
+   "mins": 5,
+   "sections": [
+    "Bad data silently breaks dashboards and models, so engineers test data just like code. Common checks: **not null** on required columns, **unique** keys, **accepted values** (status in delivered/cancelled/returned), **relationships** (every order's customer exists), **ranges** (amount > 0), **freshness** (table updated in the last 2 hours) and **volume** (row count not down 40% vs normal).",
+    "Tools: **dbt tests**, **Great Expectations**, Soda, or plain SQL checks inside the pipeline.",
+    "Decide what happens on failure: stop the pipeline (for critical checks), or load the data but alert someone. Bad records can go to a **quarantine/dead-letter** table instead of breaking everything."
+   ],
+   "example": "A dbt test catches 1,200 orders with a NULL customer_id after a source app release. The pipeline stops before the revenue dashboard refreshes, and the source team is alerted.",
+   "terms": [
+    "Not null / unique / accepted values",
+    "Freshness",
+    "Volume anomaly",
+    "Quarantine table"
+   ],
+   "tip": "In interviews, connect quality checks to business impact: 'a wrong revenue number in a CXO dashboard is worse than a late one'.",
+   "mcqTopics": [
+    "Data quality"
+   ]
+  },
+  {
+   "id": "de7",
+   "track": "Data Engineering",
+   "title": "Medallion layers, partitioning and the small-files problem",
+   "mins": 5,
+   "sections": [
+    "Many teams organise lake data in **layers**. **Bronze**: raw, as received. **Silver**: cleaned, deduplicated, typed and joined. **Gold**: business-ready aggregates and models for BI and ML. You can always rebuild silver and gold from bronze.",
+    "**Partitioning** stores data in folders by a column such as date (/orders/order_date=2025-03-01/). Queries filtering on that column skip the other folders (**partition pruning**).",
+    "Don't over-partition. Partitioning by user_id creates millions of tiny files, the **small-files problem**, which makes listing and reading slow. Pick low-to-medium cardinality columns you filter on often (date, country), and **compact** small files into larger ones (roughly 128 MB to 1 GB)."
+   ],
+   "example": "orders partitioned by order_date: a query for March reads 31 folders instead of 3 years of data.",
+   "terms": [
+    "Bronze / silver / gold",
+    "Partition pruning",
+    "Small files",
+    "Compaction"
+   ],
+   "tip": "Be ready for: 'Which column would you partition this table by, and why?' Answer with query patterns and cardinality.",
+   "mcqTopics": [
+    "Pipelines"
+   ]
+  },
+  {
+   "id": "de8",
+   "track": "Data Engineering",
+   "title": "The cloud DE toolkit (AWS, Azure, GCP)",
+   "mins": 5,
+   "sections": [
+    "You don't need every tool, but you should know the equivalents across clouds.",
+    "**Storage**: S3 (AWS) / ADLS Gen2 (Azure) / GCS (GCP). **Warehouse**: Redshift / Synapse or Fabric / BigQuery, plus Snowflake on any cloud. **Spark**: EMR or Glue / Databricks or Synapse Spark / Dataproc. **ETL & orchestration**: Glue, Step Functions or MWAA (managed Airflow) / Data Factory / Dataflow or Cloud Composer. **Streaming**: Kinesis or MSK / Event Hubs / Pub/Sub.",
+    "Indian job descriptions for fresher DE roles most often mention: SQL, Python, PySpark, one cloud (Azure and AWS are both very common), Airflow or ADF, and Databricks.",
+    "Pick one cloud and build one end-to-end project on it. Depth beats a list of logos."
+   ],
+   "example": "Azure version of a pipeline: ADF copies data from SQL Server into ADLS (bronze), Databricks notebooks build silver and gold Delta tables, and Power BI connects to the gold layer.",
+   "terms": [
+    "Object storage",
+    "Managed Spark",
+    "Managed Airflow",
+    "Cloud equivalents"
+   ],
+   "tip": "If asked about a tool you haven't used, map it to the one you know: 'I haven't used Glue, but I've used ADF for the same job, which is orchestrated copy and transform.'",
+   "mcqTopics": [
+    "Tools",
+    "Cloud"
+   ]
+  }
+ ],
+ "interview": [
+  {
+   "track": "Big Data",
+   "level": "Basic",
+   "q": "What is the difference between Hadoop and Spark?",
+   "answer": "Hadoop is an ecosystem: HDFS for storage, YARN for resources and MapReduce for processing. Spark is a processing engine. It can run on YARN and read from HDFS or S3, but it keeps intermediate data in memory, so multi-step and iterative jobs are much faster than MapReduce, which writes to disk between stages. Spark also offers DataFrames, SQL, streaming and ML in one engine.",
+   "checks": "Whether you know storage and processing are separate layers."
+  },
+  {
+   "track": "Big Data",
+   "level": "Basic",
+   "q": "Explain transformations vs actions in Spark.",
+   "answer": "Transformations (filter, select, join, groupBy) return a new DataFrame and are lazy: they only add steps to a plan. Actions (count, show, collect, write) make Spark run the plan and return or save a result. Laziness lets the optimiser combine steps and push filters down before anything runs.",
+   "checks": "Understanding of lazy evaluation and the execution model."
+  },
+  {
+   "track": "Big Data",
+   "level": "Intermediate",
+   "q": "What is a shuffle and why is it expensive?",
+   "answer": "A shuffle redistributes data across partitions so that rows with the same key end up together. It's needed for groupBy, join, distinct and repartition. It's expensive because data is serialised, written to disk and sent over the network. To reduce it: filter early, select only needed columns, broadcast small tables and avoid unnecessary repartitions.",
+   "checks": "Performance intuition."
+  },
+  {
+   "track": "Big Data",
+   "level": "Intermediate",
+   "q": "How do you handle data skew in a Spark join?",
+   "answer": "First confirm it in the Spark UI: one task runs much longer than the others. Fixes: broadcast the smaller table if it fits in memory; salt the hot key (add a random suffix on the big side and replicate the small side for each suffix); enable Adaptive Query Execution's skew-join handling; or process the few hot keys separately.",
+   "checks": "Practical debugging rather than theory."
+  },
+  {
+   "track": "Big Data",
+   "level": "Basic",
+   "q": "repartition() vs coalesce()?",
+   "answer": "repartition(n) does a full shuffle and can increase or decrease partitions, giving evenly sized partitions. coalesce(n) only reduces partitions by merging existing ones without a full shuffle, so it's cheaper but partitions can be uneven. coalesce is commonly used before writing, to avoid many small output files.",
+   "checks": "Knowledge of partition management."
+  },
+  {
+   "track": "Big Data",
+   "level": "Basic",
+   "q": "Why is Parquet preferred over CSV in data lakes?",
+   "answer": "Parquet is columnar and compressed, so queries read only the needed columns (column pruning) and can skip row groups using min/max statistics (predicate pushdown). It keeps data types and schema, and files are much smaller. CSV is text, untyped and must be read fully.",
+   "checks": "File-format fundamentals."
+  },
+  {
+   "track": "Big Data",
+   "level": "Intermediate",
+   "q": "Batch or streaming for a daily sales dashboard? For fraud detection?",
+   "answer": "Daily sales dashboard: batch, because the business looks at it once a day and batch is cheaper and simpler. Fraud detection: streaming, because a decision is needed within seconds of a transaction. Saying when NOT to use streaming shows judgement.",
+   "checks": "Business-driven technical choices."
+  },
+  {
+   "track": "Big Data",
+   "level": "Basic",
+   "q": "What are Kafka topics, partitions and offsets?",
+   "answer": "A topic is a named stream of events (e.g. 'payments'). It is split into partitions so many consumers can read in parallel; order is guaranteed only within a partition. An offset is each event's position in a partition. Consumers store their offsets, so they can restart and continue where they left off.",
+   "checks": "Core streaming vocabulary."
+  },
+  {
+   "track": "Big Data",
+   "level": "Basic",
+   "q": "Data lake vs data warehouse vs lakehouse?",
+   "answer": "Warehouse: structured, modelled data with schema-on-write, fast SQL, used by BI. Lake: raw data in any format on cheap object storage, schema-on-read, used by engineers and data scientists. Lakehouse: table formats like Delta or Iceberg add ACID transactions, schema enforcement and time travel to lake files, so one copy of data can serve both.",
+   "checks": "Architecture awareness."
+  },
+  {
+   "track": "Big Data",
+   "level": "Basic",
+   "q": "What happens when a DataNode fails in HDFS?",
+   "answer": "DataNodes send heartbeats to the NameNode. When they stop, the NameNode marks the node dead, finds the blocks that now have fewer than 3 replicas, and copies them from the surviving replicas to other DataNodes. Reads continue from the other copies, so no data is lost.",
+   "checks": "Fault-tolerance understanding."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Basic",
+   "q": "ETL vs ELT: which would you choose and why?",
+   "answer": "With a modern cloud warehouse (BigQuery, Snowflake) I'd choose ELT: load raw data first, then transform in SQL with dbt. Compute is elastic, raw history is kept for reprocessing, and transformations are version-controlled SQL. I'd use ETL when data must be cleaned or masked (e.g. PII) before it reaches the warehouse, or when the target can't handle the transformation load.",
+   "checks": "Reasoning, not definitions."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Basic",
+   "q": "What is an idempotent pipeline? Why does it matter?",
+   "answer": "Running it once or several times for the same input gives the same final result. It matters because pipelines fail and get retried or backfilled. Techniques: MERGE/UPSERT on a business key, overwrite a whole date partition instead of appending, and deduplicate using unique event IDs.",
+   "checks": "Production mindset."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Intermediate",
+   "q": "How would you design an incremental load for an orders table?",
+   "answer": "Use updated_at as a watermark. Each run, extract rows with updated_at greater than the last saved watermark (minus a small overlap for late commits), land them in staging, then MERGE into the target on order_id. Save the new max updated_at only after success. Deletes need soft-delete flags or CDC. Add row-count and duplicate checks.",
+   "checks": "End-to-end design thinking."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Basic",
+   "q": "Explain SCD Type 1 vs Type 2 with an example.",
+   "answer": "If a customer's city changes from Pune to Bengaluru: Type 1 overwrites the city, so history is lost and old sales show under Bengaluru. Type 2 closes the old row (valid_to, is_current = 0) and inserts a new row with a new surrogate key, so past sales stay under Pune. Use Type 2 when historical reporting needs the old value.",
+   "checks": "Warehouse modelling basics."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Basic",
+   "q": "What is the grain of a fact table?",
+   "answer": "The grain is exactly what one row represents, e.g. one product line within an order. It decides which dimensions can attach and which measures make sense. Mixing grains (some rows per order, some per item) causes double counting.",
+   "checks": "Modelling discipline."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Intermediate",
+   "q": "Design a pipeline for daily orders from a MySQL app database to a dashboard.",
+   "answer": "Nightly Airflow DAG: (1) incremental extract from MySQL on updated_at into S3 as Parquet, partitioned by date (bronze); (2) Spark or dbt to deduplicate, clean types and join customers and products (silver); (3) build fact_orders and daily aggregates in the warehouse (gold); (4) data-quality tests (unique order_id, not-null keys, row-count drift); (5) refresh the BI dataset and alert on failure. Mention the retries, idempotency and backfill plan.",
+   "checks": "Structured system design at a fresher level."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Basic",
+   "q": "Why use Airflow instead of cron jobs?",
+   "answer": "Cron only triggers scripts at times. Airflow models dependencies between tasks, retries with delays, backfills for past dates, alerts on failure, and keeps run history and logs in a UI. That makes multi-step pipelines manageable.",
+   "checks": "Tool understanding."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Basic",
+   "q": "What data quality checks would you add to a pipeline?",
+   "answer": "Not-null and uniqueness on keys, accepted values for status fields, referential integrity (every order has a valid customer), valid ranges (amount > 0), freshness (loaded within the SLA) and volume anomalies (row count within an expected band). Decide which checks block the pipeline and which only alert.",
+   "checks": "Ownership of data correctness."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Intermediate",
+   "q": "How do you remove duplicates from a large table, keeping the latest record?",
+   "answer": "Use a window function: ROW_NUMBER() OVER (PARTITION BY business_key ORDER BY updated_at DESC) AS rn, and keep rn = 1. In Spark, it's the same window or dropDuplicates after sorting. To delete in place, delete rows whose rn > 1, or rebuild the table from the deduplicated result.",
+   "checks": "SQL fluency on DE tasks (also SQL Quest Q75)."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Basic",
+   "q": "Which column would you partition an events table by?",
+   "answer": "Usually event_date, because most queries filter by time and its cardinality is moderate (one folder per day). Avoid high-cardinality columns like user_id, which create millions of tiny files. If queries also filter by country, consider date plus country, and check the file sizes.",
+   "checks": "Practical storage design."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Basic",
+   "q": "What is the difference between OLTP and OLAP systems?",
+   "answer": "OLTP systems (MySQL or Postgres behind an app) handle many small, fast reads and writes with strict transactions, and use normalised schemas. OLAP systems (warehouses) handle large analytical scans and aggregations over history, use denormalised star schemas and are usually columnar. We copy OLTP data into OLAP so analytics doesn't slow the app down.",
+   "checks": "Foundational concept, very common."
+  },
+  {
+   "track": "Data Engineering",
+   "level": "Intermediate",
+   "q": "A pipeline that usually loads 1 million rows loaded only 200 000 today. What do you do?",
+   "answer": "Don't publish the data blindly. Check: did the source have an outage or a partial extract? Did the watermark skip a window? Was there a filter or schema change in the code? Was there a genuine business drop (holiday)? Compare against the source counts, look at the logs, rerun for the window if needed, and tell the dashboard owners. Then add a volume-anomaly check so it alerts automatically next time.",
+   "checks": "Calm, structured debugging and communication."
+  }
+ ]
+}

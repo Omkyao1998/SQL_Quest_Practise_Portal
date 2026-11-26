@@ -3,169 +3,197 @@
   "topic": "SQL order",
   "q": "In which logical order does a SQL engine process these clauses?",
   "opts": [
-   "SELECT → FROM → WHERE → GROUP BY",
-   "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY",
    "FROM → GROUP BY → WHERE → SELECT → HAVING",
-   "WHERE → FROM → SELECT → ORDER BY"
+   "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY",
+   "WHERE → FROM → SELECT → ORDER BY",
+   "SELECT → FROM → WHERE → GROUP BY"
   ],
   "ans": 1,
-  "explain": "FROM/JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT. This is why a SELECT alias can't be used in WHERE."
+  "explain": "FROM/JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT. This is why a SELECT alias can't be used in WHERE.",
+  "bank": "dbms",
+  "id": "m1"
  },
  {
   "topic": "SQL order",
   "q": "Why does `SELECT price*2 AS p FROM products WHERE p > 100` fail in most databases?",
   "opts": [
-   "p is a reserved word",
-   "WHERE runs before SELECT, so the alias doesn't exist yet",
+   "Aliases need double quotes",
    "You can't multiply in SELECT",
-   "Aliases need double quotes"
+   "p is a reserved word",
+   "WHERE runs before SELECT, so the alias doesn't exist yet"
   ],
-  "ans": 1,
-  "explain": "WHERE is evaluated before SELECT. Repeat the expression or use a subquery/CTE."
+  "ans": 3,
+  "explain": "WHERE is evaluated before SELECT. Repeat the expression or use a subquery/CTE.",
+  "bank": "dbms",
+  "id": "m2"
  },
  {
   "topic": "Filtering",
   "q": "What is the difference between WHERE and HAVING?",
   "opts": [
-   "No difference",
    "WHERE filters rows before grouping; HAVING filters groups after aggregation",
+   "WHERE works only with numbers",
    "HAVING is faster",
-   "WHERE works only with numbers"
+   "No difference"
   ],
-  "ans": 1,
-  "explain": "Use WHERE for row conditions and HAVING for conditions on aggregates like COUNT(*) > 5."
+  "ans": 0,
+  "explain": "Use WHERE for row conditions and HAVING for conditions on aggregates like COUNT(*) > 5.",
+  "bank": "dbms",
+  "id": "m3"
  },
  {
   "topic": "NULL",
   "q": "What does `SELECT COUNT(salary) FROM employees` count?",
   "opts": [
-   "All rows",
    "Rows where salary is not NULL",
    "Distinct salaries",
+   "All rows",
    "Rows where salary is NULL"
   ],
-  "ans": 1,
-  "explain": "COUNT(col) skips NULLs. COUNT(*) counts all rows."
+  "ans": 0,
+  "explain": "COUNT(col) skips NULLs. COUNT(*) counts all rows.",
+  "bank": "dbms",
+  "id": "m4"
  },
  {
   "topic": "NULL",
   "q": "What is the result of `NULL = NULL` in SQL?",
   "opts": [
-   "TRUE",
    "FALSE",
    "UNKNOWN (NULL)",
-   "Error"
+   "Error",
+   "TRUE"
   ],
-  "ans": 2,
-  "explain": "Comparisons with NULL give UNKNOWN. Use IS NULL."
+  "ans": 1,
+  "explain": "Comparisons with NULL give UNKNOWN. Use IS NULL.",
+  "bank": "dbms",
+  "id": "m5"
  },
  {
   "topic": "NULL",
   "q": "`SELECT * FROM a WHERE id NOT IN (SELECT id FROM b)`. If b.id contains a NULL, the query returns:",
   "opts": [
-   "All rows of a",
    "Rows of a not in b",
+   "An error",
    "No rows",
-   "An error"
+   "All rows of a"
   ],
   "ans": 2,
-  "explain": "x NOT IN (1, NULL) is UNKNOWN for every x, so no rows qualify. Use NOT EXISTS instead."
+  "explain": "x NOT IN (1, NULL) is UNKNOWN for every x, so no rows qualify. Use NOT EXISTS instead.",
+  "bank": "dbms",
+  "id": "m6"
  },
  {
   "topic": "Joins",
   "q": "Table A has 5 rows, table B has 4 rows. How many rows does `A CROSS JOIN B` return?",
   "opts": [
-   "9",
-   "20",
    "5",
+   "20",
+   "9",
    "4"
   ],
   "ans": 1,
-  "explain": "A Cartesian product: 5 × 4 = 20."
+  "explain": "A Cartesian product: 5 × 4 = 20.",
+  "bank": "dbms",
+  "id": "m7"
  },
  {
   "topic": "Joins",
   "q": "Which join returns all rows from the left table and matching rows from the right (NULL where there is no match)?",
   "opts": [
-   "INNER JOIN",
    "LEFT JOIN",
-   "RIGHT JOIN",
-   "CROSS JOIN"
+   "CROSS JOIN",
+   "INNER JOIN",
+   "RIGHT JOIN"
   ],
-  "ans": 1,
-  "explain": "LEFT (OUTER) JOIN keeps every left row."
+  "ans": 0,
+  "explain": "LEFT (OUTER) JOIN keeps every left row.",
+  "bank": "dbms",
+  "id": "m8"
  },
  {
   "topic": "Joins",
   "q": "A customers table (100 rows) is LEFT JOINed to orders (300 rows, every order has a valid customer). 20 customers have no orders. How many rows come out?",
   "opts": [
    "100",
-   "300",
    "320",
+   "300",
    "120"
   ],
-  "ans": 2,
-  "explain": "300 matched order rows + 20 unmatched customers with NULLs = 320."
+  "ans": 1,
+  "explain": "300 matched order rows + 20 unmatched customers with NULLs = 320.",
+  "bank": "dbms",
+  "id": "m9"
  },
  {
   "topic": "Joins",
   "q": "Which statement about MySQL is true?",
   "opts": [
-   "It supports FULL OUTER JOIN",
-   "It does not support FULL OUTER JOIN; emulate it with LEFT JOIN UNION RIGHT JOIN",
    "It has no LEFT JOIN",
-   "It supports only INNER JOIN"
+   "It supports only INNER JOIN",
+   "It supports FULL OUTER JOIN",
+   "It does not support FULL OUTER JOIN; emulate it with LEFT JOIN UNION RIGHT JOIN"
   ],
-  "ans": 1,
-  "explain": "A frequent OA trick question. PostgreSQL, SQL Server and SQLite 3.39+ support FULL JOIN; MySQL does not."
+  "ans": 3,
+  "explain": "A frequent OA trick question. PostgreSQL, SQL Server and SQLite 3.39+ support FULL JOIN; MySQL does not.",
+  "bank": "dbms",
+  "id": "m10"
  },
  {
   "topic": "Set ops",
   "q": "Difference between UNION and UNION ALL?",
   "opts": [
-   "UNION ALL removes duplicates",
-   "UNION removes duplicates; UNION ALL keeps them and is faster",
    "They are identical",
-   "UNION works only on numbers"
+   "UNION removes duplicates; UNION ALL keeps them and is faster",
+   "UNION works only on numbers",
+   "UNION ALL removes duplicates"
   ],
   "ans": 1,
-  "explain": "UNION does an extra de-duplication step. Use UNION ALL when duplicates are impossible or wanted."
+  "explain": "UNION does an extra de-duplication step. Use UNION ALL when duplicates are impossible or wanted.",
+  "bank": "dbms",
+  "id": "m11"
  },
  {
   "topic": "DDL/DML",
   "q": "Which command removes all rows but keeps the table structure, and usually cannot be filtered with WHERE?",
   "opts": [
-   "DELETE",
-   "DROP",
+   "ALTER",
    "TRUNCATE",
-   "ALTER"
+   "DROP",
+   "DELETE"
   ],
-  "ans": 2,
-  "explain": "TRUNCATE empties the table (fast, minimal logging). DELETE can use WHERE. DROP removes the table itself."
+  "ans": 1,
+  "explain": "TRUNCATE empties the table (fast, minimal logging). DELETE can use WHERE. DROP removes the table itself.",
+  "bank": "dbms",
+  "id": "m12"
  },
  {
   "topic": "DDL/DML",
   "q": "Which of these is a DDL command?",
   "opts": [
-   "SELECT",
+   "UPDATE",
    "INSERT",
-   "ALTER",
-   "UPDATE"
+   "SELECT",
+   "ALTER"
   ],
-  "ans": 2,
-  "explain": "DDL: CREATE, ALTER, DROP, TRUNCATE. DML: SELECT, INSERT, UPDATE, DELETE. DCL: GRANT, REVOKE. TCL: COMMIT, ROLLBACK."
+  "ans": 3,
+  "explain": "DDL: CREATE, ALTER, DROP, TRUNCATE. DML: SELECT, INSERT, UPDATE, DELETE. DCL: GRANT, REVOKE. TCL: COMMIT, ROLLBACK.",
+  "bank": "dbms",
+  "id": "m13"
  },
  {
   "topic": "Keys",
   "q": "Which statement about a PRIMARY KEY is correct?",
   "opts": [
-   "It can contain NULLs",
-   "A table can have many primary keys",
    "It must be unique and NOT NULL; one per table",
-   "It must be an integer"
+   "It must be an integer",
+   "A table can have many primary keys",
+   "It can contain NULLs"
   ],
-  "ans": 2,
-  "explain": "One primary key per table (which may span several columns); unique and not null."
+  "ans": 0,
+  "explain": "One primary key per table (which may span several columns); unique and not null.",
+  "bank": "dbms",
+  "id": "m14"
  },
  {
   "topic": "Keys",
@@ -173,59 +201,69 @@
   "opts": [
    "None",
    "UNIQUE allows NULL (usually) and a table can have many; only one primary key",
-   "UNIQUE doesn't enforce uniqueness",
-   "PRIMARY KEY allows duplicates"
+   "PRIMARY KEY allows duplicates",
+   "UNIQUE doesn't enforce uniqueness"
   ],
   "ans": 1,
-  "explain": "UNIQUE columns can typically hold NULL; you can have multiple UNIQUE constraints."
+  "explain": "UNIQUE columns can typically hold NULL; you can have multiple UNIQUE constraints.",
+  "bank": "dbms",
+  "id": "m15"
  },
  {
   "topic": "Keys",
   "q": "A FOREIGN KEY is used to:",
   "opts": [
+   "Make a column unique",
    "Speed up every query",
-   "Enforce referential integrity between two tables",
    "Encrypt a column",
-   "Make a column unique"
+   "Enforce referential integrity between two tables"
   ],
-  "ans": 1,
-  "explain": "It ensures that a value in the child table exists in the parent table."
+  "ans": 3,
+  "explain": "It ensures that a value in the child table exists in the parent table.",
+  "bank": "dbms",
+  "id": "m16"
  },
  {
   "topic": "Keys",
   "q": "A composite key is:",
   "opts": [
-   "A key made of two or more columns",
    "An encrypted key",
+   "A key on a view",
    "A foreign key to itself",
-   "A key on a view"
+   "A key made of two or more columns"
   ],
-  "ans": 0,
-  "explain": "Example: (order_id, product_id) in order_items."
+  "ans": 3,
+  "explain": "Example: (order_id, product_id) in order_items.",
+  "bank": "dbms",
+  "id": "m17"
  },
  {
   "topic": "Normalization",
   "q": "A table is in 1NF when:",
   "opts": [
-   "It has a primary key and no partial dependency",
    "Every column holds atomic values (no lists/repeating groups)",
-   "It has no transitive dependency",
-   "It has no NULLs"
+   "It has no NULLs",
+   "It has a primary key and no partial dependency",
+   "It has no transitive dependency"
   ],
-  "ans": 1,
-  "explain": "1NF = atomic values. A column 'phones' = '98..., 99...' breaks 1NF."
+  "ans": 0,
+  "explain": "1NF = atomic values. A column 'phones' = '98..., 99...' breaks 1NF.",
+  "bank": "dbms",
+  "id": "m18"
  },
  {
   "topic": "Normalization",
   "q": "2NF removes which problem?",
   "opts": [
-   "Repeating groups",
-   "Partial dependency on part of a composite key",
+   "Multi-valued dependency",
    "Transitive dependency",
-   "Multi-valued dependency"
+   "Partial dependency on part of a composite key",
+   "Repeating groups"
   ],
-  "ans": 1,
-  "explain": "In order_items(order_id, product_id, product_name), product_name depends only on product_id, which is a partial dependency."
+  "ans": 2,
+  "explain": "In order_items(order_id, product_id, product_name), product_name depends only on product_id, which is a partial dependency.",
+  "bank": "dbms",
+  "id": "m19"
  },
  {
   "topic": "Normalization",
@@ -237,115 +275,135 @@
    "Duplicate rows"
   ],
   "ans": 0,
-  "explain": "employees(emp_id, dept_id, dept_name): dept_name depends on dept_id, not on emp_id directly."
+  "explain": "employees(emp_id, dept_id, dept_name): dept_name depends on dept_id, not on emp_id directly.",
+  "bank": "dbms",
+  "id": "m20"
  },
  {
   "topic": "Normalization",
   "q": "Why do analytics warehouses often denormalize?",
   "opts": [
    "To save storage",
-   "To reduce joins and make read-heavy queries faster",
    "Because normalization is wrong",
-   "To enforce foreign keys"
+   "To enforce foreign keys",
+   "To reduce joins and make read-heavy queries faster"
   ],
-  "ans": 1,
-  "explain": "OLTP favours normalization (safe writes). OLAP favours denormalized star schemas (fast reads)."
+  "ans": 3,
+  "explain": "OLTP favours normalization (safe writes). OLAP favours denormalized star schemas (fast reads).",
+  "bank": "dbms",
+  "id": "m21"
  },
  {
   "topic": "Transactions",
   "q": "ACID stands for:",
   "opts": [
    "Atomicity, Consistency, Isolation, Durability",
-   "Accuracy, Consistency, Integrity, Durability",
+   "Availability, Consistency, Isolation, Durability",
    "Atomicity, Concurrency, Isolation, Data",
-   "Availability, Consistency, Isolation, Durability"
+   "Accuracy, Consistency, Integrity, Durability"
   ],
   "ans": 0,
-  "explain": "Example for Atomicity: a UPI transfer debits and credits both, or neither."
+  "explain": "Example for Atomicity: a UPI transfer debits and credits both, or neither.",
+  "bank": "dbms",
+  "id": "m22"
  },
  {
   "topic": "Transactions",
   "q": "Which property guarantees a committed transaction survives a power failure?",
   "opts": [
-   "Atomicity",
    "Consistency",
+   "Durability",
    "Isolation",
-   "Durability"
+   "Atomicity"
   ],
-  "ans": 3,
-  "explain": "Durability: committed changes are written to stable storage."
+  "ans": 1,
+  "explain": "Durability: committed changes are written to stable storage.",
+  "bank": "dbms",
+  "id": "m23"
  },
  {
   "topic": "Transactions",
   "q": "A 'dirty read' means:",
   "opts": [
-   "Reading uncommitted data from another transaction",
-   "Reading deleted rows",
    "Reading with no index",
-   "Reading NULLs"
+   "Reading NULLs",
+   "Reading uncommitted data from another transaction",
+   "Reading deleted rows"
   ],
-  "ans": 0,
-  "explain": "Prevented by READ COMMITTED and higher isolation levels."
+  "ans": 2,
+  "explain": "Prevented by READ COMMITTED and higher isolation levels.",
+  "bank": "dbms",
+  "id": "m24"
  },
  {
   "topic": "Indexes",
   "q": "An index on a column mainly helps:",
   "opts": [
+   "Data security",
    "INSERT speed",
    "Lookup and filter speed on that column, at the cost of slower writes and extra storage",
-   "Data security",
    "Normalization"
   ],
-  "ans": 1,
-  "explain": "Indexes are like a book index: fast lookup, but they must be updated on every write."
+  "ans": 2,
+  "explain": "Indexes are like a book index: fast lookup, but they must be updated on every write.",
+  "bank": "dbms",
+  "id": "m25"
  },
  {
   "topic": "Indexes",
   "q": "Which WHERE clause is LEAST likely to use an index on order_date?",
   "opts": [
-   "order_date = '2025-03-01'",
    "order_date >= '2025-03-01'",
-   "YEAR(order_date) = 2025",
-   "order_date BETWEEN '2025-01-01' AND '2025-01-31'"
+   "order_date BETWEEN '2025-01-01' AND '2025-01-31'",
+   "order_date = '2025-03-01'",
+   "YEAR(order_date) = 2025"
   ],
-  "ans": 2,
-  "explain": "Wrapping the column in a function makes the predicate non-sargable. Rewrite it as a range."
+  "ans": 3,
+  "explain": "Wrapping the column in a function makes the predicate non-sargable. Rewrite it as a range.",
+  "bank": "dbms",
+  "id": "m26"
  },
  {
   "topic": "Indexes",
   "q": "Clustered vs non-clustered index:",
   "opts": [
-   "A table can have many clustered indexes",
-   "A clustered index decides the physical row order (one per table); non-clustered indexes are separate structures (many allowed)",
+   "They are the same",
    "Non-clustered is always faster",
-   "They are the same"
+   "A clustered index decides the physical row order (one per table); non-clustered indexes are separate structures (many allowed)",
+   "A table can have many clustered indexes"
   ],
-  "ans": 1,
-  "explain": "In MySQL InnoDB, the primary key is the clustered index."
+  "ans": 2,
+  "explain": "In MySQL InnoDB, the primary key is the clustered index.",
+  "bank": "dbms",
+  "id": "m27"
  },
  {
   "topic": "Window",
   "q": "For salaries 100, 100, 90, what does DENSE_RANK() (ORDER BY salary DESC) give?",
   "opts": [
-   "1, 2, 3",
    "1, 1, 3",
-   "1, 1, 2",
-   "1, 2, 2"
+   "1, 2, 2",
+   "1, 2, 3",
+   "1, 1, 2"
   ],
-  "ans": 2,
-  "explain": "DENSE_RANK has no gaps. RANK would give 1, 1, 3."
+  "ans": 3,
+  "explain": "DENSE_RANK has no gaps. RANK would give 1, 1, 3.",
+  "bank": "dbms",
+  "id": "m28"
  },
  {
   "topic": "Window",
   "q": "Why can't you write `WHERE ROW_NUMBER() OVER (...) = 1`?",
   "opts": [
-   "ROW_NUMBER doesn't exist",
+   "It works fine",
    "Window functions are evaluated after WHERE; filter in an outer query/CTE",
-   "You need HAVING",
-   "It works fine"
+   "ROW_NUMBER doesn't exist",
+   "You need HAVING"
   ],
   "ans": 1,
-  "explain": "Wrap the window query in a CTE or subquery, then filter. (Some engines offer QUALIFY.)"
+  "explain": "Wrap the window query in a CTE or subquery, then filter. (Some engines offer QUALIFY.)",
+  "bank": "dbms",
+  "id": "m29"
  },
  {
   "topic": "Window",
@@ -357,31 +415,37 @@
    "An error"
   ],
   "ans": 1,
-  "explain": "With ORDER BY, the default frame is from the start of the partition to the current row."
+  "explain": "With ORDER BY, the default frame is from the start of the partition to the current row.",
+  "bank": "dbms",
+  "id": "m30"
  },
  {
   "topic": "Views",
   "q": "A (non-materialized) VIEW is:",
   "opts": [
-   "A copy of the data",
-   "A saved query that runs when you select from it",
    "An index",
-   "A backup"
+   "A copy of the data",
+   "A backup",
+   "A saved query that runs when you select from it"
   ],
-  "ans": 1,
-  "explain": "A materialized view stores the result and must be refreshed."
+  "ans": 3,
+  "explain": "A materialized view stores the result and must be refreshed.",
+  "bank": "dbms",
+  "id": "m31"
  },
  {
   "topic": "Constraints",
   "q": "Which constraint ensures that age is always ≥ 18?",
   "opts": [
    "UNIQUE",
-   "CHECK (age >= 18)",
+   "FOREIGN KEY",
    "DEFAULT 18",
-   "FOREIGN KEY"
+   "CHECK (age >= 18)"
   ],
-  "ans": 1,
-  "explain": "CHECK enforces a condition on column values."
+  "ans": 3,
+  "explain": "CHECK enforces a condition on column values.",
+  "bank": "dbms",
+  "id": "m32"
  },
  {
   "topic": "Data warehousing",
@@ -393,7 +457,9 @@
    "Staging table"
   ],
   "ans": 1,
-  "explain": "Facts store numbers at a grain (e.g. one row per order line); dimensions store descriptive attributes (product, date, customer)."
+  "explain": "Facts store numbers at a grain (e.g. one row per order line); dimensions store descriptive attributes (product, date, customer).",
+  "bank": "dbms",
+  "id": "m33"
  },
  {
   "topic": "Data warehousing",
@@ -405,78 +471,1772 @@
    "OLTP is only for warehouses"
   ],
   "ans": 0,
-  "explain": "Your app's MySQL/Postgres is OLTP; BigQuery, Snowflake and Redshift are OLAP."
+  "explain": "Your app's MySQL/Postgres is OLTP; BigQuery, Snowflake and Redshift are OLAP.",
+  "bank": "dbms",
+  "id": "m34"
  },
  {
   "topic": "Data warehousing",
   "q": "A Slowly Changing Dimension Type 2 handles a customer's city change by:",
   "opts": [
-   "Overwriting the old city",
    "Adding a new row with effective dates and keeping the old row",
-   "Deleting the customer",
-   "Adding a new column"
+   "Adding a new column",
+   "Overwriting the old city",
+   "Deleting the customer"
   ],
-  "ans": 1,
-  "explain": "SCD1 = overwrite, SCD2 = new row with history (valid_from, valid_to, is_current)."
+  "ans": 0,
+  "explain": "SCD1 = overwrite, SCD2 = new row with history (valid_from, valid_to, is_current).",
+  "bank": "dbms",
+  "id": "m35"
  },
  {
   "topic": "Functions",
   "q": "`SELECT COALESCE(NULL, NULL, 'x', 'y')` returns:",
   "opts": [
-   "NULL",
    "'x'",
    "'y'",
+   "NULL",
    "Error"
   ],
-  "ans": 1,
-  "explain": "COALESCE returns the first non-NULL argument."
+  "ans": 0,
+  "explain": "COALESCE returns the first non-NULL argument.",
+  "bank": "dbms",
+  "id": "m36"
  },
  {
   "topic": "Functions",
   "q": "In PostgreSQL/SQL Server/SQLite, what does `SELECT 7/2` return?",
   "opts": [
-   "3.5",
    "3",
    "4",
-   "Error"
+   "Error",
+   "3.5"
   ],
-  "ans": 1,
-  "explain": "Integer division. In MySQL, 7/2 = 3.5000 and 7 DIV 2 = 3."
+  "ans": 0,
+  "explain": "Integer division. In MySQL, 7/2 = 3.5000 and 7 DIV 2 = 3.",
+  "bank": "dbms",
+  "id": "m37"
  },
  {
   "topic": "Aggregates",
   "q": "`SELECT AVG(x)` over values 10, NULL, 20 returns:",
   "opts": [
-   "10",
    "15",
+   "10",
    "NULL",
    "30"
   ],
-  "ans": 1,
-  "explain": "NULL is ignored: (10 + 20) / 2 = 15."
+  "ans": 0,
+  "explain": "NULL is ignored: (10 + 20) / 2 = 15.",
+  "bank": "dbms",
+  "id": "m38"
  },
  {
   "topic": "Subqueries",
   "q": "A correlated subquery is one that:",
   "opts": [
    "Runs only once",
-   "References columns of the outer query and is (logically) evaluated per outer row",
    "Uses UNION",
+   "References columns of the outer query and is (logically) evaluated per outer row",
    "Is always faster than a join"
   ],
-  "ans": 1,
-  "explain": "Example: WHERE salary > (SELECT AVG(salary) FROM employees x WHERE x.dept_id = e.dept_id)."
+  "ans": 2,
+  "explain": "Example: WHERE salary > (SELECT AVG(salary) FROM employees x WHERE x.dept_id = e.dept_id).",
+  "bank": "dbms",
+  "id": "m39"
  },
  {
   "topic": "Performance",
   "q": "Which is usually the best first step to speed up a slow analytical query?",
   "opts": [
-   "Add DISTINCT everywhere",
    "Check the execution plan (EXPLAIN), filter early, select only needed columns, index or partition the filter columns",
-   "Use SELECT *",
-   "Convert to a cursor loop"
+   "Add DISTINCT everywhere",
+   "Convert to a cursor loop",
+   "Use SELECT *"
+  ],
+  "ans": 0,
+  "explain": "Interviewers expect EXPLAIN + filtering + avoiding SELECT * + appropriate indexing/partitioning.",
+  "bank": "dbms",
+  "id": "m40"
+ },
+ {
+  "topic": "Basics",
+  "q": "Which of these best describes a DBMS?",
+  "opts": [
+   "An operating system",
+   "Software to store, retrieve and manage data with integrity and concurrency control",
+   "A programming language",
+   "A spreadsheet app"
   ],
   "ans": 1,
-  "explain": "Interviewers expect EXPLAIN + filtering + avoiding SELECT * + appropriate indexing/partitioning."
+  "explain": "A DBMS (MySQL, PostgreSQL, Oracle) manages data safely for many users at once.",
+  "bank": "dbms",
+  "id": "m41"
+ },
+ {
+  "topic": "Basics",
+  "q": "What is a schema in a relational database?",
+  "opts": [
+   "A user's password",
+   "The structure: tables, columns, types and constraints",
+   "The data stored right now",
+   "A backup copy"
+  ],
+  "ans": 1,
+  "explain": "Schema = the blueprint. The actual rows at a point in time are called an instance.",
+  "bank": "dbms",
+  "id": "m42"
+ },
+ {
+  "topic": "Basics",
+  "q": "A row in a relational table is also called a:",
+  "opts": [
+   "Domain",
+   "Tuple",
+   "Attribute",
+   "Relation"
+  ],
+  "ans": 1,
+  "explain": "Row = tuple/record; column = attribute/field; table = relation.",
+  "bank": "dbms",
+  "id": "m43"
+ },
+ {
+  "topic": "Basics",
+  "q": "The set of allowed values for a column is its:",
+  "opts": [
+   "Key",
+   "Cardinality",
+   "Domain",
+   "Degree"
+  ],
+  "ans": 2,
+  "explain": "Domain example: age must be an integer between 0 and 120.",
+  "bank": "dbms",
+  "id": "m44"
+ },
+ {
+  "topic": "Basics",
+  "q": "The number of columns in a table is called its:",
+  "opts": [
+   "Width key",
+   "Degree",
+   "Arity of rows",
+   "Cardinality"
+  ],
+  "ans": 1,
+  "explain": "Degree = number of attributes. Cardinality = number of rows.",
+  "bank": "dbms",
+  "id": "m45"
+ },
+ {
+  "topic": "Keys",
+  "q": "A candidate key is:",
+  "opts": [
+   "A minimal set of columns that uniquely identifies a row",
+   "Any column",
+   "A key with NULLs",
+   "A foreign key"
+  ],
+  "ans": 0,
+  "explain": "A table can have several candidate keys; one is chosen as the primary key.",
+  "bank": "dbms",
+  "id": "m46"
+ },
+ {
+  "topic": "Keys",
+  "q": "A super key is:",
+  "opts": [
+   "A key across databases",
+   "Any set of columns that uniquely identifies a row (may include extra columns)",
+   "A primary key with an index",
+   "The largest table"
+  ],
+  "ans": 1,
+  "explain": "Every candidate key is a super key, but a super key may have unnecessary columns.",
+  "bank": "dbms",
+  "id": "m47"
+ },
+ {
+  "topic": "Keys",
+  "q": "Candidate keys that are NOT chosen as the primary key are called:",
+  "opts": [
+   "Surrogate keys",
+   "Alternate keys",
+   "Composite keys",
+   "Foreign keys"
+  ],
+  "ans": 1,
+  "explain": "Example: email is an alternate key if emp_id is the primary key.",
+  "bank": "dbms",
+  "id": "m48"
+ },
+ {
+  "topic": "Keys",
+  "q": "A surrogate key is:",
+  "opts": [
+   "A system-generated identifier (e.g. auto-increment id) with no business meaning",
+   "A composite key",
+   "A key copied from another table",
+   "A deleted key"
+  ],
+  "ans": 0,
+  "explain": "Warehouses use surrogate keys so business keys can change safely.",
+  "bank": "dbms",
+  "id": "m49"
+ },
+ {
+  "topic": "Keys",
+  "q": "ON DELETE CASCADE on a foreign key means:",
+  "opts": [
+   "Nothing happens",
+   "Deleting a parent row also deletes matching child rows",
+   "Deletes are blocked",
+   "Child rows get NULL"
+  ],
+  "ans": 1,
+  "explain": "Alternatives: ON DELETE SET NULL, RESTRICT/NO ACTION.",
+  "bank": "dbms",
+  "id": "m50"
+ },
+ {
+  "topic": "ER model",
+  "q": "In an ER diagram, a relationship where one customer can place many orders is:",
+  "opts": [
+   "One-to-many",
+   "Many-to-many",
+   "Recursive",
+   "One-to-one"
+  ],
+  "ans": 0,
+  "explain": "Implemented with a foreign key customer_id in orders.",
+  "bank": "dbms",
+  "id": "m51"
+ },
+ {
+  "topic": "ER model",
+  "q": "How is a many-to-many relationship (students ↔ courses) implemented in tables?",
+  "opts": [
+   "It can't be implemented",
+   "A foreign key in courses",
+   "A junction/bridge table with both keys",
+   "A foreign key in students"
+  ],
+  "ans": 2,
+  "explain": "enrollments(student_id, course_id) is the bridge table.",
+  "bank": "dbms",
+  "id": "m52"
+ },
+ {
+  "topic": "ER model",
+  "q": "A weak entity is one that:",
+  "opts": [
+   "Cannot be identified without its owner entity",
+   "Is optional",
+   "Has no relationships",
+   "Has few attributes"
+  ],
+  "ans": 0,
+  "explain": "Example: a dependant identified only together with the employee.",
+  "bank": "dbms",
+  "id": "m53"
+ },
+ {
+  "topic": "ER model",
+  "q": "An employee table where manager_id refers to emp_id in the same table shows a:",
+  "opts": [
+   "Recursive (self-referencing) relationship",
+   "Ternary relationship",
+   "Weak entity",
+   "Many-to-many relationship"
+  ],
+  "ans": 0,
+  "explain": "Queried with a self join.",
+  "bank": "dbms",
+  "id": "m54"
+ },
+ {
+  "topic": "Normalization",
+  "q": "Which anomaly happens when you can't add a new course until a student enrolls in it?",
+  "opts": [
+   "Update anomaly",
+   "Deletion anomaly",
+   "Read anomaly",
+   "Insertion anomaly"
+  ],
+  "ans": 3,
+  "explain": "Normalization separates courses into their own table to avoid this.",
+  "bank": "dbms",
+  "id": "m55"
+ },
+ {
+  "topic": "Normalization",
+  "q": "Deleting the last student of a course also loses the course details. This is a:",
+  "opts": [
+   "Join anomaly",
+   "Deletion anomaly",
+   "Update anomaly",
+   "Insertion anomaly"
+  ],
+  "ans": 1,
+  "explain": "Caused by storing two facts in one table.",
+  "bank": "dbms",
+  "id": "m56"
+ },
+ {
+  "topic": "Normalization",
+  "q": "A functional dependency A → B means:",
+  "opts": [
+   "B determines A",
+   "A is a foreign key to B",
+   "Each value of A maps to exactly one value of B",
+   "A and B are both keys"
+  ],
+  "ans": 2,
+  "explain": "Example: emp_id → emp_name.",
+  "bank": "dbms",
+  "id": "m57"
+ },
+ {
+  "topic": "Normalization",
+  "q": "BCNF requires that for every functional dependency X → Y:",
+  "opts": [
+   "Y is a key",
+   "X is a super key",
+   "X is a foreign key",
+   "There is no Y"
+  ],
+  "ans": 1,
+  "explain": "BCNF is a stricter form of 3NF.",
+  "bank": "dbms",
+  "id": "m58"
+ },
+ {
+  "topic": "Normalization",
+  "q": "A table orders(order_id, product_ids='1,4,9') violates:",
+  "opts": [
+   "2NF only",
+   "3NF only",
+   "BCNF only",
+   "1NF"
+  ],
+  "ans": 3,
+  "explain": "Multiple values in one cell break atomicity. Use one row per product.",
+  "bank": "dbms",
+  "id": "m59"
+ },
+ {
+  "topic": "SQL",
+  "q": "Which clause is used to rename a column in the result?",
+  "opts": [
+   "ALIAS",
+   "LABEL",
+   "AS",
+   "RENAME"
+  ],
+  "ans": 2,
+  "explain": "SELECT salary * 12 AS annual_salary ...",
+  "bank": "dbms",
+  "id": "m60"
+ },
+ {
+  "topic": "SQL",
+  "q": "What does `SELECT DISTINCT dept_id, city` return?",
+  "opts": [
+   "An error",
+   "Unique dept_id values only",
+   "Unique (dept_id, city) combinations",
+   "Unique city values only"
+  ],
+  "ans": 2,
+  "explain": "DISTINCT applies to the whole selected row.",
+  "bank": "dbms",
+  "id": "m61"
+ },
+ {
+  "topic": "SQL",
+  "q": "Which operator checks for a pattern?",
+  "opts": [
+   "BETWEEN",
+   "LIKE",
+   "EXISTS",
+   "IN"
+  ],
+  "ans": 1,
+  "explain": "LIKE 'A%' = starts with A; '_' matches exactly one character.",
+  "bank": "dbms",
+  "id": "m62"
+ },
+ {
+  "topic": "SQL",
+  "q": "`WHERE salary BETWEEN 50000 AND 80000` includes:",
+  "opts": [
+   "Only 80000",
+   "Only 50000",
+   "50000 and 80000",
+   "Neither end"
+  ],
+  "ans": 2,
+  "explain": "BETWEEN is inclusive on both ends.",
+  "bank": "dbms",
+  "id": "m63"
+ },
+ {
+  "topic": "SQL",
+  "q": "Which query counts employees per department?",
+  "opts": [
+   "SELECT dept_id, COUNT(*) FROM employees GROUP BY dept_id",
+   "SELECT dept_id FROM employees HAVING COUNT(*)",
+   "SELECT dept_id, COUNT(*) FROM employees",
+   "SELECT COUNT(dept_id) GROUP employees"
+  ],
+  "ans": 0,
+  "explain": "Non-aggregated columns in SELECT must appear in GROUP BY.",
+  "bank": "dbms",
+  "id": "m64"
+ },
+ {
+  "topic": "SQL",
+  "q": "Which is TRUE about ORDER BY?",
+  "opts": [
+   "It runs before WHERE",
+   "It can sort by a column alias defined in SELECT",
+   "It removes duplicates",
+   "It is mandatory with GROUP BY"
+  ],
+  "ans": 1,
+  "explain": "ORDER BY runs after SELECT, so aliases are visible.",
+  "bank": "dbms",
+  "id": "m65"
+ },
+ {
+  "topic": "SQL",
+  "q": "What is a self join?",
+  "opts": [
+   "A join on primary keys only",
+   "Joining a table to itself using aliases",
+   "A join without condition",
+   "Joining two databases"
+  ],
+  "ans": 1,
+  "explain": "Used for employee–manager style hierarchies.",
+  "bank": "dbms",
+  "id": "m66"
+ },
+ {
+  "topic": "SQL",
+  "q": "An INNER JOIN between A (5 rows) and B (3 rows) on a key where 2 values match one-to-one returns:",
+  "opts": [
+   "5 rows",
+   "3 rows",
+   "2 rows",
+   "15 rows"
+  ],
+  "ans": 2,
+  "explain": "Only matching rows are kept.",
+  "bank": "dbms",
+  "id": "m67"
+ },
+ {
+  "topic": "SQL",
+  "q": "Which subquery operator returns TRUE if the subquery returns at least one row?",
+  "opts": [
+   "ANY",
+   "EXISTS",
+   "IN",
+   "ALL"
+  ],
+  "ans": 1,
+  "explain": "EXISTS stops at the first match, which is efficient for 'has at least one' checks.",
+  "bank": "dbms",
+  "id": "m68"
+ },
+ {
+  "topic": "SQL",
+  "q": "`salary > ALL (SELECT salary FROM employees WHERE dept_id = 20)` means:",
+  "opts": [
+   "Error",
+   "Greater than every dept-20 salary",
+   "Equal to all",
+   "Greater than at least one dept-20 salary"
+  ],
+  "ans": 1,
+  "explain": "ANY = at least one; ALL = every.",
+  "bank": "dbms",
+  "id": "m69"
+ },
+ {
+  "topic": "SQL",
+  "q": "What does a CTE (WITH clause) give you?",
+  "opts": [
+   "A permanent table",
+   "A trigger",
+   "A named, temporary result you can reference in the query",
+   "An index"
+  ],
+  "ans": 2,
+  "explain": "CTEs make multi-step logic readable; recursive CTEs handle hierarchies.",
+  "bank": "dbms",
+  "id": "m70"
+ },
+ {
+  "topic": "SQL",
+  "q": "Which statement adds a new column to an existing table?",
+  "opts": [
+   "ALTER TABLE ... ADD COLUMN",
+   "UPDATE TABLE",
+   "INSERT COLUMN",
+   "MODIFY TABLE ADD"
+  ],
+  "ans": 0,
+  "explain": "ALTER changes structure; UPDATE changes data.",
+  "bank": "dbms",
+  "id": "m71"
+ },
+ {
+  "topic": "SQL",
+  "q": "Which statement changes existing data?",
+  "opts": [
+   "INSERT",
+   "UPDATE",
+   "CREATE",
+   "ALTER"
+  ],
+  "ans": 1,
+  "explain": "UPDATE employees SET salary = salary * 1.1 WHERE dept_id = 10;",
+  "bank": "dbms",
+  "id": "m72"
+ },
+ {
+  "topic": "SQL",
+  "q": "What happens with `UPDATE employees SET salary = 0;` (no WHERE)?",
+  "opts": [
+   "Only the first row changes",
+   "Nothing",
+   "Error",
+   "Every row's salary becomes 0"
+  ],
+  "ans": 3,
+  "explain": "Always double-check WHERE on UPDATE/DELETE; use a transaction in production.",
+  "bank": "dbms",
+  "id": "m73"
+ },
+ {
+  "topic": "SQL",
+  "q": "CHAR(10) vs VARCHAR(10):",
+  "opts": [
+   "VARCHAR is fixed length",
+   "CHAR holds numbers only",
+   "Identical",
+   "CHAR is fixed length (padded); VARCHAR stores only the characters used"
+  ],
+  "ans": 3,
+  "explain": "Use CHAR for fixed codes like state codes; VARCHAR for names.",
+  "bank": "dbms",
+  "id": "m74"
+ },
+ {
+  "topic": "SQL",
+  "q": "Which function returns the current date in MySQL?",
+  "opts": [
+   "TODAY()",
+   "NOW_DATE()",
+   "SYSDATE_ONLY()",
+   "CURDATE()"
+  ],
+  "ans": 3,
+  "explain": "CURDATE() gives the date; NOW() gives date and time.",
+  "bank": "dbms",
+  "id": "m75"
+ },
+ {
+  "topic": "SQL",
+  "q": "INTERSECT returns:",
+  "opts": [
+   "All rows with duplicates",
+   "Rows in either query",
+   "Rows present in both queries",
+   "Rows only in the first query"
+  ],
+  "ans": 2,
+  "explain": "EXCEPT/MINUS returns rows in the first but not the second.",
+  "bank": "dbms",
+  "id": "m76"
+ },
+ {
+  "topic": "Transactions",
+  "q": "Which command undoes the changes of the current transaction?",
+  "opts": [
+   "SAVEPOINT",
+   "TRUNCATE",
+   "ROLLBACK",
+   "COMMIT"
+  ],
+  "ans": 2,
+  "explain": "COMMIT makes changes permanent; ROLLBACK discards them.",
+  "bank": "dbms",
+  "id": "m77"
+ },
+ {
+  "topic": "Transactions",
+  "q": "A SAVEPOINT lets you:",
+  "opts": [
+   "Roll back part of a transaction to a named point",
+   "Lock a table",
+   "Commit automatically",
+   "Back up the database"
+  ],
+  "ans": 0,
+  "explain": "ROLLBACK TO savepoint_name keeps earlier work in the transaction.",
+  "bank": "dbms",
+  "id": "m78"
+ },
+ {
+  "topic": "Transactions",
+  "q": "A 'lost update' happens when:",
+  "opts": [
+   "A row is deleted",
+   "A transaction commits twice",
+   "An index is dropped",
+   "Two transactions read the same row and the later write overwrites the earlier one"
+  ],
+  "ans": 3,
+  "explain": "Prevented with locking or proper isolation levels.",
+  "bank": "dbms",
+  "id": "m79"
+ },
+ {
+  "topic": "Transactions",
+  "q": "Which isolation level prevents dirty, non-repeatable and phantom reads?",
+  "opts": [
+   "READ UNCOMMITTED",
+   "REPEATABLE READ",
+   "READ COMMITTED",
+   "SERIALIZABLE"
+  ],
+  "ans": 3,
+  "explain": "SERIALIZABLE is the strictest (and slowest).",
+  "bank": "dbms",
+  "id": "m80"
+ },
+ {
+  "topic": "Transactions",
+  "q": "A deadlock is:",
+  "opts": [
+   "A corrupted table",
+   "A slow query",
+   "A full disk",
+   "Two transactions each waiting for a lock the other holds"
+  ],
+  "ans": 3,
+  "explain": "Databases detect it and roll back one of the transactions.",
+  "bank": "dbms",
+  "id": "m81"
+ },
+ {
+  "topic": "Indexes",
+  "q": "Which column is usually the WORST choice for an index?",
+  "opts": [
+   "A gender column with 2-3 distinct values in a huge table",
+   "A unique email column",
+   "A date column used in range filters",
+   "A foreign key used in joins"
+  ],
+  "ans": 0,
+  "explain": "Low-cardinality columns rarely help a B-tree index.",
+  "bank": "dbms",
+  "id": "m82"
+ },
+ {
+  "topic": "Indexes",
+  "q": "Most relational databases implement indexes using:",
+  "opts": [
+   "Linked lists",
+   "Stacks",
+   "B-trees (or B+ trees)",
+   "Queues"
+  ],
+  "ans": 2,
+  "explain": "B+ trees keep data sorted and support range scans.",
+  "bank": "dbms",
+  "id": "m83"
+ },
+ {
+  "topic": "Indexes",
+  "q": "A composite index on (city, signup_date) helps most with:",
+  "opts": [
+   "WHERE signup_date = ... only",
+   "WHERE name LIKE '%a'",
+   "WHERE city = ... AND signup_date > ...",
+   "ORDER BY name"
+  ],
+  "ans": 2,
+  "explain": "Composite indexes follow the leftmost-prefix rule.",
+  "bank": "dbms",
+  "id": "m84"
+ },
+ {
+  "topic": "Indexes",
+  "q": "`WHERE name LIKE '%kumar'` usually:",
+  "opts": [
+   "Throws an error",
+   "Is faster than '=''",
+   "Uses an index fully",
+   "Cannot use a normal B-tree index efficiently (leading wildcard)"
+  ],
+  "ans": 3,
+  "explain": "A leading % means the index order can't be used.",
+  "bank": "dbms",
+  "id": "m85"
+ },
+ {
+  "topic": "Views & objects",
+  "q": "A stored procedure is:",
+  "opts": [
+   "An index type",
+   "A table backup",
+   "A saved set of SQL statements you can call with parameters",
+   "A view"
+  ],
+  "ans": 2,
+  "explain": "CALL monthly_report(2025, 3);",
+  "bank": "dbms",
+  "id": "m86"
+ },
+ {
+  "topic": "Views & objects",
+  "q": "A trigger is:",
+  "opts": [
+   "Code that runs automatically on INSERT/UPDATE/DELETE events",
+   "A function in SELECT",
+   "A scheduled job",
+   "A type of key"
+  ],
+  "ans": 0,
+  "explain": "Example: write an audit row whenever salary changes.",
+  "bank": "dbms",
+  "id": "m87"
+ },
+ {
+  "topic": "Views & objects",
+  "q": "A materialized view differs from a normal view because it:",
+  "opts": [
+   "Stores its result physically and must be refreshed",
+   "Cannot be queried",
+   "Is always up to date",
+   "Only works on one table"
+  ],
+  "ans": 0,
+  "explain": "Great for heavy dashboards; the trade-off is staleness.",
+  "bank": "dbms",
+  "id": "m88"
+ },
+ {
+  "topic": "Views & objects",
+  "q": "Which object automatically generates unique numbers (e.g. in Oracle/PostgreSQL)?",
+  "opts": [
+   "Trigger",
+   "Synonym",
+   "Cursor",
+   "Sequence"
+  ],
+  "ans": 3,
+  "explain": "MySQL uses AUTO_INCREMENT; PostgreSQL uses sequences/SERIAL/IDENTITY.",
+  "bank": "dbms",
+  "id": "m89"
+ },
+ {
+  "topic": "Storage",
+  "q": "Row-oriented vs column-oriented storage: column stores are better for:",
+  "opts": [
+   "Transactions",
+   "Small lookup tables",
+   "Inserting single rows quickly",
+   "Analytical queries that read a few columns over many rows"
+  ],
+  "ans": 3,
+  "explain": "Redshift, BigQuery and Snowflake are columnar; MySQL InnoDB is row-based.",
+  "bank": "dbms",
+  "id": "m90"
+ },
+ {
+  "topic": "Storage",
+  "q": "What is database partitioning?",
+  "opts": [
+   "Creating a backup",
+   "Deleting old data",
+   "Encrypting a table",
+   "Splitting a large table into smaller pieces (e.g. by month) while querying it as one"
+  ],
+  "ans": 3,
+  "explain": "Queries filtering by the partition key scan less data (partition pruning).",
+  "bank": "dbms",
+  "id": "m91"
+ },
+ {
+  "topic": "Storage",
+  "q": "Sharding means:",
+  "opts": [
+   "Creating views",
+   "Splitting data across multiple database servers by a key",
+   "Adding replicas",
+   "Compressing columns"
+  ],
+  "ans": 1,
+  "explain": "Used when one server can't handle the load; adds complexity to joins.",
+  "bank": "dbms",
+  "id": "m92"
+ },
+ {
+  "topic": "Storage",
+  "q": "Replication is mainly used for:",
+  "opts": [
+   "Faster writes on one server",
+   "Normalization",
+   "High availability and scaling reads with copies of the data",
+   "Reducing table size"
+  ],
+  "ans": 2,
+  "explain": "A primary takes writes; replicas serve reads.",
+  "bank": "dbms",
+  "id": "m93"
+ },
+ {
+  "topic": "NoSQL",
+  "q": "Which is a document database?",
+  "opts": [
+   "Neo4j",
+   "MongoDB",
+   "MySQL",
+   "Redis (as a key-value store)"
+  ],
+  "ans": 1,
+  "explain": "MongoDB stores JSON-like documents; Neo4j is a graph DB.",
+  "bank": "dbms",
+  "id": "m94"
+ },
+ {
+  "topic": "NoSQL",
+  "q": "The CAP theorem says a distributed system can fully guarantee only two of:",
+  "opts": [
+   "Cost, Accuracy, Performance",
+   "Concurrency, Atomicity, Persistence",
+   "Cache, API, Protocol",
+   "Consistency, Availability, Partition tolerance"
+  ],
+  "ans": 3,
+  "explain": "During a network partition you choose consistency or availability.",
+  "bank": "dbms",
+  "id": "m95"
+ },
+ {
+  "topic": "NoSQL",
+  "q": "When is a relational database usually a better choice than NoSQL?",
+  "opts": [
+   "Unstructured logs at huge scale",
+   "Storing images",
+   "Caching sessions",
+   "Data with clear relationships needing transactions and joins (e.g. payments)"
+  ],
+  "ans": 3,
+  "explain": "Banks and order systems rely on ACID transactions.",
+  "bank": "dbms",
+  "id": "m96"
+ },
+ {
+  "topic": "Security",
+  "q": "SQL injection is prevented best by:",
+  "opts": [
+   "Using SELECT *",
+   "Hiding error messages",
+   "Parameterised queries / prepared statements",
+   "Adding indexes"
+  ],
+  "ans": 2,
+  "explain": "Never build SQL by concatenating user input.",
+  "bank": "dbms",
+  "id": "m97"
+ },
+ {
+  "topic": "Security",
+  "q": "GRANT SELECT ON sales TO analyst; is an example of:",
+  "opts": [
+   "DCL",
+   "TCL",
+   "DML",
+   "DDL"
+  ],
+  "ans": 0,
+  "explain": "DCL = GRANT/REVOKE (permissions).",
+  "bank": "dbms",
+  "id": "m98"
+ },
+ {
+  "topic": "Security",
+  "q": "The principle of least privilege means:",
+  "opts": [
+   "Give users only the access they need for their job",
+   "Read-only for admins",
+   "No passwords",
+   "Everyone is admin"
+  ],
+  "ans": 0,
+  "explain": "Analysts usually get read-only access to reporting schemas.",
+  "bank": "dbms",
+  "id": "m99"
+ },
+ {
+  "topic": "Normalization",
+  "q": "Which normal form deals with multi-valued dependencies?",
+  "opts": [
+   "4NF",
+   "3NF",
+   "2NF",
+   "BCNF"
+  ],
+  "ans": 0,
+  "explain": "4NF removes multi-valued dependencies, e.g. a teacher's subjects and languages stored as independent lists in one table.",
+  "bank": "dbms",
+  "id": "m100"
+ },
+ {
+  "topic": "Big Data basics",
+  "q": "The '3 Vs' of Big Data are:",
+  "opts": [
+   "Volume, Validity, Vendor",
+   "Value, Vision, Version",
+   "Velocity, Visual, Virtual",
+   "Volume, Velocity, Variety"
+  ],
+  "ans": 3,
+  "explain": "Later lists add Veracity (trust) and Value.",
+  "bank": "bigdata",
+  "id": "m101"
+ },
+ {
+  "topic": "Big Data basics",
+  "q": "Which is an example of high-velocity data?",
+  "opts": [
+   "A PDF report",
+   "UPI transaction events arriving every second",
+   "A yearly census file",
+   "A static product catalogue"
+  ],
+  "ans": 1,
+  "explain": "Velocity = speed at which data arrives.",
+  "bank": "bigdata",
+  "id": "m102"
+ },
+ {
+  "topic": "Big Data basics",
+  "q": "JSON clickstream logs, images and tables together show which V?",
+  "opts": [
+   "Variety",
+   "Volume",
+   "Value",
+   "Velocity"
+  ],
+  "ans": 0,
+  "explain": "Variety = different formats: structured, semi-structured, unstructured.",
+  "bank": "bigdata",
+  "id": "m103"
+ },
+ {
+  "topic": "Big Data basics",
+  "q": "JSON and XML are examples of:",
+  "opts": [
+   "Semi-structured data",
+   "Structured data",
+   "Binary only data",
+   "Unstructured data"
+  ],
+  "ans": 0,
+  "explain": "They have tags/keys but no fixed table schema.",
+  "bank": "bigdata",
+  "id": "m104"
+ },
+ {
+  "topic": "Big Data basics",
+  "q": "Horizontal scaling (scale-out) means:",
+  "opts": [
+   "Compressing data",
+   "Buying a bigger server",
+   "Adding RAM",
+   "Adding more machines to share the work"
+  ],
+  "ans": 3,
+  "explain": "Big Data systems like Hadoop and Spark scale out on many cheaper machines.",
+  "bank": "bigdata",
+  "id": "m105"
+ },
+ {
+  "topic": "Hadoop",
+  "q": "HDFS stands for:",
+  "opts": [
+   "Hadoop Distributed File System",
+   "Hadoop Data Frame Store",
+   "Hybrid Disk File Service",
+   "High Data File Storage"
+  ],
+  "ans": 0,
+  "explain": "HDFS splits files into blocks spread across many machines.",
+  "bank": "bigdata",
+  "id": "m106"
+ },
+ {
+  "topic": "Hadoop",
+  "q": "In HDFS, the NameNode:",
+  "opts": [
+   "Is a backup disk",
+   "Stores the actual data blocks",
+   "Stores metadata: which blocks make up a file and where they live",
+   "Runs Spark jobs"
+  ],
+  "ans": 2,
+  "explain": "DataNodes store the blocks.",
+  "bank": "bigdata",
+  "id": "m107"
+ },
+ {
+  "topic": "Hadoop",
+  "q": "The default HDFS replication factor is:",
+  "opts": [
+   "1",
+   "2",
+   "3",
+   "5"
+  ],
+  "ans": 2,
+  "explain": "Each block is stored on 3 machines so one failure doesn't lose data.",
+  "bank": "bigdata",
+  "id": "m108"
+ },
+ {
+  "topic": "Hadoop",
+  "q": "Default HDFS block size (Hadoop 2/3) is:",
+  "opts": [
+   "1 GB",
+   "64 MB",
+   "4 KB",
+   "128 MB"
+  ],
+  "ans": 3,
+  "explain": "Large blocks reduce metadata and suit big sequential reads.",
+  "bank": "bigdata",
+  "id": "m109"
+ },
+ {
+  "topic": "Hadoop",
+  "q": "YARN in Hadoop is responsible for:",
+  "opts": [
+   "Writing SQL",
+   "Storing files",
+   "Resource management and job scheduling across the cluster",
+   "Data visualisation"
+  ],
+  "ans": 2,
+  "explain": "YARN = Yet Another Resource Negotiator.",
+  "bank": "bigdata",
+  "id": "m110"
+ },
+ {
+  "topic": "MapReduce",
+  "q": "In a word-count MapReduce job, the Map step:",
+  "opts": [
+   "Deletes duplicates",
+   "Emits (word, 1) pairs from each line",
+   "Sorts the final output",
+   "Adds up counts per word"
+  ],
+  "ans": 1,
+  "explain": "Shuffle groups pairs by word; Reduce sums them.",
+  "bank": "bigdata",
+  "id": "m111"
+ },
+ {
+  "topic": "MapReduce",
+  "q": "The 'shuffle' phase in MapReduce:",
+  "opts": [
+   "Moves and groups mapper outputs by key so each reducer gets all values for its keys",
+   "Starts the job",
+   "Randomises input",
+   "Compresses files"
+  ],
+  "ans": 0,
+  "explain": "Shuffle is often the most expensive step (network + disk).",
+  "bank": "bigdata",
+  "id": "m112"
+ },
+ {
+  "topic": "MapReduce",
+  "q": "Why did Spark largely replace MapReduce for processing?",
+  "opts": [
+   "Spark only runs SQL",
+   "Spark keeps intermediate data in memory, so iterative jobs are much faster",
+   "Spark can't scale",
+   "MapReduce is newer"
+  ],
+  "ans": 1,
+  "explain": "MapReduce writes to disk between every stage.",
+  "bank": "bigdata",
+  "id": "m113"
+ },
+ {
+  "topic": "Spark",
+  "q": "In Spark, a transformation like filter() is:",
+  "opts": [
+   "Executed immediately",
+   "Run on the driver only",
+   "Always cached",
+   "Lazy: recorded in a plan and run only when an action is called"
+  ],
+  "ans": 3,
+  "explain": "Actions like count(), collect(), write() trigger execution.",
+  "bank": "bigdata",
+  "id": "m114"
+ },
+ {
+  "topic": "Spark",
+  "q": "Which is a Spark ACTION?",
+  "opts": [
+   "filter()",
+   "map()",
+   "count()",
+   "select()"
+  ],
+  "ans": 2,
+  "explain": "count() returns a result to the driver, so the job runs.",
+  "bank": "bigdata",
+  "id": "m115"
+ },
+ {
+  "topic": "Spark",
+  "q": "A 'wide' transformation (e.g. groupBy, join) causes:",
+  "opts": [
+   "A shuffle of data across partitions",
+   "Data loss",
+   "A driver crash",
+   "No data movement"
+  ],
+  "ans": 0,
+  "explain": "Narrow transformations (map, filter) don't need a shuffle.",
+  "bank": "bigdata",
+  "id": "m116"
+ },
+ {
+  "topic": "Spark",
+  "q": "Spark's main abstraction for SQL-style work today is the:",
+  "opts": [
+   "HashMap",
+   "CSV reader",
+   "DataFrame / Dataset",
+   "RDD only"
+  ],
+  "ans": 2,
+  "explain": "DataFrames use the Catalyst optimiser; RDDs are lower level.",
+  "bank": "bigdata",
+  "id": "m117"
+ },
+ {
+  "topic": "Spark",
+  "q": "The Spark driver:",
+  "opts": [
+   "Builds the execution plan and coordinates executors",
+   "Is a database",
+   "Stores HDFS blocks",
+   "Only reads files"
+  ],
+  "ans": 0,
+  "explain": "Executors run tasks on worker nodes.",
+  "bank": "bigdata",
+  "id": "m118"
+ },
+ {
+  "topic": "Spark",
+  "q": "`df.cache()` is useful when:",
+  "opts": [
+   "Reading CSV headers",
+   "The DataFrame is used once",
+   "The same DataFrame is reused in several actions",
+   "Writing to disk"
+  ],
+  "ans": 2,
+  "explain": "Caching avoids recomputing the lineage each time.",
+  "bank": "bigdata",
+  "id": "m119"
+ },
+ {
+  "topic": "Spark",
+  "q": "Data skew in Spark means:",
+  "opts": [
+   "A few keys have far more data, so some tasks run much longer than others",
+   "Columns are misnamed",
+   "Files are encrypted",
+   "Too many partitions"
+  ],
+  "ans": 0,
+  "explain": "Fixes: salting keys, broadcast joins, AQE skew handling.",
+  "bank": "bigdata",
+  "id": "m120"
+ },
+ {
+  "topic": "Spark",
+  "q": "A broadcast join is best when:",
+  "opts": [
+   "Both tables are huge",
+   "One table is small enough to send a copy to every executor",
+   "There is no join key",
+   "Data is streaming"
+  ],
+  "ans": 1,
+  "explain": "It avoids shuffling the big table.",
+  "bank": "bigdata",
+  "id": "m121"
+ },
+ {
+  "topic": "Streaming",
+  "q": "Apache Kafka is primarily a:",
+  "opts": [
+   "File format",
+   "BI tool",
+   "Distributed event streaming platform (publish/subscribe log)",
+   "Relational database"
+  ],
+  "ans": 2,
+  "explain": "Producers write events to topics; consumers read them.",
+  "bank": "bigdata",
+  "id": "m122"
+ },
+ {
+  "topic": "Streaming",
+  "q": "In Kafka, a topic is split into:",
+  "opts": [
+   "Schemas",
+   "Blocks",
+   "Tables",
+   "Partitions"
+  ],
+  "ans": 3,
+  "explain": "Partitions allow parallel consumption and keep order within a partition.",
+  "bank": "bigdata",
+  "id": "m123"
+ },
+ {
+  "topic": "Streaming",
+  "q": "Batch vs stream processing: streaming suits:",
+  "opts": [
+   "Year-end reports",
+   "Monthly payroll",
+   "Historical backfills",
+   "Real-time fraud alerts on card transactions"
+  ],
+  "ans": 3,
+  "explain": "Batch suits large periodic jobs; streaming suits low-latency needs.",
+  "bank": "bigdata",
+  "id": "m124"
+ },
+ {
+  "topic": "Formats",
+  "q": "Why is Parquet popular for analytics?",
+  "opts": [
+   "It's human-readable",
+   "It has no schema",
+   "It stores images",
+   "It's columnar and compressed, so queries read only needed columns"
+  ],
+  "ans": 3,
+  "explain": "Parquet/ORC are columnar; CSV/JSON are row-based text.",
+  "bank": "bigdata",
+  "id": "m125"
+ },
+ {
+  "topic": "Formats",
+  "q": "Which format is row-based and common for streaming/serialisation with schemas?",
+  "opts": [
+   "Avro",
+   "Parquet",
+   "ORC",
+   "Delta"
+  ],
+  "ans": 0,
+  "explain": "Avro is row-oriented with an embedded schema; popular with Kafka.",
+  "bank": "bigdata",
+  "id": "m126"
+ },
+ {
+  "topic": "Storage",
+  "q": "A data lake is:",
+  "opts": [
+   "Central storage for raw data in any format (often on S3/ADLS/GCS)",
+   "A backup tape",
+   "A cleaned, modelled warehouse",
+   "A type of index"
+  ],
+  "ans": 0,
+  "explain": "Lakes store raw data cheaply; warehouses store modelled, query-ready data.",
+  "bank": "bigdata",
+  "id": "m127"
+ },
+ {
+  "topic": "Storage",
+  "q": "A 'lakehouse' (e.g. Delta Lake, Iceberg) adds what on top of a data lake?",
+  "opts": [
+   "Spreadsheets",
+   "ACID transactions, schema enforcement and time travel on lake files",
+   "Images",
+   "Email"
+  ],
+  "ans": 1,
+  "explain": "It brings warehouse-like reliability to cheap lake storage.",
+  "bank": "bigdata",
+  "id": "m128"
+ },
+ {
+  "topic": "Cloud",
+  "q": "Which is a serverless cloud data warehouse?",
+  "opts": [
+   "HDFS",
+   "Kafka",
+   "Google BigQuery",
+   "MySQL on a laptop"
+  ],
+  "ans": 2,
+  "explain": "Snowflake, Redshift Serverless and Synapse are also cloud warehouses.",
+  "bank": "bigdata",
+  "id": "m129"
+ },
+ {
+  "topic": "Cloud",
+  "q": "Amazon S3 is best described as:",
+  "opts": [
+   "A GPU service",
+   "A relational database",
+   "Object storage",
+   "A message queue"
+  ],
+  "ans": 2,
+  "explain": "Azure equivalent: ADLS/Blob; Google: GCS.",
+  "bank": "bigdata",
+  "id": "m130"
+ },
+ {
+  "topic": "ETL/ELT",
+  "q": "ETL vs ELT: in ELT, the transformation happens:",
+  "opts": [
+   "On the source database",
+   "Never",
+   "Before loading, on a separate server",
+   "After loading, inside the target warehouse"
+  ],
+  "ans": 3,
+  "explain": "Modern cloud warehouses make ELT practical (e.g. dbt transforms in Snowflake/BigQuery).",
+  "bank": "de",
+  "id": "m131"
+ },
+ {
+  "topic": "ETL/ELT",
+  "q": "An idempotent pipeline is one that:",
+  "opts": [
+   "Runs only once",
+   "Never fails",
+   "Gives the same result if re-run for the same input",
+   "Is written in Python"
+  ],
+  "ans": 2,
+  "explain": "Essential so retries don't create duplicates.",
+  "bank": "de",
+  "id": "m132"
+ },
+ {
+  "topic": "ETL/ELT",
+  "q": "An incremental load means:",
+  "opts": [
+   "Loading a sample",
+   "Deleting old data",
+   "Loading only new or changed records since the last run",
+   "Reloading the full table every day"
+  ],
+  "ans": 2,
+  "explain": "Usually driven by a watermark like updated_at or an ID.",
+  "bank": "de",
+  "id": "m133"
+ },
+ {
+  "topic": "ETL/ELT",
+  "q": "A watermark in incremental loading is:",
+  "opts": [
+   "A logo",
+   "The last processed value (e.g. max updated_at) used to pick up only newer rows",
+   "A primary key",
+   "A backup"
+  ],
+  "ans": 1,
+  "explain": "Store it after each successful run.",
+  "bank": "de",
+  "id": "m134"
+ },
+ {
+  "topic": "ETL/ELT",
+  "q": "Change Data Capture (CDC) is:",
+  "opts": [
+   "A file format",
+   "Tracking inserts/updates/deletes in a source database and streaming them downstream",
+   "A BI chart",
+   "Capturing screenshots"
+  ],
+  "ans": 1,
+  "explain": "Tools: Debezium, AWS DMS, Fivetran.",
+  "bank": "de",
+  "id": "m135"
+ },
+ {
+  "topic": "ETL/ELT",
+  "q": "An UPSERT (MERGE) operation:",
+  "opts": [
+   "Only inserts",
+   "Creates indexes",
+   "Deletes everything",
+   "Inserts new rows and updates existing ones based on a key"
+  ],
+  "ans": 3,
+  "explain": "MERGE INTO target USING staging ON key WHEN MATCHED THEN UPDATE WHEN NOT MATCHED THEN INSERT.",
+  "bank": "de",
+  "id": "m136"
+ },
+ {
+  "topic": "Modelling",
+  "q": "In a star schema, dimension tables contain:",
+  "opts": [
+   "Logs only",
+   "Descriptive attributes like product name, city, date parts",
+   "Indexes",
+   "Measurable numeric events"
+  ],
+  "ans": 1,
+  "explain": "Fact tables hold measures (amount, quantity) and foreign keys to dimensions.",
+  "bank": "de",
+  "id": "m137"
+ },
+ {
+  "topic": "Modelling",
+  "q": "The 'grain' of a fact table means:",
+  "opts": [
+   "Its size on disk",
+   "What one row represents (e.g. one order line per day)",
+   "The number of dimensions",
+   "Its index"
+  ],
+  "ans": 1,
+  "explain": "Always define the grain before designing a fact table.",
+  "bank": "de",
+  "id": "m138"
+ },
+ {
+  "topic": "Modelling",
+  "q": "A snowflake schema differs from a star schema because:",
+  "opts": [
+   "Dimensions are normalised into further sub-tables",
+   "It has no facts",
+   "It has only one table",
+   "It can't be queried"
+  ],
+  "ans": 0,
+  "explain": "Star = denormalised dimensions (fewer joins); snowflake = normalised.",
+  "bank": "de",
+  "id": "m139"
+ },
+ {
+  "topic": "Modelling",
+  "q": "SCD Type 2 keeps history by:",
+  "opts": [
+   "Adding a new row with start/end dates (or is_current flag) for each change",
+   "Overwriting the row",
+   "Adding a column per change",
+   "Deleting old rows"
+  ],
+  "ans": 0,
+  "explain": "SCD1 overwrites; SCD3 keeps only the previous value in a column.",
+  "bank": "de",
+  "id": "m140"
+ },
+ {
+  "topic": "Modelling",
+  "q": "A degenerate dimension is:",
+  "opts": [
+   "A date dimension",
+   "A dimension attribute stored in the fact table with no separate table (e.g. invoice number)",
+   "A broken table",
+   "A deleted dimension"
+  ],
+  "ans": 1,
+  "explain": "Useful for grouping lines of the same order.",
+  "bank": "de",
+  "id": "m141"
+ },
+ {
+  "topic": "Orchestration",
+  "q": "Apache Airflow is used to:",
+  "opts": [
+   "Schedule and orchestrate pipelines as DAGs of tasks",
+   "Replace SQL",
+   "Visualise dashboards",
+   "Store data"
+  ],
+  "ans": 0,
+  "explain": "DAG = directed acyclic graph of tasks with dependencies.",
+  "bank": "de",
+  "id": "m142"
+ },
+ {
+  "topic": "Orchestration",
+  "q": "In Airflow, a DAG must be:",
+  "opts": [
+   "Run every minute",
+   "Cyclic",
+   "Acyclic (no loops between tasks)",
+   "Written in SQL"
+  ],
+  "ans": 2,
+  "explain": "Tasks run in dependency order; cycles would never finish.",
+  "bank": "de",
+  "id": "m143"
+ },
+ {
+  "topic": "Orchestration",
+  "q": "A backfill means:",
+  "opts": [
+   "Deleting data",
+   "Running a pipeline for past dates to fill missing or corrected history",
+   "Copying code",
+   "Adding indexes"
+  ],
+  "ans": 1,
+  "explain": "Idempotent pipelines make backfills safe.",
+  "bank": "de",
+  "id": "m144"
+ },
+ {
+  "topic": "Orchestration",
+  "q": "Retries with exponential backoff help when:",
+  "opts": [
+   "Disk is full forever",
+   "Failures are temporary (network blips, rate limits)",
+   "Data is duplicated",
+   "Logic is wrong"
+  ],
+  "ans": 1,
+  "explain": "Wait 1, 2, 4, 8 minutes... before retrying.",
+  "bank": "de",
+  "id": "m145"
+ },
+ {
+  "topic": "Data quality",
+  "q": "Which is a data quality check?",
+  "opts": [
+   "Count of NULLs in a mandatory column",
+   "Font size",
+   "Code comments",
+   "Server colour"
+  ],
+  "ans": 0,
+  "explain": "Others: uniqueness of keys, valid ranges, freshness, row-count drift.",
+  "bank": "de",
+  "id": "m146"
+ },
+ {
+  "topic": "Data quality",
+  "q": "Data freshness means:",
+  "opts": [
+   "Data is pretty",
+   "Data is compressed",
+   "How recently the data was updated compared with expectations",
+   "Data has no NULLs"
+  ],
+  "ans": 2,
+  "explain": "Example alert: orders table not updated in 3 hours.",
+  "bank": "de",
+  "id": "m147"
+ },
+ {
+  "topic": "Data quality",
+  "q": "Great Expectations and dbt tests are used for:",
+  "opts": [
+   "Storing files",
+   "Orchestration only",
+   "Building UIs",
+   "Automated data validation/testing in pipelines"
+  ],
+  "ans": 3,
+  "explain": "e.g. dbt tests: unique, not_null, accepted_values, relationships.",
+  "bank": "de",
+  "id": "m148"
+ },
+ {
+  "topic": "Data quality",
+  "q": "A dead-letter queue is used to:",
+  "opts": [
+   "Park bad/unprocessable records for later inspection without stopping the pipeline",
+   "Delete data",
+   "Speed up queries",
+   "Store passwords"
+  ],
+  "ans": 0,
+  "explain": "Common in streaming systems.",
+  "bank": "de",
+  "id": "m149"
+ },
+ {
+  "topic": "Tools",
+  "q": "dbt is mainly used for:",
+  "opts": [
+   "Storing files",
+   "Ingesting data from APIs",
+   "Transforming data inside the warehouse with SQL models, tests and docs",
+   "Streaming"
+  ],
+  "ans": 2,
+  "explain": "The 'T' in ELT.",
+  "bank": "de",
+  "id": "m150"
+ },
+ {
+  "topic": "Tools",
+  "q": "Which AWS service is a managed ETL/data catalogue service?",
+  "opts": [
+   "AWS Lambda only",
+   "AWS Glue",
+   "Amazon EC2",
+   "Amazon SES"
+  ],
+  "ans": 1,
+  "explain": "Azure: Data Factory; GCP: Dataflow/Dataproc + Data Catalog.",
+  "bank": "de",
+  "id": "m151"
+ },
+ {
+  "topic": "Tools",
+  "q": "Azure Data Factory is mainly used for:",
+  "opts": [
+   "Hosting websites",
+   "Building data integration/ETL pipelines",
+   "Training ML models only",
+   "Email"
+  ],
+  "ans": 1,
+  "explain": "It moves and transforms data between sources.",
+  "bank": "de",
+  "id": "m152"
+ },
+ {
+  "topic": "Pipelines",
+  "q": "Partitioning a lake table by order_date helps because:",
+  "opts": [
+   "It encrypts data",
+   "It removes duplicates",
+   "Queries filtering on date read only the needed folders",
+   "It sorts columns"
+  ],
+  "ans": 2,
+  "explain": "Over-partitioning (too many tiny files) hurts performance.",
+  "bank": "de",
+  "id": "m153"
+ },
+ {
+  "topic": "Pipelines",
+  "q": "The 'small files problem' in data lakes is:",
+  "opts": [
+   "Files are too secure",
+   "Files have no names",
+   "Files are too big",
+   "Millions of tiny files slow down listing and reading"
+  ],
+  "ans": 3,
+  "explain": "Fix: compaction into larger files (e.g. 128 MB–1 GB).",
+  "bank": "de",
+  "id": "m154"
+ },
+ {
+  "topic": "Pipelines",
+  "q": "Schema evolution means:",
+  "opts": [
+   "A new index",
+   "Deleting a schema",
+   "Moving to NoSQL",
+   "Handling changes in source structure (new/renamed columns) without breaking the pipeline"
+  ],
+  "ans": 3,
+  "explain": "Avro, Parquet and Delta support controlled schema evolution.",
+  "bank": "de",
+  "id": "m155"
+ },
+ {
+  "topic": "Pipelines",
+  "q": "Bronze, Silver and Gold layers (medallion architecture) mean:",
+  "opts": [
+   "Pricing tiers",
+   "Raw → cleaned/conformed → business-ready aggregated data",
+   "User roles",
+   "Server sizes"
+  ],
+  "ans": 1,
+  "explain": "Common in Databricks/lakehouse setups.",
+  "bank": "de",
+  "id": "m156"
+ },
+ {
+  "topic": "Pipelines",
+  "q": "OLTP data is usually copied to a warehouse instead of querying production directly because:",
+  "opts": [
+   "OLTP can't store numbers",
+   "Heavy analytics would slow down the live app and production schemas aren't modelled for analysis",
+   "It's illegal",
+   "Warehouses are cheaper to write"
+  ],
+  "ans": 1,
+  "explain": "Separate systems for transactions and analytics.",
+  "bank": "de",
+  "id": "m157"
+ },
+ {
+  "topic": "Pipelines",
+  "q": "Exactly-once processing in streaming means:",
+  "opts": [
+   "Only one consumer",
+   "Events are dropped",
+   "Each event affects the result exactly one time, even with retries",
+   "Events are processed at most once"
+  ],
+  "ans": 2,
+  "explain": "At-least-once + idempotent writes is a common practical approach.",
+  "bank": "de",
+  "id": "m158"
+ },
+ {
+  "topic": "Python for DE",
+  "q": "Which Python library is most common for DataFrame work on a single machine?",
+  "opts": [
+   "pandas",
+   "Flask",
+   "Matplotlib",
+   "NumPy only"
+  ],
+  "ans": 0,
+  "explain": "PySpark is used when data outgrows one machine.",
+  "bank": "de",
+  "id": "m159"
+ },
+ {
+  "topic": "Python for DE",
+  "q": "Reading a 20 GB CSV with pandas on an 8 GB laptop is best handled by:",
+  "opts": [
+   "Reading in chunks (chunksize) or using Spark/Polars/DuckDB",
+   "read_csv(...) normally",
+   "Converting to Word",
+   "Emailing it"
+  ],
+  "ans": 0,
+  "explain": "Process in chunks or use out-of-core tools.",
+  "bank": "de",
+  "id": "m160"
  }
 ]

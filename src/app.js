@@ -21,10 +21,9 @@ function dayDiff(a, b) { return Math.round((new Date(a + "T00:00:00") - new Date
 function toast(msg, kind) { const t = document.createElement("div"); t.className = "toast " + (kind || ""); t.innerHTML = msg; $("#toasts").appendChild(t); setTimeout(() => t.classList.add("show"), 10); setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 400); }, 3200); }
 
 // ---------- state ----------
-function blank() { return { profile: null, solved: {}, attempts: {}, hints: {}, revealed: {}, drafts: {}, mcq: {}, mcqTried: {}, oa: [], days: [], badges: {}, expRead: {}, pendingSync: false }; }
+function blank() { return { profile: null, solved: {}, attempts: {}, hints: {}, revealed: {}, drafts: {}, mcq: {}, mcqTried: {}, oa: [], days: [], badges: {}, expRead: {}, lessonRead: {}, scenario: {}, pendingSync: false }; }
 let S = blank();
-try { const raw = localStorage.getItem(STORE_KEY); if (raw) S = Object.assign(blank(), JSON.parse(raw)); } catch (e) { /* storage unavailable: progress lives in memory */ }
-function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) { } }
+function save() { try { localStorage.setItem(storeKey(), JSON.stringify(S)); } catch (e) { } }
 function markDay() { const t = today(); if (!S.days.includes(t)) { S.days.push(t); S.days.sort(); } }
 
 // ---------- gamification ----------
@@ -33,7 +32,7 @@ function xpFor(q, hintsUsed, firstTry, revealed) {
   const base = BASE_XP[q.diff];
   return Math.round(base * Math.max(0.25, 1 - 0.25 * hintsUsed)) + (firstTry && hintsUsed === 0 ? 5 : 0);
 }
-function totalXP() { let x = 0; for (const k in S.solved) x += S.solved[k].xp; for (const k in S.mcq) if (S.mcq[k]) x += 5; x += 2 * Object.keys(S.expRead || {}).length; return x; }
+function totalXP() { let x = 0; for (const k in S.solved) x += S.solved[k].xp; for (const k in S.mcq) if (S.mcq[k]) x += 5; x += 2 * Object.keys(S.expRead || {}).length; x += 3 * Object.keys(S.lessonRead || {}).length; x += scenarioXP(); return x; }
 function levelInfo(xp) {
   let i = 0; while (i + 1 < LEVELS.length && xp >= LEVELS[i + 1][0]) i++;
   const cur = LEVELS[i], nxt = LEVELS[i + 1];
@@ -50,7 +49,7 @@ function bestStreak() { const d = S.days.slice().sort(); let best = d.length ? 1
 function solvedCount(filter) { return QS.filter(q => S.solved[q.id] && (!filter || filter(q))).length; }
 function noHintSolves() { return Object.values(S.solved).filter(s => s.hints === 0 && !s.revealed).length; }
 function oaBest() { return S.oa.reduce((m, o) => Math.max(m, o.pct), 0); }
-function mcqCorrect() { return Object.values(S.mcq).filter(Boolean).length; }
+function mcqCorrect(bank) { return Object.keys(S.mcq).filter(id => S.mcq[id] && (!bank || (mcqById(id) || {}).bank === bank)).length; }
 function jdQs(company) { return QS.filter(q => q.jd.includes(company)); }
 
 const BADGES = [
@@ -64,7 +63,12 @@ const BADGES = [
   { id: "streak3", icon: "📅", name: "3-Day Streak", desc: "Practise 3 days in a row", test: () => bestStreak() >= 3 },
   { id: "streak7", icon: "🗓️", name: "7-Day Streak", desc: "Practise 7 days in a row", test: () => bestStreak() >= 7 },
   { id: "mcq20", icon: "📘", name: "Theory Buff", desc: "Answer 20 DBMS MCQs correctly", test: () => mcqCorrect() >= 20 },
-  { id: "mcqall", icon: "🎓", name: "DBMS Brain", desc: "Answer all 40 DBMS MCQs correctly", test: () => mcqCorrect() >= MCQS.length },
+  { id: "mcqall", icon: "🎓", name: "DBMS Brain", desc: "Answer all 100 DBMS MCQs correctly", test: () => mcqCorrect("dbms") >= MCQS.filter(m => m.bank === "dbms").length },
+  { id: "bdall", icon: "🐘", name: "Big Data Basics", desc: "Answer all Big Data MCQs correctly", test: () => mcqCorrect("bigdata") >= MCQS.filter(m => m.bank === "bigdata").length },
+  { id: "deall", icon: "🛠️", name: "Pipeline Pro", desc: "Answer all Data Engineering MCQs correctly", test: () => mcqCorrect("de") >= MCQS.filter(m => m.bank === "de").length },
+  { id: "lessons", icon: "📚", name: "Concept Builder", desc: "Read all Big Data & DE lessons", test: () => Object.keys(S.lessonRead || {}).length >= (D.learn ? D.learn.lessons.length : 99) },
+  { id: "sc1", icon: "✍️", name: "First Answer", desc: "Get a scenario answer marked", test: () => Object.keys(S.scenario || {}).length >= 1 },
+  { id: "sc8", icon: "🧑‍💼", name: "Interview Ready", desc: "Score 8+ on 8 scenario questions", test: () => Object.values(S.scenario || {}).filter(v => v >= 8).length >= 8 },
   { id: "oa70", icon: "✅", name: "OA Ready", desc: "Score 70%+ in the OA Simulator", test: () => oaBest() >= 70 },
   { id: "oa90", icon: "🌟", name: "OA Topper", desc: "Score 90%+ in the OA Simulator", test: () => oaBest() >= 90 },
   { id: "exp10", icon: "🗣️", name: "Interview Insider", desc: "Read 10 interview experiences", test: () => Object.keys(S.expRead || {}).length >= 10 },
@@ -208,46 +212,512 @@ function tableHTML(cols, rows, max) {
     `<div class="muted small">${rows.length} row(s)${rows.length > max ? `, showing first ${max}` : ""}</div>`;
 }
 
-// ---------- leaderboard sync ----------
-const LB = {
-  enabled: () => !!(CFG.LEADERBOARD_URL && CFG.LEADERBOARD_URL.startsWith("https://")),
-  payload(event) {
-    const p = S.profile || {}; const xp = totalXP(); const lv = levelInfo(xp);
-    return { action: "progress", classCode: p.classCode || "", roll: p.roll, name: p.name, batch: p.batch, pin: p.pin,
-      xp, level: lv.name, solved: solvedCount(), easy: solvedCount(q => q.diff === "E"), medium: solvedCount(q => q.diff === "M"), hard: solvedCount(q => q.diff === "H"),
-      mcq: mcqCorrect(), streak: streak(), badges: Object.keys(S.badges).length, oaBest: oaBest(),
-      hintsUsed: Object.values(S.hints).reduce((a, b) => a + b, 0), revealed: Object.keys(S.revealed).length, event: event || null };
-  },
-  async push(event) {
-    if (!this.enabled() || !S.profile || !S.profile.roll) return;
+// ===== v2 modules: backend session + sync, login, dashboards, scenario questions, MCQ banks, lessons, faculty tools =====
+// (spliced into app.js by tools/patch_v2.py; uses helpers defined above it)
+
+// ---------- backend session ----------
+const SESSION_KEY = "sqlquest_session";
+let SESSION = null; try { SESSION = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch (e) { }
+const BACKEND = () => String(CFG.BACKEND_URL || CFG.LEADERBOARD_URL || "");
+const Api = {
+  enabled: () => /^https?:\/\//.test(BACKEND()),
+  async call(action, payload) {
+    const body = Object.assign({ action, token: SESSION && SESSION.token }, payload || {});
+    let j;
     try {
-      const r = await fetch(CFG.LEADERBOARD_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(this.payload(event)) });
-      const j = await r.json();
-      if (!j.ok) { toast("Leaderboard: " + esc(j.error || "not saved"), "bad"); S.pendingSync = true; } else S.pendingSync = false;
-    } catch (e) { S.pendingSync = true; }
-    save();
-  },
-  async board(batch) {
-    const u = CFG.LEADERBOARD_URL + "?action=board&classCode=" + encodeURIComponent((S.profile && S.profile.classCode) || "") + (batch ? "&batch=" + encodeURIComponent(batch) : "");
-    const r = await fetch(u); return r.json();
+      const r = await fetch(BACKEND(), { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) });
+      j = await r.json();
+    } catch (e) { return { ok: false, offline: true, error: "Can't reach the server. Check your internet connection and try again." }; }
+    if (!j.ok && /log in again|expired/i.test(j.error || "") && !/Login$/.test(action)) { toast("Your session ended. Please log in again.", "bad"); logout(); }
+    return j;
   }
 };
+function isFaculty() { return !!(SESSION && (SESSION.role === "faculty" || SESSION.role === "admin")); }
+function isAdmin() { return !!(SESSION && SESSION.role === "admin"); }
+function isStudentOnline() { return Api.enabled() && !!SESSION && SESSION.role === "student"; }
+function needLogin() { return Api.enabled() && !SESSION; }
+function storeKey() { return SESSION && SESSION.role === "student" ? STORE_KEY + ":" + SESSION.profile.roll : STORE_KEY; }
+function loadLocal(key) { try { const raw = localStorage.getItem(key); return raw ? migrate(Object.assign(blank(), JSON.parse(raw))) : blank(); } catch (e) { return blank(); } }
+function migrate(st) {   // v1 stored MCQ answers by position; v2 uses MCQ ids
+  ["mcq", "mcqTried"].forEach(k => { const o = st[k] || {}, n = {}; Object.keys(o).forEach(key => { n[/^\d+$/.test(key) ? "m" + (+key + 1) : key] = o[key]; }); st[k] = n; });
+  st.lessonRead = st.lessonRead || {}; st.scenario = st.scenario || {}; st.expRead = st.expRead || {};
+  return st;
+}
+function slimState() {
+  const c = JSON.parse(JSON.stringify(S)); delete c.drafts; delete c.pendingSync;
+  for (const k in c.solved) if (c.solved[k].query) c.solved[k].query = String(c.solved[k].query).slice(0, 300);
+  return c;
+}
+function qsum() { return { s: Object.keys(S.solved).map(Number), a: S.attempts, h: S.hints, r: Object.keys(S.revealed).map(Number) }; }
+function summary() {
+  const xp = totalXP();
+  return { xp, level: levelInfo(xp).name, solved: solvedCount(), easy: solvedCount(q => q.diff === "E"), medium: solvedCount(q => q.diff === "M"), hard: solvedCount(q => q.diff === "H"),
+    mcq: mcqCorrect(), streak: streak(), badges: Object.keys(S.badges).length, oaBest: oaBest(), hints: Object.values(S.hints).reduce((a, b) => a + b, 0),
+    revealed: Object.keys(S.revealed).length, expRead: Object.keys(S.expRead || {}).length };
+}
+function mergeState(a, b) {             // a = this device, b = server copy; never loses progress from either side
+  if (!b) return a;
+  const o = migrate(Object.assign(blank(), b));
+  o.solved = Object.assign({}, a.solved, b.solved);
+  ["attempts", "hints"].forEach(k => { o[k] = Object.assign({}, b[k]); for (const id in a[k] || {}) o[k][id] = Math.max(a[k][id] || 0, (b[k] || {})[id] || 0); });
+  ["revealed", "expRead", "lessonRead", "badges"].forEach(k => o[k] = Object.assign({}, a[k] || {}, o[k] || {}));
+  o.mcq = Object.assign({}, a.mcq); for (const id in o.mcq) o.mcq[id] = !!o.mcq[id]; for (const id in (b.mcq || {})) o.mcq[id] = !!(o.mcq[id] || migrate({ mcq: b.mcq }).mcq[id]);
+  o.mcqTried = Object.assign({}, a.mcqTried, o.mcqTried);
+  const seen = {}; o.oa = (o.oa || []).concat(a.oa || []).filter(x => { const k = x.date + "|" + x.score + "|" + x.mins; return seen[k] ? false : (seen[k] = true); });
+  o.days = Array.from(new Set((a.days || []).concat(o.days || []))).sort();
+  o.scenario = Object.assign({}, a.scenario, o.scenario);
+  o.drafts = a.drafts || {}; o.profile = b.profile || a.profile;
+  return o;
+}
+let syncTimer = null;
+const LB = {
+  push(event) {
+    if (!isStudentOnline()) return Promise.resolve();
+    clearTimeout(syncTimer);
+    if (event) return this.send(event);
+    return new Promise(res => { syncTimer = setTimeout(() => this.send().then(res), 1200); });
+  },
+  async send(event) {
+    clearTimeout(syncTimer);
+    if (!isStudentOnline()) return { ok: true };
+    const j = await Api.call("saveState", { state: slimState(), summary: summary(), qsum: qsum(), event: event || null });
+    S.pendingSync = !j.ok; save();
+    if (!j.ok && !j.offline && !/log in/i.test(j.error || "")) toast(esc(j.error), "bad");
+    return j;
+  }
+};
+async function afterLogin() {
+  if (!SESSION) return;
+  if (SESSION.role === "student") {
+    const mc = await Api.call("mcqList"); if (mc.ok) CUSTOM_MCQ = mc.rows;
+    const sc = await Api.call("myScenario"); if (sc.ok) applyScenario(sc.rows);
+  } else {
+    const mc = await Api.call("mcqList"); if (mc.ok) CUSTOM_MCQ = mc.rows;
+  }
+}
+function applyScenario(rows) {
+  MY_SUBS = rows || [];
+  MY_SUBS.forEach(r => { if (r.finalScore != null) S.scenario[r.qid] = Math.max(S.scenario[r.qid] || 0, r.finalScore); });
+  save();
+}
+function logout() {
+  clearTimeout(syncTimer);
+  SESSION = null; try { localStorage.removeItem(SESSION_KEY); } catch (e) { }
+  S = blank(); CUSTOM_MCQ = []; MY_SUBS = []; FAC = { rows: null };
+  location.hash = "#/home"; route();
+}
+
+// ---------- login page ----------
+function viewLogin() {
+  document.body.classList.add("loggedout");
+  main().innerHTML = `<div class="loginwrap"><div class="card loginbox">
+    <div class="brand big">SQL <span>Quest</span></div><p class="muted">Placement practice for data roles: SQL, DBMS, Big Data and interview prep.</p>
+    <div class="tabs2"><button class="tab on" data-lt="s">🎓 Student</button><button class="tab" data-lt="f">👩‍🏫 Faculty</button></div>
+    <div id="lg-s"><label>Roll number<input id="lg-roll" autocomplete="username" maxlength="30"></label>
+      <label>PIN<input id="lg-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="6"></label>
+      <p class="small muted">First time here? Type a new 4 to 6 digit PIN. It becomes your PIN, so remember it. Forgot it later? Your faculty can reset it.</p>
+      <button class="btn primary wide" id="lg-sgo">Log in</button></div>
+    <div id="lg-f" hidden><label>Username<input id="lg-user" autocomplete="username" maxlength="30"></label>
+      <label>Password<input id="lg-pass" type="password" autocomplete="current-password"></label>
+      <button class="btn primary wide" id="lg-fgo">Log in as faculty</button></div>
+    <div class="err" id="lg-err"></div></div></div>`;
+  main().querySelectorAll("[data-lt]").forEach(b => b.onclick = () => {
+    main().querySelectorAll("[data-lt]").forEach(x => x.classList.toggle("on", x === b));
+    $("#lg-s").hidden = b.dataset.lt !== "s"; $("#lg-f").hidden = b.dataset.lt !== "f"; $("#lg-err").textContent = "";
+  });
+  const go = async (action, payload, btn) => {
+    btn.disabled = true; $("#lg-err").textContent = "Checking…";
+    const j = await Api.call(action, payload); btn.disabled = false;
+    if (!j.ok) { $("#lg-err").textContent = j.error || "Login failed"; return; }
+    SESSION = { token: j.token, role: j.role, profile: j.profile };
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION)); } catch (e) { }
+    document.body.classList.remove("loggedout");
+    if (j.role === "student") {
+      S = mergeState(loadLocal(storeKey()), j.state); S.profile = j.profile; save();
+      if (j.first) toast("PIN set. Welcome to SQL Quest! 🎉", "good");
+      await afterLogin(); checkBadges(); LB.push();
+      location.hash = "#/home";
+    } else { await afterLogin(); location.hash = "#/f/overview"; }
+    route();
+  };
+  $("#lg-sgo").onclick = () => go("studentLogin", { roll: $("#lg-roll").value, pin: $("#lg-pin").value }, $("#lg-sgo"));
+  $("#lg-fgo").onclick = () => go("facultyLogin", { username: $("#lg-user").value, password: $("#lg-pass").value }, $("#lg-fgo"));
+  ["lg-roll", "lg-pin"].forEach(id => $("#" + id).addEventListener("keydown", e => { if (e.key === "Enter") $("#lg-sgo").click(); }));
+  ["lg-user", "lg-pass"].forEach(id => $("#" + id).addEventListener("keydown", e => { if (e.key === "Enter") $("#lg-fgo").click(); }));
+}
+
+function accountModal() {
+  if (isFaculty()) { location.hash = "#/f/team"; return; }
+  const p = S.profile || {};
+  openModal(`<h2>My account</h2><p><b>${esc(p.name)}</b><br><span class="muted">Roll ${esc(p.roll)} · Batch ${esc(p.batch || "-")}</span></p>
+    <p class="small muted">Your progress is saved to your class account, so you can log in from any device.</p>
+    <details><summary>Change PIN</summary><label>Current PIN<input id="ac-old" type="password" inputmode="numeric" maxlength="6"></label>
+    <label>New PIN (4 to 6 digits)<input id="ac-new" type="password" inputmode="numeric" maxlength="6"></label><button class="btn small" id="ac-pin">Update PIN</button></details>
+    <div class="err" id="ac-err"></div><div class="row gap mt"><button class="btn warn" id="ac-out">Log out</button><button class="btn" id="ac-close">Close</button></div>`);
+  $("#ac-close").onclick = closeModal;
+  $("#ac-out").onclick = async () => { await LB.send(); closeModal(); logout(); };
+  $("#ac-pin").onclick = async () => { const j = await Api.call("changePin", { oldPin: $("#ac-old").value, newPin: $("#ac-new").value }); $("#ac-err").textContent = j.ok ? "PIN updated ✔" : j.error; };
+}
+
+// ---------- navigation ----------
+function renderNav() {
+  const stu = [["#/home", "🏠 My Dashboard"], ["#/list", "🧩 SQL Practice (100)"], ["#/mcq", "📘 MCQ Quiz"], ["#/scenario", "✍️ Scenario Questions"], ["#/learn", "📚 Big Data & DE"],
+    ["#/oa", "⏱ OA Simulator"], ["#/exp", "🗣 Interview Experiences"], ["#/sandbox", "🧪 Playground"], ["#/badges", "🏅 Badges"], ["#/board", "🏆 Leaderboard"], ["#/guide", "📄 Cheat sheet"]];
+  const fac = [["#/f/overview", "📋 Students"], ["#/f/questions", "📈 Question analytics"], ["#/f/review", "✅ Review answers"], ["#/f/roster", "👥 Roster & PINs"],
+    ["#/f/mcq", "➕ MCQ manager"], ["#/board", "🏆 Leaderboard"], ["#/f/team", "🔑 Team & password"]];
+  const content = [["#/list", "🧩 SQL Practice"], ["#/mcq", "📘 MCQ Quiz"], ["#/scenario", "✍️ Scenario Questions"], ["#/learn", "📚 Big Data & DE"], ["#/exp", "🗣 Interview Experiences"], ["#/guide", "📄 Cheat sheet"]];
+  const link = ([h, t]) => `<a href="${h}">${t}</a>`;
+  $("#nav").innerHTML = (isFaculty() ? `<div class="navhead">Faculty</div>${fac.map(link).join("")}<div class="navhead">Student content</div>${content.map(link).join("")}` : stu.map(link).join("")) +
+    `<div id="engine" class="${Engine && ENGINE_OK === true ? "ok" : ""}">${ENGINE_MSG}</div>`;
+}
+let ENGINE_OK = null, ENGINE_MSG = "Loading SQL engine…";
+
+// ---------- MCQ banks ----------
+const BANKS = { dbms: "DBMS & SQL", bigdata: "Big Data", de: "Data Engineering" };
+let CUSTOM_MCQ = [];
+function allMcq() { return MCQS.concat(CUSTOM_MCQ.filter(m => m.active !== false).map(m => Object.assign({ custom: true }, m))); }
+function mcqById(id) { return allMcq().find(m => m.id === id); }
+function viewMCQ(params) {
+  const bank = BANKS[params.get("bank")] ? params.get("bank") : "dbms";
+  const topic = params.get("topic") || "";
+  const inBank = allMcq().filter(m => m.bank === bank);
+  const list = inBank.filter(m => !topic || m.topic === topic);
+  if (!list.length) { main().innerHTML = `<h1>📘 MCQ Quiz</h1><p>No questions here yet.</p>`; return; }
+  const i = Math.max(0, Math.min(list.length - 1, parseInt(params.get("i") || "0", 10) || 0));
+  const m = list[i], answered = S.mcqTried[m.id];
+  const topics = Array.from(new Set(inBank.map(x => x.topic)));
+  const q = (o) => { const p = new URLSearchParams({ bank }); if (topic) p.set("topic", topic); Object.keys(o).forEach(k => p.set(k, o[k])); return "#/mcq?" + p.toString(); };
+  main().innerHTML = `<h1>📘 MCQ Quiz <span class="muted small">+5 XP for each first correct answer</span></h1>
+  <div class="row gap wrap mb">${Object.keys(BANKS).map(b => { const all = allMcq().filter(x => x.bank === b); return `<a class="tab ${b === bank ? "on" : ""}" href="#/mcq?bank=${b}">${BANKS[b]} <span class="small">${all.filter(x => S.mcq[x.id]).length}/${all.length}</span></a>`; }).join("")}</div>
+  <div class="row gap wrap mb"><select id="mcq-topic"><option value="">All topics</option>${topics.map(t => `<option ${t === topic ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>
+    <span class="muted small">${list.filter(x => S.mcq[x.id]).length}/${list.length} correct in this set</span></div>
+  <div class="mcqnav">${list.map((x, k) => `<a href="${q({ i: k })}" class="dot ${S.mcq[x.id] ? "ok" : S.mcqTried[x.id] !== undefined ? "bad" : ""} ${k === i ? "cur" : ""}">${k + 1}</a>`).join("")}</div>
+  <div class="card mcq"><div class="muted small">${esc(m.topic)} · Question ${i + 1} of ${list.length}${m.custom ? ` · <span class="chip jdchip">Added by faculty</span>` : ""}</div><h2>${md(m.q)}</h2>
+    <div class="opts">${m.opts.map((o, k) => `<button class="opt" data-k="${k}">${String.fromCharCode(65 + k)}. ${md(o)}</button>`).join("")}</div>
+    <div id="mcq-fb"></div>
+    <div class="row gap mt">${i > 0 ? `<a class="btn" href="${q({ i: i - 1 })}">← Prev</a>` : ""}${i < list.length - 1 ? `<a class="btn primary" href="${q({ i: i + 1 })}">Next →</a>` : ""}</div></div>`;
+  $("#mcq-topic").onchange = e => { const p = new URLSearchParams({ bank }); if (e.target.value) p.set("topic", e.target.value); location.hash = "#/mcq?" + p.toString(); };
+  const reveal = (pick) => {
+    main().querySelectorAll(".opt").forEach(b => { const k = +b.dataset.k; b.disabled = true; if (k === m.ans) b.classList.add("right"); else if (k === pick) b.classList.add("wrong"); });
+    $("#mcq-fb").innerHTML = `<div class="fb ${pick === m.ans ? "good" : "bad"}">${pick === m.ans ? "✔ Correct." : "✘ Not quite."} ${md(m.explain || "")}</div>`;
+  };
+  if (answered !== undefined) reveal(answered);
+  main().querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    const k = +b.dataset.k;
+    if (S.mcqTried[m.id] === undefined) { S.mcqTried[m.id] = k; S.mcq[m.id] = k === m.ans; if (k === m.ans) { markDay(); toast("+5 XP", "good"); } checkBadges(); save(); renderHeader(); LB.push(); }
+    reveal(k);
+  });
+}
+
+// ---------- scenario questions ----------
+const SUBJ = D.subjective || [];
+const SBY = {}; SUBJ.forEach(s => SBY[s.id] = s);
+let MY_SUBS = [];
+function scenarioXP() { return Object.values(S.scenario || {}).reduce((a, b) => a + Math.round(2 * b), 0); }
+function viewScenarioList() {
+  const areas = Array.from(new Set(SUBJ.map(s => s.area)));
+  const online = isStudentOnline();
+  main().innerHTML = `<h1>✍️ Scenario Questions</h1>
+  <div class="card"><p>Interview-style questions you answer in your own words, the way you would speak in a real round. ${online ? "Each answer is <b>marked out of 10 against a rubric</b> by AI within a minute (your faculty can review and change the mark). You get <b>3 attempts</b> per question, and your best score counts: up to 20 XP each." : "This copy runs without a server, so you'll compare your answer with the rubric and model answer yourself (self-check, no XP)."}</p>
+  <p class="small muted">Tip: structure beats length. State your approach, give one concrete example, and mention trade-offs.</p></div>
+  ${areas.map(a => `<h2>${esc(a)}</h2><div class="qlist">${SUBJ.filter(s => s.area === a).map(s => {
+    const best = S.scenario[s.id], subs = MY_SUBS.filter(r => r.qid === s.id), pend = subs.some(r => r.status === "pending");
+    return `<a class="qrow srow" href="#/scenario/${s.id}"><span class="status ${best != null ? "ok" : pend ? "tried" : ""}">${best != null ? "✔" : pend ? "…" : ""}</span><span class="qt">${esc(s.title)}</span>
+      <span class="chip d${s.diff}">${DIFF_NAME[s.diff]}</span><span class="small muted">${online ? `${subs.length}/3 attempts` : ""}</span><span class="qxp small">${best != null ? best + "/10" : pend ? "Marking…" : "up to 20 XP"}</span></a>`;
+  }).join("")}</div>`).join("")}`;
+}
+function feedbackHTML(r) {
+  const f = r.aiFeedback || {};
+  if (r.status === "pending") return `<div class="fb">⏳ Your answer is in the marking queue. It's usually marked within a few minutes. <button class="btn small" id="sc-refresh">Refresh</button></div>`;
+  if (r.status === "ai_error") return `<div class="fb bad">The AI couldn't mark this one, so your faculty will grade it.</div>`;
+  return `<div class="scorebox"><div class="score">${r.finalScore}<span>/10</span></div><div>${r.status === "reviewed" ? `<b>Reviewed by faculty</b>${r.facultyComment ? `: “${esc(r.facultyComment)}”` : ""}${r.aiScore != null && r.aiScore !== r.finalScore ? `<div class="small muted">AI had given ${r.aiScore}/10</div>` : ""}` : `<b>AI mark</b> <span class="small muted">(faculty may review)</span>`}
+    ${f.summary ? `<p>${esc(f.summary)}</p>` : ""}</div></div>
+    ${(f.criteria || []).length ? `<table class="crit"><thead><tr><th>Rubric point</th><th>Marks</th><th>Comment</th></tr></thead><tbody>${f.criteria.map(c => `<tr><td>${esc(c.point)}</td><td><b>${c.awarded}</b>/${c.max}</td><td>${esc(c.comment || "")}</td></tr>`).join("")}</tbody></table>` : ""}
+    <div class="grid2">${(f.strengths || []).length ? `<div><h3>👍 What was good</h3><ul>${f.strengths.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}${(f.improve || []).length ? `<div><h3>🎯 To improve</h3><ul>${f.improve.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}</div>`;
+}
+function viewScenario(id) {
+  const s = SBY[id]; if (!s) return viewScenarioList();
+  const online = isStudentOnline();
+  const subs = MY_SUBS.filter(r => r.qid === id).sort((a, b) => a.attempt - b.attempt);
+  const left = 3 - subs.length, latest = subs[subs.length - 1];
+  const showModel = !online ? !!S.drafts["sc_done_" + id] : subs.length > 0;
+  main().innerHTML = `<div class="row between mb"><a class="linkbtn" href="#/scenario">← All scenario questions</a></div>
+  <div class="qgrid"><div class="card"><div class="muted small">${esc(s.area)}</div><h1 class="qtitle">${esc(s.title)}</h1><span class="chip d${s.diff}">${DIFF_NAME[s.diff]}</span>
+    <div class="prompt mt">${md(s.prompt)}</div>
+    <details ${subs.length ? "" : "open"}><summary><b>How it's marked</b></summary><ul>${s.rubric.map(c => `<li>${esc(c.point)} <b>(${c.marks})</b></li>`).join("")}</ul></details>
+    ${showModel ? `<div class="learn"><h3>Model answer</h3><p>${esc(s.model)}</p></div>` : `<p class="small muted">The model answer appears after your first submission.</p>`}</div>
+  <div><div class="card"><h3>Your answer</h3><textarea id="sc-ans" class="answer" placeholder="Write as you would answer in an interview…" ${online && left <= 0 ? "disabled" : ""}>${esc(S.drafts["sc_" + id] || "")}</textarea>
+    <div class="row between wrap"><span class="small muted" id="sc-wc">0 words</span><span class="small muted">${online ? `${Math.max(0, left)} of 3 attempts left` : "Self-check mode"}</span></div>
+    <div class="row gap mt"><button class="btn primary" id="sc-go" ${online && left <= 0 ? "disabled" : ""}>${online ? "Submit for marking" : "Compare with model answer"}</button></div><div id="sc-msg"></div></div>
+    <div id="sc-results">${subs.slice().reverse().map(r => `<div class="card"><div class="row between"><b>Attempt ${r.attempt}</b><span class="small muted">${r.ts ? new Date(r.ts).toLocaleString() : ""}</span></div>
+      ${feedbackHTML(r)}<details><summary class="small">Your answer</summary><p class="small pre">${esc(r.answer)}</p></details></div>`).join("")}</div></div></div>`;
+  const ta = $("#sc-ans"), wc = () => $("#sc-wc").textContent = (ta.value.trim().match(/\S+/g) || []).length + " words";
+  ta.oninput = () => { S.drafts["sc_" + id] = ta.value; save(); wc(); }; wc();
+  if ($("#sc-refresh")) $("#sc-refresh").onclick = async () => { const j = await Api.call("myScenario"); if (j.ok) { applyScenario(j.rows); renderHeader(); viewScenario(id); } };
+  $("#sc-go").onclick = async () => {
+    const ans = ta.value.trim();
+    if (ans.length < 40) { $("#sc-msg").innerHTML = `<div class="fb bad">Write a fuller answer: a few clear sentences at least.</div>`; return; }
+    if (!online) { S.drafts["sc_done_" + id] = 1; save(); viewScenario(id); return; }
+    $("#sc-go").disabled = true; $("#sc-msg").innerHTML = `<div class="fb">Marking your answer… (usually 5–20 seconds)</div>`;
+    const j = await Api.call("submitScenario", { qid: id, answer: ans });
+    if (!j.ok) { $("#sc-go").disabled = false; $("#sc-msg").innerHTML = `<div class="fb bad">${esc(j.error)}</div>`; return; }
+    MY_SUBS.push(j.submission); applyScenario(MY_SUBS); markDay(); delete S.drafts["sc_" + id];
+    if (j.submission.finalScore != null) celebrate(Math.round(2 * j.submission.finalScore), j.submission.finalScore >= 9);
+    checkBadges(); save(); renderHeader(); LB.push({ type: "scenario", qid: id, xp: j.submission.finalScore });
+    viewScenario(id);
+  };
+}
+
+// ---------- Big Data & DE lessons ----------
+const LEARN = D.learn || { lessons: [], interview: [] };
+const LBY = {}; LEARN.lessons.forEach(l => LBY[l.id] = l);
+function viewLearn(params) {
+  const tab = params.get("tab") || "lessons", track = params.get("track") || "";
+  const read = S.lessonRead || {};
+  const head = `<h1>📚 Big Data & Data Engineering</h1>
+  <div class="row gap wrap mb"><a class="tab ${tab === "lessons" ? "on" : ""}" href="#/learn">Concept lessons <span class="small">${Object.keys(read).length}/${LEARN.lessons.length}</span></a>
+    <a class="tab ${tab === "interview" ? "on" : ""}" href="#/learn?tab=interview">Interview Q&A (${LEARN.interview.length})</a>
+    <a class="tab" href="#/mcq?bank=bigdata">Big Data MCQs</a><a class="tab" href="#/mcq?bank=de">DE MCQs</a></div>`;
+  if (tab === "interview") {
+    const list = LEARN.interview.filter(x => !track || x.track === track);
+    main().innerHTML = head + `<div class="row gap mb"><select id="iq-track"><option value="">Both tracks</option>${["Big Data", "Data Engineering"].map(t => `<option ${t === track ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+    <div class="exps">${list.map(x => `<details class="card exp"><summary><b>${esc(x.q)}</b><div class="mt"><span class="chip">${esc(x.track)}</span> <span class="chip tchip">${esc(x.level)}</span></div></summary>
+      <div class="expbody"><h3>Model answer</h3><p>${esc(x.answer)}</p><p class="small muted"><b>What they're checking:</b> ${esc(x.checks)}</p></div></details>`).join("")}</div>`;
+    $("#iq-track").onchange = e => location.hash = "#/learn?tab=interview" + (e.target.value ? "&track=" + encodeURIComponent(e.target.value) : "");
+    return;
+  }
+  main().innerHTML = head + ["Big Data", "Data Engineering"].map(t => `<h2>${t}</h2><div class="grid worlds">${LEARN.lessons.filter(l => l.track === t).map((l, i) =>
+    `<a class="card world ${read[l.id] ? "done" : ""}" href="#/learn/${l.id}"><div class="wname">${i + 1}. ${esc(l.title)}</div><div class="small muted">${l.mins} min read</div>${read[l.id] ? `<div class="small good">✔ Read</div>` : `<div class="small">+3 XP</div>`}</a>`).join("")}</div>`).join("");
+}
+function viewLesson(id) {
+  const l = LBY[id]; if (!l) return viewLearn(new URLSearchParams());
+  const same = LEARN.lessons.filter(x => x.track === l.track), idx = same.indexOf(l), next = same[idx + 1];
+  const read = S.lessonRead || (S.lessonRead = {});
+  const bank = l.track === "Big Data" ? "bigdata" : "de";
+  main().innerHTML = `<div class="row between mb"><a class="linkbtn" href="#/learn">← All lessons</a><span class="muted small">${esc(l.track)} · lesson ${idx + 1} of ${same.length} · ${l.mins} min</span></div>
+  <article class="card lesson"><h1>${esc(l.title)}</h1>${l.sections.map(p => `<p>${md(p)}</p>`).join("")}
+    <div class="example"><b>Example</b><p>${md(l.example)}</p></div>
+    <h3>Key terms</h3><div>${l.terms.map(t => `<span class="chip tchip">${esc(t)}</span>`).join(" ")}</div>
+    <div class="tip"><b>💡 Interview tip</b><p>${md(l.tip)}</p></div>
+    <div class="row between wrap gap mt"><div class="row gap wrap">${(l.mcqTopics || []).map(t => `<a class="btn small" href="#/mcq?bank=${bank}&topic=${encodeURIComponent(t)}">Check yourself: ${esc(t)} MCQs →</a>`).join("")}</div>
+    ${read[id] ? `<span class="good small">✔ Read</span>` : `<button class="btn primary" id="ls-read">Mark as read (+3 XP)</button>`}</div></article>
+  ${next ? `<a class="btn mt" href="#/learn/${next.id}">Next: ${esc(next.title)} →</a>` : ""}`;
+  if ($("#ls-read")) $("#ls-read").onclick = () => { read[id] = today(); markDay(); toast("+3 XP", "good"); checkBadges(); save(); renderHeader(); LB.push(); viewLesson(id); };
+}
+
+// ---------- student dashboard extras ----------
+async function dashExtras() {
+  const host = $("#dash-extra"); if (!host) return;
+  const banks = Object.keys(BANKS).map(b => { const all = allMcq().filter(x => x.bank === b), c = all.filter(x => S.mcq[x.id]).length; return { b, c, n: all.length }; });
+  const sDone = Object.keys(S.scenario || {}).length, sAvg = sDone ? Math.round(10 * Object.values(S.scenario).reduce((a, b) => a + b, 0) / sDone) / 10 : 0;
+  host.innerHTML = `<h2>My progress</h2><div class="grid jd">
+    ${banks.map(x => `<a class="card jdc" href="#/mcq?bank=${x.b}"><div class="row between"><b>${BANKS[x.b]} MCQs</b><span>${x.c}/${x.n}</span></div><div class="minibar"><div style="width:${Math.round(100 * x.c / Math.max(1, x.n))}%"></div></div></a>`).join("")}
+    <a class="card jdc" href="#/scenario"><div class="row between"><b>Scenario answers</b><span>${sDone}/${SUBJ.length}</span></div><div class="minibar"><div style="width:${Math.round(100 * sDone / Math.max(1, SUBJ.length))}%"></div></div><div class="small muted">Average best score: ${sAvg}/10</div></a>
+    <a class="card jdc" href="#/learn"><div class="row between"><b>Lessons read</b><span>${Object.keys(S.lessonRead || {}).length}/${LEARN.lessons.length}</span></div><div class="minibar"><div style="width:${Math.round(100 * Object.keys(S.lessonRead || {}).length / Math.max(1, LEARN.lessons.length))}%"></div></div></a>
+  </div><div id="dash-board"></div>`;
+  if (!isStudentOnline()) return;
+  const j = await Api.call("board", {});
+  if (!j.ok || !$("#dash-board")) return;
+  const me = S.profile || {}, idx = j.rows.findIndex(r => r.name === me.name && String(me.roll || "").endsWith(r.rollTail));
+  $("#dash-board").innerHTML = `<h2>Leaderboard <a class="small" href="#/board">see all →</a></h2><div class="card"><p>${idx >= 0 ? `You're <b>#${idx + 1}</b> of ${j.rows.length} students.` : "Solve a question to appear on the leaderboard."}</p>
+    <table class="lb"><tbody>${j.rows.slice(0, 5).map((r, k) => `<tr class="${k === idx ? "me" : ""}"><td>${["🥇", "🥈", "🥉"][k] || k + 1}</td><td>${esc(r.name)}</td><td class="muted">${esc(r.batch)}</td><td><b>${r.xp}</b> XP</td></tr>`).join("")}</tbody></table></div>`;
+}
+
+// ---------- leaderboard ----------
+async function viewBoard(params) {
+  if (!Api.enabled()) {
+    main().innerHTML = `<h1>🏆 Leaderboard</h1><div class="card"><p>The class leaderboard isn't switched on for this copy of the portal.</p><h3>Your stats</h3><p>${totalXP()} XP · ${solvedCount()} solved · best OA ${oaBest()}%</p></div>`; return;
+  }
+  const batch = params.get("batch") || "";
+  main().innerHTML = `<h1>🏆 Leaderboard</h1><div class="row gap mb"><input id="lb-batch" placeholder="Filter by batch" value="${esc(batch)}"><button class="btn" id="lb-go">Apply</button></div><div id="lb-out" class="card">Loading…</div>`;
+  $("#lb-go").onclick = () => location.hash = "#/board?batch=" + encodeURIComponent($("#lb-batch").value.trim());
+  if (isStudentOnline()) await LB.send();
+  const j = await Api.call("board", { batch });
+  if (!j.ok) { $("#lb-out").innerHTML = `<p>${esc(j.error)}</p>`; return; }
+  const me = S.profile || {};
+  $("#lb-out").innerHTML = `<div class="tablewrap"><table class="lb"><thead><tr><th>#</th><th>Name</th><th>Batch</th><th>XP</th><th>Level</th><th>Solved</th><th>Hard</th><th>MCQ</th><th>Scenario avg</th><th>🔥</th><th>Best OA</th></tr></thead><tbody>
+    ${j.rows.map((r, k) => `<tr class="${!isFaculty() && r.name === me.name && String(me.roll || "").endsWith(r.rollTail) ? "me" : ""}"><td>${["🥇", "🥈", "🥉"][k] || k + 1}</td><td>${esc(r.name)}</td><td>${esc(r.batch)}</td><td><b>${r.xp}</b></td><td>${esc(r.level)}</td><td>${r.solved}</td><td>${r.hard}</td><td>${r.mcq}</td><td>${r.scenarioAvg || "-"}</td><td>${r.streak}</td><td>${r.oaBest}%</td></tr>`).join("")}</tbody></table></div>
+    <div class="small muted">${j.rows.length} students · updated ${new Date().toLocaleTimeString()}</div>`;
+}
+
+// ---------- faculty ----------
+let FAC = { rows: null };
+async function facRows(force) {
+  if (!FAC.rows || force) { const j = await Api.call("overview"); if (!j.ok) throw new Error(j.error); FAC.rows = j.rows; FAC.pending = j.pendingReview; }
+  return FAC.rows;
+}
+function ago(iso) { if (!iso) return "never"; const d = (Date.now() - new Date(iso)) / 864e5; return d < 1 ? "today" : d < 2 ? "yesterday" : Math.floor(d) + " days ago"; }
+function downloadCSV(name, rows) {
+  const csv = rows.map(r => r.map(v => { const s = String(v == null ? "" : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(",")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+async function viewFacOverview(params) {
+  main().innerHTML = `<h1>📋 Students</h1><div id="fo">Loading…</div>`;
+  let rows; try { rows = await facRows(params.get("refresh") === "1"); } catch (e) { $("#fo").innerHTML = `<div class="fb bad">${esc(e.message)}</div>`; return; }
+  const batch = params.get("batch") || "", s = (params.get("s") || "").toLowerCase(), sort = params.get("sort") || "xp";
+  const batches = Array.from(new Set(rows.map(r => r.batch))).filter(Boolean).sort();
+  let list = rows.filter(r => (!batch || r.batch === batch) && (!s || (r.name + " " + r.roll).toLowerCase().includes(s)));
+  list.sort((a, b) => sort === "name" ? String(a.name).localeCompare(b.name) : sort === "active" ? String(b.lastActive).localeCompare(String(a.lastActive)) : (b[sort] || 0) - (a[sort] || 0));
+  const act = rows.filter(r => r.activated), week = rows.filter(r => r.lastActive && (Date.now() - new Date(r.lastActive)) < 7 * 864e5);
+  const avg = k => act.length ? Math.round(act.reduce((a, r) => a + (r[k] || 0), 0) / act.length) : 0;
+  $("#fo").innerHTML = `<div class="stats4">
+    <div class="card"><b>${rows.length}</b><span>on roster</span></div><div class="card"><b>${act.length}</b><span>have logged in</span></div>
+    <div class="card"><b>${week.length}</b><span>active in last 7 days</span></div><div class="card"><b>${avg("solved")}</b><span>avg SQL solved</span></div>
+    <a class="card" href="#/f/review"><b>${FAC.pending || 0}</b><span>answers to review</span></a></div>
+  <div class="filters"><select id="fo-batch"><option value="">All batches</option>${batches.map(b => `<option ${b === batch ? "selected" : ""}>${esc(b)}</option>`).join("")}</select>
+    <select id="fo-sort">${[["xp", "Sort: XP"], ["solved", "SQL solved"], ["hard", "Hard solved"], ["mcq", "MCQs"], ["scenarioAvg", "Scenario avg"], ["active", "Last active"], ["name", "Name"]].map(([v, t]) => `<option value="${v}" ${v === sort ? "selected" : ""}>${t}</option>`).join("")}</select>
+    <input type="search" id="fo-s" placeholder="Search name or roll" value="${esc(params.get("s") || "")}"><button class="btn" id="fo-csv">⬇ Export CSV</button><a class="btn" href="#/f/overview?refresh=1">↻ Refresh</a></div>
+  <div class="tablewrap card"><table><thead><tr><th>Name</th><th>Roll</th><th>Batch</th><th>XP</th><th>SQL solved (E/M/H)</th><th>MCQ</th><th>Scenario</th><th>Hints</th><th>Solutions seen</th><th>OA best</th><th>Last active</th></tr></thead><tbody>
+  ${list.map(r => `<tr class="click" data-roll="${esc(r.roll)}"><td><b>${esc(r.name)}</b>${r.status === "disabled" ? ` <span class="chip">disabled</span>` : ""}</td><td>${esc(r.roll)}</td><td>${esc(r.batch)}</td>
+    <td>${r.activated ? r.xp : `<span class="muted">not logged in</span>`}</td><td>${r.solved} <span class="muted small">(${r.easy}/${r.medium}/${r.hard})</span></td><td>${r.mcq}</td>
+    <td>${r.scenarioDone ? r.scenarioAvg + "/10 <span class='muted small'>(" + r.scenarioDone + ")</span>" : "-"}</td><td>${r.hints}</td><td>${r.revealed}</td><td>${r.oaBest ? r.oaBest + "%" : "-"}</td><td>${ago(r.lastActive)}</td></tr>`).join("")}
+  </tbody></table></div><p class="small muted">Click a student to see their full progress.</p>`;
+  const nav = () => { const p = new URLSearchParams(); if ($("#fo-batch").value) p.set("batch", $("#fo-batch").value); if ($("#fo-sort").value !== "xp") p.set("sort", $("#fo-sort").value); if ($("#fo-s").value) p.set("s", $("#fo-s").value); location.hash = "#/f/overview?" + p.toString(); };
+  ["fo-batch", "fo-sort", "fo-s"].forEach(id => $("#" + id).onchange = nav);
+  $("#fo-csv").onclick = () => downloadCSV("sql-quest-students.csv", [["name", "roll", "batch", "xp", "level", "solved", "easy", "medium", "hard", "mcq", "scenario_avg", "scenario_done", "hints", "solutions_seen", "oa_best", "streak", "last_active"]]
+    .concat(list.map(r => [r.name, r.roll, r.batch, r.xp, r.level, r.solved, r.easy, r.medium, r.hard, r.mcq, r.scenarioAvg, r.scenarioDone, r.hints, r.revealed, r.oaBest, r.streak, r.lastActive])));
+  main().querySelectorAll("tr[data-roll]").forEach(tr => tr.onclick = () => location.hash = "#/f/student/" + encodeURIComponent(tr.dataset.roll));
+}
+async function viewFacStudent(roll) {
+  main().innerHTML = `<a class="linkbtn" href="#/f/overview">← All students</a><div id="fs">Loading…</div>`;
+  const j = await Api.call("student", { roll });
+  if (!j.ok) { $("#fs").innerHTML = `<div class="fb bad">${esc(j.error)}</div>`; return; }
+  const st = migrate(Object.assign(blank(), j.state || {})), solved = st.solved || {};
+  const solvedIds = Object.keys(solved).map(Number);
+  const mcqC = b => allMcq().filter(m => m.bank === b && st.mcq[m.id]).length;
+  $("#fs").innerHTML = `<div class="row between wrap"><h1>${esc(j.profile.name)} <span class="muted small">${esc(j.profile.roll)} · ${esc(j.profile.batch)}</span></h1>
+    <div class="row gap"><button class="btn small" id="fs-pin">Reset PIN</button><button class="btn small warn" id="fs-dis">${j.profile.status === "disabled" ? "Enable account" : "Disable account"}</button></div></div>
+  <div class="stats4"><div class="card"><b>${solvedIds.length}</b><span>SQL solved</span></div><div class="card"><b>${Object.keys(st.mcq).filter(k => st.mcq[k]).length}</b><span>MCQs correct</span></div>
+    <div class="card"><b>${j.submissions.length}</b><span>scenario answers</span></div><div class="card"><b>${Object.keys(st.revealed || {}).length}</b><span>solutions seen</span></div><div class="card"><b>${(st.oa || []).length}</b><span>OA attempts</span></div></div>
+  <h2>SQL progress by world</h2><div class="grid jd">${WORLDS.map(w => { const qs = QS.filter(q => q.world === w.name), d = qs.filter(q => solved[q.id]).length; return `<div class="card"><b>${esc(w.name)}</b><div class="minibar"><div style="width:${Math.round(100 * d / qs.length)}%"></div></div><span class="small">${d}/${qs.length}</span></div>`; }).join("")}</div>
+  <h2>MCQs</h2><p>${Object.keys(BANKS).map(b => `${BANKS[b]}: <b>${mcqC(b)}</b>/${allMcq().filter(m => m.bank === b).length}`).join(" · ")}</p>
+  <h2>SQL questions attempted</h2><div class="tablewrap card"><table><thead><tr><th>Q</th><th>Title</th><th>Level</th><th>Status</th><th>Wrong tries</th><th>Hints</th><th>XP</th><th>Their query</th></tr></thead><tbody>
+  ${QS.filter(q => solved[q.id] || st.attempts[q.id] || st.hints[q.id]).map(q => { const s = solved[q.id]; return `<tr><td>Q${q.id}</td><td>${esc(q.title)}</td><td><span class="chip d${q.diff}">${DIFF_NAME[q.diff]}</span></td>
+    <td>${s ? (s.revealed || st.revealed[q.id] ? "Solved after viewing solution" : "✔ Solved") : st.revealed[q.id] ? "Viewed solution" : "Trying"}</td><td>${st.attempts[q.id] || 0}</td><td>${st.hints[q.id] || 0}</td><td>${s ? s.xp : "-"}</td>
+    <td>${s && s.query ? `<details><summary class="small">view</summary><pre class="mono small">${esc(s.query)}</pre></details>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="8" class="muted">No attempts yet.</td></tr>`}</tbody></table></div>
+  <h2>Scenario answers</h2>${j.submissions.length ? j.submissions.map(r => `<div class="card"><div class="row between wrap"><b>${esc((SBY[r.qid] || {}).title || r.qid)}</b><span>Attempt ${r.attempt} · ${r.finalScore != null ? `<b>${r.finalScore}/10</b>` : r.status}</span></div><p class="small pre">${esc(r.answer)}</p><a class="small" href="#/f/review?id=${r.id}">Review / change mark →</a></div>`).join("") : `<p class="muted">None yet.</p>`}`;
+  $("#fs-pin").onclick = async function () { if (this.dataset.c !== "1") { this.dataset.c = "1"; this.textContent = "Click again to confirm"; return; } const r = await Api.call("resetPin", { roll }); toast(r.ok ? "PIN reset. The student sets a new PIN at next login." : esc(r.error), r.ok ? "good" : "bad"); this.textContent = "Reset PIN"; this.dataset.c = ""; };
+  $("#fs-dis").onclick = async () => { const r = await Api.call("setStatus", { roll, status: j.profile.status === "disabled" ? "active" : "disabled" }); if (r.ok) { FAC.rows = null; viewFacStudent(roll); } };
+}
+async function viewFacQuestions() {
+  main().innerHTML = `<h1>📈 Question analytics</h1><div id="fq">Loading…</div>`;
+  let rows; try { rows = (await facRows()).filter(r => r.activated); } catch (e) { $("#fq").innerHTML = `<div class="fb bad">${esc(e.message)}</div>`; return; }
+  const n = rows.length || 1;
+  const stats = QS.map(q => {
+    let solved = 0, tried = 0, wrong = 0, hints = 0, rev = 0;
+    rows.forEach(r => { const s = r.qsum || {}; const sv = (s.s || []).includes(q.id), a = (s.a || {})[q.id] || 0, h = (s.h || {})[q.id] || 0, rv = (s.r || []).includes(q.id);
+      if (sv || a || h || rv) tried++; if (sv) solved++; wrong += a; hints += h; if (rv) rev++; });
+    return { q, solved, tried, stuck: tried - solved, solveRate: tried ? Math.round(100 * solved / tried) : null, avgWrong: tried ? Math.round(10 * wrong / tried) / 10 : 0, hints, rev };
+  });
+  const hardest = stats.filter(x => x.tried >= 1).sort((a, b) => (a.solveRate - b.solveRate) || (b.avgWrong - a.avgWrong)).slice(0, 10);
+  $("#fq").innerHTML = `<p class="muted">Based on ${rows.length} students who have logged in. Use the "stuck" list to decide what to re-teach in class.</p>
+  <h2>Where students get stuck most</h2><div class="tablewrap card"><table><thead><tr><th>Q</th><th>Title</th><th>World</th><th>Tried</th><th>Solve rate</th><th>Avg wrong tries</th><th>Solutions seen</th></tr></thead><tbody>
+  ${hardest.map(x => `<tr><td><a href="#/q/${x.q.id}">Q${x.q.id}</a></td><td>${esc(x.q.title)}</td><td class="small">${esc(x.q.world)}</td><td>${x.tried}</td><td><b>${x.solveRate}%</b></td><td>${x.avgWrong}</td><td>${x.rev}</td></tr>`).join("") || `<tr><td colspan="7" class="muted">No attempts yet.</td></tr>`}</tbody></table></div>
+  <h2>By world</h2><div class="grid jd">${WORLDS.map(w => { const ws = stats.filter(x => x.q.world === w.name), sol = ws.reduce((a, x) => a + x.solved, 0), tot = ws.length * n; return `<div class="card"><b>${esc(w.name)}</b><div class="minibar"><div style="width:${Math.round(100 * sol / tot)}%"></div></div><span class="small">${Math.round(100 * sol / tot)}% of all possible solves</span></div>`; }).join("")}</div>
+  <h2>All questions</h2><div class="tablewrap card"><table><thead><tr><th>Q</th><th>Title</th><th>Level</th><th>Solved by</th><th>Tried</th><th>Solve rate</th><th>Avg wrong</th><th>Hints used</th><th>Solutions seen</th></tr></thead><tbody>
+  ${stats.map(x => `<tr><td><a href="#/q/${x.q.id}">Q${x.q.id}</a></td><td>${esc(x.q.title)}</td><td><span class="chip d${x.q.diff}">${DIFF_NAME[x.q.diff]}</span></td><td>${x.solved} <span class="muted small">(${Math.round(100 * x.solved / n)}%)</span></td><td>${x.tried}</td><td>${x.solveRate == null ? "-" : x.solveRate + "%"}</td><td>${x.avgWrong}</td><td>${x.hints}</td><td>${x.rev}</td></tr>`).join("")}</tbody></table></div>`;
+}
+async function viewFacReview(params) {
+  const status = params.get("status") || (params.get("id") ? "" : "ai_graded"), only = params.get("id");
+  main().innerHTML = `<h1>✅ Review scenario answers</h1><div class="row gap wrap mb">${[["ai_graded", "AI-marked (to review)"], ["pending", "Waiting for AI"], ["ai_error", "AI failed"], ["reviewed", "Reviewed"], ["", "All"]].map(([v, t]) => `<a class="tab ${v === status && !only ? "on" : ""}" href="#/f/review?status=${v}">${t}</a>`).join("")}</div><div id="fr">Loading…</div>`;
+  const j = await Api.call("submissions", { status: only ? "" : status });
+  if (!j.ok) { $("#fr").innerHTML = `<div class="fb bad">${esc(j.error)}</div>`; return; }
+  const rows = only ? j.rows.filter(r => r.id === only) : j.rows;
+  $("#fr").innerHTML = rows.length ? rows.map(r => { const q = SBY[r.qid] || { title: r.qid, rubric: [] }; return `<div class="card rv" data-id="${r.id}">
+    <div class="row between wrap"><div><b>${esc(r.name)}</b> <span class="muted small">${esc(r.roll)} · ${esc(r.batch)}</span></div><span class="small muted">${esc(q.title)} · attempt ${r.attempt} · ${r.ts ? new Date(r.ts).toLocaleString() : ""}</span></div>
+    <details><summary class="small">Question & rubric</summary><p class="small">${md(q.prompt || "")}</p><ul class="small">${(q.rubric || []).map(c => `<li>${esc(c.point)} (${c.marks})</li>`).join("")}</ul><p class="small"><b>Model:</b> ${esc(q.model || "")}</p></details>
+    <p class="pre">${esc(r.answer)}</p>${r.status !== "pending" ? feedbackHTML(r) : `<div class="fb">Waiting for AI marking.</div>`}
+    <div class="row gap wrap mt"><label class="inline">Final mark /10 <input type="number" min="0" max="10" step="0.5" class="rv-score" value="${r.finalScore != null ? r.finalScore : ""}"></label>
+      <input class="rv-comment grow" placeholder="Comment for the student (optional)" value="${esc(r.facultyComment || "")}"><button class="btn primary rv-save">Save mark</button><button class="btn rv-ai">Re-run AI</button></div></div>`; }).join("")
+    : `<p class="muted">Nothing here. 🎉</p>`;
+  $("#fr").querySelectorAll(".rv").forEach(card => {
+    const id = card.dataset.id;
+    card.querySelector(".rv-save").onclick = async () => { const r = await Api.call("grade", { id, score: card.querySelector(".rv-score").value, comment: card.querySelector(".rv-comment").value }); toast(r.ok ? "Mark saved ✔" : esc(r.error), r.ok ? "good" : "bad"); if (r.ok) { FAC.rows = null; card.style.opacity = .5; } };
+    card.querySelector(".rv-ai").onclick = async () => { toast("Re-running AI…"); const r = await Api.call("regrade", { id }); toast(r.ok ? "Done" : esc(r.error), r.ok ? "good" : "bad"); if (r.ok) viewFacReview(params); };
+  });
+}
+async function viewFacRoster() {
+  main().innerHTML = `<h1>👥 Roster & PINs</h1>
+  <div class="card"><h3>Add or update students</h3><p class="small muted">Paste one student per line: <code>roll, name, batch</code>. You can copy three columns straight from Excel or Google Sheets. Existing roll numbers get their name/batch updated; their PIN and progress are kept.</p>
+    <textarea id="ro-in" rows="8" placeholder="NST2027001, Riya Desai, 2027-A&#10;NST2027002, Arjun Mehta, 2027-A"></textarea><button class="btn primary mt" id="ro-go">Add to roster</button><div id="ro-msg"></div></div>
+  <div class="card"><h3>Students on the roster</h3><div id="ro-list">Loading…</div></div>`;
+  $("#ro-go").onclick = async () => {
+    const rows = $("#ro-in").value.split(/\n/).map(l => l.split(/\t|,/).map(x => x.trim())).filter(c => c[0]).map(c => ({ roll: c[0], name: c[1] || "", batch: c[2] || "" }));
+    const j = await Api.call("rosterAdd", { rows });
+    $("#ro-msg").innerHTML = j.ok ? `<div class="fb good">Added ${j.added}, updated ${j.updated}. Students can now log in with their roll number and choose a PIN.</div>` : `<div class="fb bad">${esc(j.error)}</div>`;
+    if (j.ok) { $("#ro-in").value = ""; FAC.rows = null; list(); }
+  };
+  const list = async () => {
+    let rows; try { rows = await facRows(); } catch (e) { $("#ro-list").innerHTML = esc(e.message); return; }
+    $("#ro-list").innerHTML = `<p class="small muted">${rows.length} students · ${rows.filter(r => r.activated).length} have set a PIN</p><div class="tablewrap"><table><thead><tr><th>Roll</th><th>Name</th><th>Batch</th><th>PIN set</th><th></th></tr></thead><tbody>
+      ${rows.map(r => `<tr><td>${esc(r.roll)}</td><td>${esc(r.name)}</td><td>${esc(r.batch)}</td><td>${r.activated ? "✔" : "-"}</td><td><button class="btn small" data-reset="${esc(r.roll)}">Reset PIN</button></td></tr>`).join("")}</tbody></table></div>`;
+    $("#ro-list").querySelectorAll("[data-reset]").forEach(b => b.onclick = async function () { if (this.dataset.c !== "1") { this.dataset.c = "1"; this.textContent = "Confirm?"; return; } const r = await Api.call("resetPin", { roll: b.dataset.reset }); toast(r.ok ? "PIN reset ✔" : esc(r.error), r.ok ? "good" : "bad"); FAC.rows = null; list(); });
+  };
+  list();
+}
+async function viewFacMCQ(params) {
+  const editId = params.get("edit") || "";
+  main().innerHTML = `<h1>➕ MCQ manager</h1><div class="card"><h3 id="fm-title">Add a new MCQ</h3>
+    <div class="row gap wrap"><select id="fm-bank">${Object.keys(BANKS).map(b => `<option value="${b}">${BANKS[b]}</option>`).join("")}</select><input id="fm-topic" placeholder="Topic (e.g. Joins)"></div>
+    <textarea id="fm-q" rows="2" placeholder="Question"></textarea>
+    ${[0, 1, 2, 3].map(k => `<div class="row gap"><input type="radio" name="fm-ans" value="${k}" ${k === 0 ? "checked" : ""} title="Correct answer"><input class="grow fm-opt" placeholder="Option ${String.fromCharCode(65 + k)}"></div>`).join("")}
+    <p class="small muted">Select the radio button next to the correct option.</p><textarea id="fm-exp" rows="2" placeholder="Explanation shown after answering"></textarea>
+    <label class="inline"><input type="checkbox" id="fm-active" checked> Visible to students</label>
+    <div class="row gap mt"><button class="btn primary" id="fm-save">Save MCQ</button>${editId ? `<a class="btn" href="#/f/mcq">Cancel edit</a>` : ""}</div><div id="fm-msg"></div></div>
+  <div class="card"><h3>MCQs added by faculty</h3><div id="fm-list">Loading…</div></div>`;
+  const j = await Api.call("mcqList"); const rows = j.ok ? j.rows : [];
+  CUSTOM_MCQ = rows;
+  if (editId) { const m = rows.find(r => r.id === editId); if (m) { $("#fm-title").textContent = "Edit MCQ"; $("#fm-bank").value = m.bank; $("#fm-topic").value = m.topic; $("#fm-q").value = m.q; main().querySelectorAll(".fm-opt").forEach((el, k) => el.value = m.opts[k]); main().querySelector(`input[name=fm-ans][value="${m.ans}"]`).checked = true; $("#fm-exp").value = m.explain; $("#fm-active").checked = m.active; } }
+  $("#fm-list").innerHTML = rows.length ? `<table><thead><tr><th>Bank</th><th>Topic</th><th>Question</th><th>Visible</th><th>By</th><th></th></tr></thead><tbody>${rows.map(r => `<tr><td>${BANKS[r.bank]}</td><td>${esc(r.topic)}</td><td>${esc(r.q)}</td><td>${r.active ? "✔" : "hidden"}</td><td class="small">${esc(r.author)}</td><td><a class="btn small" href="#/f/mcq?edit=${r.id}">Edit</a></td></tr>`).join("")}</tbody></table>` : `<p class="muted">None yet. The built-in bank has ${MCQS.length} MCQs.</p>`;
+  $("#fm-save").onclick = async () => {
+    const mcq = { id: editId || undefined, bank: $("#fm-bank").value, topic: $("#fm-topic").value.trim() || "Faculty", q: $("#fm-q").value.trim(), opts: Array.from(main().querySelectorAll(".fm-opt")).map(el => el.value.trim()),
+      ans: +main().querySelector("input[name=fm-ans]:checked").value, explain: $("#fm-exp").value.trim(), active: $("#fm-active").checked };
+    const r = await Api.call("mcqSave", { mcq });
+    $("#fm-msg").innerHTML = r.ok ? `<div class="fb good">Saved ✔ Students see it in the ${BANKS[mcq.bank]} bank.</div>` : `<div class="fb bad">${esc(r.error)}</div>`;
+    if (r.ok) setTimeout(() => { location.hash = "#/f/mcq?saved=" + Date.now(); }, 600);
+  };
+}
+async function viewFacTeam() {
+  main().innerHTML = `<h1>🔑 Team & password</h1>
+  <div class="card"><h3>Change my password</h3><div class="row gap wrap"><input type="password" id="ft-old" placeholder="Current password"><input type="password" id="ft-new" placeholder="New password (8+ characters)"><button class="btn" id="ft-chg">Update</button></div><div id="ft-msg"></div>
+    <button class="btn warn mt" id="ft-out">Log out</button></div>
+  ${isAdmin() ? `<div class="card"><h3>Faculty accounts</h3><div id="ft-list">Loading…</div>
+    <h3>Add a faculty member</h3><div class="row gap wrap"><input id="fa-user" placeholder="username"><input id="fa-name" placeholder="Full name"><input id="fa-pass" type="password" placeholder="Temporary password (8+)">
+    <select id="fa-role"><option value="faculty">Faculty</option><option value="admin">Admin</option></select><button class="btn primary" id="fa-go">Add</button></div><div id="fa-msg"></div></div>` : ""}`;
+  $("#ft-chg").onclick = async () => { const r = await Api.call("changePassword", { oldPassword: $("#ft-old").value, newPassword: $("#ft-new").value }); $("#ft-msg").innerHTML = `<div class="fb ${r.ok ? "good" : "bad"}">${r.ok ? "Password updated ✔" : esc(r.error)}</div>`; };
+  $("#ft-out").onclick = () => logout();
+  if (!isAdmin()) return;
+  const list = async () => { const j = await Api.call("facultyList"); $("#ft-list").innerHTML = j.ok ? `<table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Last login</th></tr></thead><tbody>${j.rows.map(r => `<tr><td>${esc(r.username)}</td><td>${esc(r.name)}</td><td>${esc(r.role)}</td><td>${r.lastLogin ? new Date(r.lastLogin).toLocaleString() : "never"}</td></tr>`).join("")}</tbody></table>` : esc(j.error); };
+  $("#fa-go").onclick = async () => { const r = await Api.call("facultyAdd", { username: $("#fa-user").value, name: $("#fa-name").value, password: $("#fa-pass").value, role: $("#fa-role").value }); $("#fa-msg").innerHTML = `<div class="fb ${r.ok ? "good" : "bad"}">${r.ok ? "Added ✔ Share the username and temporary password with them, and ask them to change it." : esc(r.error)}</div>`; if (r.ok) list(); };
+  list();
+}
 
 // ---------- layout ----------
 function renderHeader() {
+  renderNav();
+  if (needLogin()) { $("#hdr-stats").innerHTML = ""; return; }
+  if (isFaculty()) {
+    $("#hdr-stats").innerHTML = `<div class="lvl">👩‍🏫 Faculty${isAdmin() ? " · admin" : ""}</div><button class="linkbtn" id="btn-profile">${esc(SESSION.profile.name || SESSION.profile.username)}</button><button class="btn small" id="btn-logout">Log out</button>`;
+    $("#btn-profile").onclick = () => location.hash = "#/f/team"; $("#btn-logout").onclick = () => logout();
+    markNav(); return;
+  }
   const xp = totalXP(), lv = levelInfo(xp), st = streak();
   $("#hdr-stats").innerHTML = `
     <div class="lvl" title="Level ${lv.idx}">Lv ${lv.idx} · ${esc(lv.name)}</div>
     <div class="xpbar" title="${lv.next ? (lv.next - xp) + " XP to " + lv.nextName : "Max level"}"><div style="width:${lv.pct}%"></div><span>${xp} XP</span></div>
     <div class="streak" title="Daily streak">🔥 ${st}</div>
     <button class="linkbtn" id="btn-profile">${esc((S.profile && S.profile.name) || "Set up profile")}</button>`;
-  $("#btn-profile").onclick = profileModal;
-  document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("active", location.hash.startsWith(a.getAttribute("href")) || (location.hash === "" && a.getAttribute("href") === "#/home")));
+  $("#btn-profile").onclick = () => isStudentOnline() ? accountModal() : profileModal();
+  markNav();
+}
+function markNav() {
+  const h = location.hash.split("?")[0] || "#/home";
+  document.querySelectorAll("#nav a").forEach(a => { const href = a.getAttribute("href"); a.classList.toggle("active", h === href || (href !== "#/home" && h.startsWith(href + "/")) || (h === "#/q" && href === "#/list") || (h.startsWith("#/q/") && href === "#/list")); });
 }
 
 function profileModal(force) {
   const p = S.profile || {};
-  const lb = LB.enabled();
+  const lb = false;
   openModal(`<h2>${p.name ? "Your profile" : "Welcome to SQL Quest 👋"}</h2>
     <p class="muted">${lb ? "Your XP appears on the class leaderboard under this name." : "Progress is saved in this browser."}</p>
     <label>Full name<input id="pf-name" value="${esc(p.name || "")}" maxlength="40"></label>
@@ -291,9 +761,9 @@ function viewHome() {
       <div class="bigbar"><div style="width:${lv.pct}%"></div></div>
       <div class="row gap wrap mt">
         ${next ? `<a class="btn primary" href="#/q/${next.id}">▶ Continue: Q${next.id} ${esc(next.title)}</a>` : `<span class="pill good">All 100 solved 🏆</span>`}
-        <a class="btn" href="#/oa">⏱ Take a mock OA</a><a class="btn" href="#/mcq">📘 DBMS quiz</a></div></div>
+        <a class="btn" href="#/oa">⏱ Take a mock OA</a><a class="btn" href="#/scenario">✍️ Scenario questions</a></div></div>
     <div class="stats">
-      <div><b>${n}</b><span>/100 solved</span></div><div><b>${mcqCorrect()}</b><span>/${MCQS.length} MCQs</span></div>
+      <div><b>${n}</b><span>/100 SQL solved</span></div><div><b>${mcqCorrect()}</b><span>/${allMcq().length} MCQs</span></div>
       <div><b>🔥 ${streak()}</b><span>day streak</span></div><div><b>${Object.keys(S.badges).length}</b><span>badges</span></div></div>
   </section>
   <h2>Worlds <span class="muted small">Work top to bottom. Each world builds on the previous one.</span></h2>
@@ -308,7 +778,8 @@ function viewHome() {
     const qs = jdQs(c), d = qs.filter(q => S.solved[q.id]).length, pct = Math.round(100 * d / qs.length);
     return `<a class="card jdc" href="#/list?jd=${encodeURIComponent(c)}"><div class="row between"><b>${esc(c)}</b><span>${pct}%</span></div>
       <div class="minibar ${pct >= 80 ? "good" : ""}"><div style="width:${pct}%"></div></div><div class="small muted">${d}/${qs.length} questions</div></a>`;
-  }).join("")}</div>`;
+  }).join("")}</div><div id="dash-extra"></div>`;
+  dashExtras();
 }
 
 function viewList(params) {
@@ -484,28 +955,6 @@ function viewQuestion(id) {
   questionWorkspace(q, "practice", $("#ws"));
 }
 
-// ---------- MCQ quiz ----------
-function viewMCQ(params) {
-  const i = Math.max(0, Math.min(MCQS.length - 1, parseInt(params.get("i") || "0", 10) || 0));
-  const m = MCQS[i], answered = S.mcqTried[i];
-  main().innerHTML = `<h1>📘 DBMS & SQL theory <span class="muted small">${mcqCorrect()}/${MCQS.length} correct · +5 XP for each first correct answer</span></h1>
-  <div class="mcqnav">${MCQS.map((x, k) => `<a href="#/mcq?i=${k}" class="dot ${S.mcq[k] ? "ok" : S.mcqTried[k] ? "bad" : ""} ${k === i ? "cur" : ""}">${k + 1}</a>`).join("")}</div>
-  <div class="card mcq"><div class="muted small">${esc(m.topic)} · Question ${i + 1} of ${MCQS.length}</div><h2>${md(m.q)}</h2>
-    <div class="opts">${m.opts.map((o, k) => `<button class="opt" data-k="${k}">${String.fromCharCode(65 + k)}. ${md(o)}</button>`).join("")}</div>
-    <div id="mcq-fb"></div>
-    <div class="row gap mt">${i > 0 ? `<a class="btn" href="#/mcq?i=${i - 1}">← Prev</a>` : ""}${i < MCQS.length - 1 ? `<a class="btn primary" href="#/mcq?i=${i + 1}">Next →</a>` : ""}</div></div>`;
-  const reveal = (pick) => {
-    main().querySelectorAll(".opt").forEach(b => { const k = +b.dataset.k; b.disabled = true; if (k === m.ans) b.classList.add("right"); else if (k === pick) b.classList.add("wrong"); });
-    $("#mcq-fb").innerHTML = `<div class="fb ${pick === m.ans ? "good" : "bad"}">${pick === m.ans ? "✔ Correct." : "✘ Not quite."} ${md(m.explain)}</div>`;
-  };
-  if (answered !== undefined) reveal(answered);
-  main().querySelectorAll(".opt").forEach(b => b.onclick = () => {
-    const k = +b.dataset.k;
-    if (S.mcqTried[i] === undefined) { S.mcqTried[i] = k; if (k === m.ans) { S.mcq[i] = true; markDay(); toast("+5 XP", "good"); } else S.mcq[i] = false; checkBadges(); save(); renderHeader(); LB.push(); }
-    reveal(k);
-  });
-}
-
 // ---------- OA simulator ----------
 let OA = null;
 function pick(arr, n) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, n); }
@@ -519,7 +968,7 @@ function viewOA() {
     ${hist.length ? `<h2>Recent attempts</h2><div class="card">${hist.map(o => `<div class="row between"><span>${esc(o.date)}</span><span>${o.score}/100 · ${o.mins} min</span></div>`).join("")}</div>` : ""}`;
     $("#oa-start").onclick = () => {
       const pickD = d => pick(QS.filter(q => q.diff === d), 1)[0].id;
-      OA = { sql: [pickD("E"), pickD("M"), pickD("H")], mcq: pick(MCQS.map((_, k) => k), 10), solved: {}, mcqAns: {}, drafts: {}, start: Date.now(), dur: 30 * 60000, tab: "s0" };
+      OA = { sql: [pickD("E"), pickD("M"), pickD("H")], mcq: pick(MCQS.filter(m => m.bank === "dbms").map(m => m.id), 10), solved: {}, mcqAns: {}, drafts: {}, start: Date.now(), dur: 30 * 60000, tab: "s0" };
       OA.timer = setInterval(() => { const el = $("#oa-time"); if (!OA) return; const left = OA.dur - (Date.now() - OA.start); if (left <= 0) finishOA(); else if (el) el.textContent = mmss(left); }, 500);
       viewOA();
     };
@@ -531,8 +980,8 @@ function viewOA() {
   main().querySelectorAll(".tab").forEach(b => b.onclick = () => { OA.tab = b.dataset.t; viewOA(); });
   $("#oa-finish").onclick = function () { if (this.dataset.c !== "1") { this.dataset.c = "1"; this.textContent = "Click again to finish"; return; } finishOA(); };
   if (OA.tab === "m") {
-    $("#oa-body").innerHTML = OA.mcq.map((k, n) => { const m = MCQS[k]; return `<div class="card mcq"><div class="muted small">Q${n + 1}</div><h3>${md(m.q)}</h3><div class="opts">${m.opts.map((o, j) => `<button class="opt ${OA.mcqAns[k] === j ? "picked" : ""}" data-k="${k}" data-j="${j}">${String.fromCharCode(65 + j)}. ${md(o)}</button>`).join("")}</div></div>`; }).join("");
-    $("#oa-body").querySelectorAll(".opt").forEach(b => b.onclick = () => { OA.mcqAns[+b.dataset.k] = +b.dataset.j; viewOA(); });
+    $("#oa-body").innerHTML = OA.mcq.map((k, n) => { const m = mcqById(k); return `<div class="card mcq"><div class="muted small">Q${n + 1}</div><h3>${md(m.q)}</h3><div class="opts">${m.opts.map((o, j) => `<button class="opt ${OA.mcqAns[k] === j ? "picked" : ""}" data-k="${k}" data-j="${j}">${String.fromCharCode(65 + j)}. ${md(o)}</button>`).join("")}</div></div>`; }).join("");
+    $("#oa-body").querySelectorAll(".opt").forEach(b => b.onclick = () => { OA.mcqAns[b.dataset.k] = +b.dataset.j; viewOA(); });
   } else {
     const q = QBY[OA.sql[+OA.tab.slice(1)]];
     questionWorkspace(q, "oa", $("#oa-body"), { oaState: OA, onOAResult: (qq, pass) => { if (pass) { OA.solved[qq.id] = true; main().querySelectorAll(".tab")[OA.sql.indexOf(qq.id)].textContent = "SQL " + (OA.sql.indexOf(qq.id) + 1) + " ✔"; } } });
@@ -543,7 +992,7 @@ function finishOA() {
   if (!OA || OA.done) return;
   clearInterval(OA.timer);
   const sqlScore = OA.sql.filter(id => OA.solved[id]).length * 20;
-  const mcqScore = OA.mcq.filter(k => OA.mcqAns[k] === MCQS[k].ans).length * 4;
+  const mcqScore = OA.mcq.filter(k => OA.mcqAns[k] === mcqById(k).ans).length * 4;
   OA.done = true; OA.score = sqlScore + mcqScore; OA.mins = Math.min(30, Math.round((Date.now() - OA.start) / 60000));
   S.oa.push({ date: today(), score: OA.score, pct: OA.score, mins: OA.mins }); markDay(); checkBadges(); save(); renderHeader();
   LB.push({ type: "oa", qid: "", xp: 0, query: "OA score " + OA.score });
@@ -551,11 +1000,11 @@ function finishOA() {
 }
 function renderOAResult() {
   main().innerHTML = `<h1>OA result: ${OA.score}/100 ${OA.score >= 70 ? "✅" : ""}</h1>
-  <div class="card"><p>SQL: ${OA.sql.filter(id => OA.solved[id]).length}/3 correct · MCQ: ${OA.mcq.filter(k => OA.mcqAns[k] === MCQS[k].ans).length}/10 correct · Time used: ${OA.mins} min</p>
+  <div class="card"><p>SQL: ${OA.sql.filter(id => OA.solved[id]).length}/3 correct · MCQ: ${OA.mcq.filter(k => OA.mcqAns[k] === mcqById(k).ans).length}/10 correct · Time used: ${OA.mins} min</p>
   <p class="muted">${OA.score >= 70 ? "Good. Real OAs often have a 60-70% cut-off. Try another set to confirm it wasn't luck." : "Review below, then practise the weak worlds and retake the OA."}</p>
   <div class="row gap"><button class="btn primary" id="oa-again">New OA</button><a class="btn" href="#/home">Home</a></div></div>
   <h2>Review</h2>${OA.sql.map(id => { const q = QBY[id]; return `<div class="card"><b>${OA.solved[id] ? "✔" : "✘"} Q${q.id} ${esc(q.title)}</b> <span class="chip d${q.diff}">${DIFF_NAME[q.diff]}</span> <a class="small" href="#/q/${q.id}">practise it</a>${learnBlock(q)}</div>`; }).join("")}
-  <div class="card">${OA.mcq.map(k => { const m = MCQS[k], ok = OA.mcqAns[k] === m.ans; return `<p>${ok ? "✔" : "✘"} ${md(m.q)}<br><span class="small">Answer: <b>${md(m.opts[m.ans])}</b>. ${md(m.explain)}</span></p>`; }).join("")}</div>`;
+  <div class="card">${OA.mcq.map(k => { const m = mcqById(k), ok = OA.mcqAns[k] === m.ans; return `<p>${ok ? "✔" : "✘"} ${md(m.q)}<br><span class="small">Answer: <b>${md(m.opts[m.ans])}</b>. ${md(m.explain)}</span></p>`; }).join("")}</div>`;
   $("#oa-again").onclick = () => { OA = null; viewOA(); };
 }
 
@@ -578,26 +1027,6 @@ function viewBadges() {
   <div class="grid badges">${BADGES.map(b => `<div class="card badge ${S.badges[b.id] ? "got" : ""}"><div class="bicon">${b.icon}</div><b>${esc(b.name)}</b><div class="small muted">${esc(b.desc)}</div>${S.badges[b.id] ? `<div class="small good">Unlocked ${esc(S.badges[b.id])}</div>` : ""}</div>`).join("")}</div>
   <h2>Levels</h2><div class="card">${LEVELS.map((l, i) => `<div class="row between ${totalXP() >= l[0] ? "" : "muted"}"><span>Lv ${i + 1} · ${esc(l[1])}</span><span>${l[0]} XP</span></div>`).join("")}
   <p class="small muted">XP rules: Easy 10, Medium 20, Hard 30. Each hint costs 25% of a question's XP. Solving first try with no hints gives +5 bonus. Opening the solution gives 0 XP for that question. Each first-time correct MCQ gives +5. Each interview experience you mark as read gives +2.</p></div>`;
-}
-
-// ---------- leaderboard ----------
-async function viewBoard(params) {
-  if (!LB.enabled()) {
-    main().innerHTML = `<h1>🏆 Leaderboard</h1><div class="card"><p>The class leaderboard isn't switched on for this copy of the portal.</p><p class="muted small">Mentor: follow the setup guide (Google Sheet + Apps Script) and paste the web-app URL into <code>LEADERBOARD_URL</code> at the top of this file.</p>
-    <h3>Your stats</h3><p>${totalXP()} XP · ${solvedCount()} solved · best OA ${oaBest()}%</p></div>`; return;
-  }
-  const batch = params.get("batch") || "";
-  main().innerHTML = `<h1>🏆 Leaderboard</h1><div class="row gap mb"><input id="lb-batch" placeholder="Filter by batch" value="${esc(batch)}"><button class="btn" id="lb-go">Apply</button>${S.pendingSync ? `<button class="btn warn" id="lb-sync">Sync my progress</button>` : ""}</div><div id="lb-out" class="card">Loading…</div>`;
-  $("#lb-go").onclick = () => location.hash = "#/board?batch=" + encodeURIComponent($("#lb-batch").value.trim());
-  if ($("#lb-sync")) $("#lb-sync").onclick = () => LB.push().then(() => viewBoard(params));
-  try {
-    const j = await LB.board(batch);
-    if (!j.ok) throw new Error(j.error || "error");
-    const me = S.profile && S.profile.roll;
-    $("#lb-out").innerHTML = `<div class="tablewrap"><table class="lb"><thead><tr><th>#</th><th>Name</th><th>Batch</th><th>XP</th><th>Level</th><th>Solved</th><th>Hard</th><th>MCQ</th><th>🔥</th><th>Best OA</th></tr></thead><tbody>
-      ${j.rows.map((r, k) => `<tr class="${r.rollTail && me && me.endsWith(r.rollTail) && r.name === S.profile.name ? "me" : ""}"><td>${k < 3 ? ["🥇", "🥈", "🥉"][k] : k + 1}</td><td>${esc(r.name)}</td><td>${esc(r.batch)}</td><td><b>${r.xp}</b></td><td>${esc(r.level)}</td><td>${r.solved}</td><td>${r.hard}</td><td>${r.mcq}</td><td>${r.streak}</td><td>${r.oaBest}%</td></tr>`).join("")}</tbody></table></div>
-      <div class="small muted">Updated ${new Date().toLocaleTimeString()} · ${j.rows.length} students</div>`;
-  } catch (e) { $("#lb-out").innerHTML = `<p>Couldn't load the leaderboard right now. Check your internet connection. Your progress is saved on this device and will sync later.</p>`; }
 }
 
 // ---------- guide ----------
@@ -668,7 +1097,23 @@ function route() {
   const parts = path.split("/").filter(Boolean);
   window.scrollTo(0, 0);
   if (!$("#modal").dataset.locked) closeModal();
-  if (parts[0] === "q") viewQuestion(parseInt(parts[1], 10));
+  if (needLogin()) { renderHeader(); return viewLogin(); }
+  document.body.classList.remove("loggedout");
+  if (parts[0] === "f" && !isFaculty()) { location.hash = "#/home"; return; }
+  if (isFaculty() && (!parts[0] || parts[0] === "home")) { location.hash = "#/f/overview"; return; }
+  if (parts[0] === "f") {
+    const v = parts[1];
+    if (v === "student") viewFacStudent(decodeURIComponent(parts[2] || ""));
+    else if (v === "questions") viewFacQuestions();
+    else if (v === "review") viewFacReview(params);
+    else if (v === "roster") viewFacRoster();
+    else if (v === "mcq") viewFacMCQ(params);
+    else if (v === "team") viewFacTeam();
+    else viewFacOverview(params);
+  }
+  else if (parts[0] === "scenario") parts[1] ? viewScenario(parts[1]) : viewScenarioList();
+  else if (parts[0] === "learn") parts[1] ? viewLesson(parts[1]) : viewLearn(params);
+  else if (parts[0] === "q") viewQuestion(parseInt(parts[1], 10));
   else if (parts[0] === "list") viewList(params);
   else if (parts[0] === "mcq") viewMCQ(params);
   else if (parts[0] === "oa") viewOA();
@@ -683,10 +1128,17 @@ function route() {
 window.addEventListener("hashchange", route);
 $("#modal").addEventListener("click", e => { if (e.target.id === "modal" && !$("#modal").dataset.locked) closeModal(); });
 $("#modal-close").onclick = () => { if (!$("#modal").dataset.locked) closeModal(); };
+S = loadLocal(storeKey());
 route();
-Engine.ready().then(r => { $("#engine").textContent = r.ok ? (r.fallback ? "SQL engine ready (compatibility mode)" : "SQL engine ready") : "Engine error: " + r.error; $("#engine").className = r.ok ? "ok" : "bad"; });
-if (!S.profile || !S.profile.name) profileModal(true);
-else if (S.pendingSync) LB.push();
-checkBadges(); save();
-window.__SQLQ = { S: () => S, Engine, QS, compare, expected, decode };
+Engine.ready().then(r => {
+  ENGINE_OK = !!r.ok; ENGINE_MSG = r.ok ? (r.fallback ? "SQL engine ready (compatibility mode)" : "SQL engine ready") : "Engine error: " + r.error;
+  const el = $("#engine"); if (el) { el.textContent = ENGINE_MSG; el.className = r.ok ? "ok" : "bad"; }
+});
+if (!Api.enabled() && (!S.profile || !S.profile.name)) profileModal(true);
+if (SESSION) {
+  // refresh progress from the server on every visit (another device may have added progress)
+  Api.call("me").then(j => { if (j.ok && j.role === "student") { S = mergeState(S, j.state); S.profile = j.profile; save(); afterLogin().then(() => { checkBadges(); save(); route(); LB.push(); }); } else if (j.ok) afterLogin(); });
+}
+if (!SESSION) { checkBadges(); save(); }
+window.__SQLQ = { S: () => S, Engine, QS, compare, expected, decode, session: () => SESSION };
 })();
