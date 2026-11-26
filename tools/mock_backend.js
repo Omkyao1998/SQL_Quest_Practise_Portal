@@ -12,13 +12,14 @@ function makeContext(opts = {}) {
     appendRow(a) { this.rows.push(a.slice()); },
     setFrozenRows() {},
     getDataRange() { const s = this; return { getValues: () => s.rows.map(r => r.slice()) }; },
+    deleteRow(r) { this.rows.splice(r - 1, 1); },
     getRange(r, c, nr, nc) { const s = this; return { setValues(v) { for (let i = 0; i < v.length; i++) { const row = s.rows[r - 1 + i] || (s.rows[r - 1 + i] = []); for (let j = 0; j < v[i].length; j++) row[c - 1 + j] = v[i][j]; } } }; },
   };
   const ss = { getSheetByName: n => sheets[n] || null, insertSheet: n => (sheets[n] = new Sheet(n)) };
   const blob = (bytes, type) => ({ bytes: Buffer.from(bytes), getBytes() { return this.bytes; }, getDataAsString() { return this.bytes.toString("utf8"); } });
   const subjective = fs.readFileSync(path.join(ROOT, "data", "subjective.json"), "utf8");
   const ctx = {
-    console, JSON, Math, Date, String, Number, Object, Array, Error, encodeURIComponent,
+    console, JSON, Math, Date, String, Number, Object, Array, Error, encodeURIComponent, Boolean,
     SpreadsheetApp: { getActiveSpreadsheet: () => ss },
     PropertiesService: { getScriptProperties: () => ({ getProperty: k => props[k] || null, setProperty: (k, v) => { props[k] = v; } }) },
     CacheService: { getScriptCache: () => ({ get: k => cache[k] || null, put: (k, v) => { cache[k] = v; } }) },
@@ -34,6 +35,7 @@ function makeContext(opts = {}) {
       base64Decode: s => [...Buffer.from(s, "base64")],
       base64DecodeWebSafe: s => [...Buffer.from(s.replace(/-/g, "+").replace(/_/g, "/"), "base64")],
       getUuid: () => crypto.randomUUID(),
+      formatDate: (d, tz, fmt) => d.toISOString().slice(0, 10),
       newBlob: (d, type) => blob(typeof d === "string" ? Buffer.from(d, "utf8") : d, type),
       gzip: b => blob(zlib.gzipSync(b.getBytes())),
       ungzip: b => blob(zlib.gunzipSync(b.getBytes())),
@@ -41,6 +43,8 @@ function makeContext(opts = {}) {
     UrlFetchApp: {
       fetch(url, o) {
         if (url.indexOf("data/subjective.json") >= 0) return { getResponseCode: () => 200, getContentText: () => subjective };
+        const m = url.match(/data\/(questions|mcq)\.json$/);
+        if (m) { const txt = fs.readFileSync(path.join(ROOT, "data", m[1] + ".json"), "utf8"); return { getResponseCode: () => 200, getContentText: () => txt }; }
         if (aiBusy) return { getResponseCode: () => 429, getContentText: () => "busy" };
         const prompt = JSON.parse(o.payload).contents[0].parts[0].text;
         const answer = (prompt.split("<answer>")[1] || "").split("</answer>")[0].toLowerCase();

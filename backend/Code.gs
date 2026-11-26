@@ -349,6 +349,93 @@ function setup() {
   return "Setup complete. Admin user: " + u;
 }
 
+// ---------------- demo data (for testing; remove with clearDemo) ----------------
+const DEMO_FACULTY = [
+  { username: "demo.faculty1", name: "Priya Kulkarni (demo)", password: "DemoFaculty@1" },
+  { username: "demo.faculty2", name: "Rahul Verma (demo)", password: "DemoFaculty@2" },
+];
+const DEMO_PIN = "1234";
+const DEMO_NAMES = ["Aarav Sharma", "Diya Patel", "Kabir Nair", "Ananya Iyer", "Rohan Gupta", "Sneha Kulkarni", "Vikram Reddy", "Isha Joshi", "Arjun Mehta", "Meera Pillai", "Siddharth Rao", "Zara Khan"];
+
+/** Run once from the editor: creates demo faculty, gives DEMO students PIN 1234 and realistic practice progress. */
+function seedDemo() {
+  setup();
+  const qs = JSON.parse(UrlFetchApp.fetch(PORTAL_URL + "data/questions.json", { muteHttpExceptions: true }).getContentText());
+  const mcqs = JSON.parse(UrlFetchApp.fetch(PORTAL_URL + "data/mcq.json", { muteHttpExceptions: true }).getContentText());
+  const bank = scenarioBank_(), sids = Object.keys(bank);
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const XPB = { E: 10, M: 20, H: 30 }, LEVELS = [[0, "Rookie"], [80, "Query Cadet"], [200, "Filter Fighter"], [400, "Join Ninja"], [700, "Aggregation Ace"], [1100, "Window Wizard"], [1600, "SQL Sensei"], [2100, "Placement Ready"]];
+  const day = n => Utilities.formatDate(new Date(Date.now() - n * 864e5), "Asia/Kolkata", "yyyy-MM-dd");
+  return withLock_(() => {
+    const f = table_("Faculty");
+    DEMO_FACULTY.forEach(d => { if (!f.find("username", d.username)) f.append({ username: d.username, name: d.name, pass_hash: hash_("fac:" + d.username + ":" + d.password), role: "faculty", created: new Date() }); });
+    const t = table_("Students");
+    if (!t.all().some(r => String(r.roll).indexOf("DEMO") === 0)) {
+      DEMO_NAMES.forEach((n, i) => t.append({ roll: "DEMO" + String(i + 1).padStart(3, "0"), name: n + " (demo)", batch: i < 6 ? "2027-A" : "2027-B", status: "active", created: new Date() }));
+    }
+    const subs = table_("Submissions");
+    const demo = table_("Students").all().filter(r => String(r.roll).indexOf("DEMO") === 0);
+    demo.forEach((r, i) => {
+      const skill = 0.15 + 0.8 * (((i * 37) % 100) / 100);           // spread from beginners to toppers
+      const st = { profile: { roll: r.roll, name: r.name, batch: r.batch }, solved: {}, attempts: {}, hints: {}, revealed: {}, drafts: {}, mcq: {}, mcqTried: {}, oa: [], days: [], badges: {}, expRead: {}, lessonRead: {}, scenario: {} };
+      qs.forEach(q => {
+        const p = skill * (1.15 - q.id / 110);
+        if (rnd() < p) {
+          const h = rnd() < 0.25 ? 1 + Math.floor(rnd() * 2) : 0, wrong = rnd() < 0.35 ? 1 + Math.floor(rnd() * 2) : 0;
+          st.solved[q.id] = { xp: Math.round(XPB[q.diff] * Math.max(0.25, 1 - 0.25 * h)) + (wrong === 0 && h === 0 ? 5 : 0), hints: h, firstTry: wrong === 0, revealed: false, ts: Date.now(), query: "-- demo progress" };
+          if (h) st.hints[q.id] = h; if (wrong) st.attempts[q.id] = wrong;
+        } else if (rnd() < p * 0.6) {
+          st.attempts[q.id] = 1 + Math.floor(rnd() * 3);
+          if (st.attempts[q.id] >= 3 && rnd() < 0.4) st.revealed[q.id] = true;
+        }
+      });
+      mcqs.forEach(m => { if (rnd() < skill * 0.8) { const ok = rnd() < Math.min(0.95, skill + 0.25); st.mcqTried[m.id] = ok ? m.ans : (m.ans + 1) % 4; st.mcq[m.id] = ok; } });
+      const active = 1 + Math.floor(skill * 10); for (let d = 0; d < active; d++) st.days.push(day(d)); st.days.sort();
+      if (skill > 0.4) st.oa.push({ date: day(1), score: Math.round(skill * 90 / 4) * 4, pct: Math.round(skill * 90 / 4) * 4, mins: 25 });
+      ["bd1", "bd2", "bd4", "de1", "de2", "de4"].slice(0, Math.floor(skill * 6)).forEach(id => st.lessonRead[id] = day(0));
+      for (let e = 1; e <= Math.floor(skill * 12); e++) st.expRead[e] = day(0);
+      // scenario answers (graded with demo feedback); two answers left pending so real AI marking can be tested
+      const nAns = Math.floor(skill * 4);
+      for (let k = 0; k < nAns; k++) {
+        const qid = sids[(i * 3 + k * 5) % sids.length], q = bank[qid];
+        if (subs.all().some(x => x.roll === r.roll && x.qid === qid)) continue;
+        const pending = (i === 4 && k === 0) || (i === 9 && k === 0);
+        const score = Math.round(Math.min(10, Math.max(2, skill * 10 + (rnd() - 0.5) * 3)) * 2) / 2;
+        const fb = { criteria: q.rubric.map(c => ({ point: c.point, max: c.marks, awarded: Math.round(c.marks * score / 10 * 2) / 2, comment: "Demo feedback." })), strengths: ["(demo) Clear structure"], improve: ["(demo) Add one concrete example"], summary: "Demo feedback generated for testing the dashboards." };
+        subs.append({ id: Utilities.getUuid().slice(0, 8), ts: new Date(), roll: r.roll, name: r.name, batch: r.batch, qid: qid, area: q.area, attempt: 1,
+          answer: "(Demo answer) " + q.model.split(". ").slice(0, 3).join(". ") + ".", status: pending ? "pending" : "ai_graded",
+          ai_score: pending ? "" : score, ai_feedback: pending ? "" : JSON.stringify(fb), final_score: pending ? "" : score, faculty_score: "", faculty_comment: "", graded_by: "", graded_at: "" });
+        if (!pending) st.scenario[qid] = score;
+      }
+      // summary numbers, computed the same way the portal does
+      let xp = 0; Object.keys(st.solved).forEach(k => xp += st.solved[k].xp);
+      const mc = Object.keys(st.mcq).filter(k => st.mcq[k]).length;
+      xp += 5 * mc + 2 * Object.keys(st.expRead).length + 3 * Object.keys(st.lessonRead).length;
+      Object.keys(st.scenario).forEach(k => xp += Math.round(2 * st.scenario[k]));
+      let lv = LEVELS[0][1]; LEVELS.forEach(l => { if (xp >= l[0]) lv = l[1]; });
+      const ids = Object.keys(st.solved).map(Number), by = d => ids.filter(id => (qs[id - 1] || {}).diff === d).length;
+      [["first", 1], ["s10", 10], ["s25", 25], ["s50", 50]].forEach(b => { if (ids.length >= b[1]) st.badges[b[0]] = day(0); });
+      table_("Students").update(table_("Students").find("roll", r.roll), {
+        pin_hash: hash_("pin:" + r.roll + ":" + DEMO_PIN), last_active: new Date(Date.now() - (i % 4) * 864e5), state: writeState_(JSON.stringify(st)),
+        qsum: JSON.stringify({ s: ids, a: st.attempts, h: st.hints, r: Object.keys(st.revealed).map(Number) }),
+        xp: xp, level: lv, solved: ids.length, easy: by("E"), medium: by("M"), hard: by("H"), mcq: mc, streak: active, badges: Object.keys(st.badges).length,
+        oa_best: st.oa.length ? st.oa[0].pct : 0, hints: Object.keys(st.hints).reduce((a, k) => a + st.hints[k], 0), revealed: Object.keys(st.revealed).length, exp_read: Object.keys(st.expRead).length });
+      refreshScenarioAvg_(r.roll);
+    });
+    return "Demo ready: " + demo.length + " students (PIN " + DEMO_PIN + "), faculty: " + DEMO_FACULTY.map(d => d.username).join(", ");
+  });
+}
+
+/** Removes every DEMO student, the demo faculty, and their submissions and logs. */
+function clearDemo() {
+  return withLock_(() => {
+    const isDemo = r => String(r.roll).indexOf("DEMO") === 0;
+    const n = table_("Students").removeWhere(isDemo) + table_("Submissions").removeWhere(isDemo) + table_("Log").removeWhere(isDemo)
+      + table_("Faculty").removeWhere(r => DEMO_FACULTY.some(d => d.username === r.username));
+    return "Removed " + n + " demo rows";
+  });
+}
+
 // ---------------- helpers ----------------
 function sheet_(ss, name) {
   let sh = ss.getSheetByName(name);
@@ -371,6 +458,11 @@ function table_(name) {
     update: (r, patch) => {
       Object.keys(patch).forEach(k => r[k] = patch[k]);
       sh.getRange(r._row, 1, 1, head.length).setValues([head.map(h => r[h] === undefined ? "" : r[h])]);
+    },
+    removeWhere: (fn) => {            // deletes matching rows bottom-up so row numbers stay valid
+      const hit = rows.filter(fn).sort((a, b) => b._row - a._row);
+      hit.forEach(r => sh.deleteRow(r._row));
+      return hit.length;
     },
   };
 }

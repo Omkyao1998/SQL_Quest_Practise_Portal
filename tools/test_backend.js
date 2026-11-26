@@ -76,5 +76,24 @@ call(noAi, { action: "rosterAdd", token: a2.token, rows: [{ roll: "X1", name: "X
 const x = call(noAi, { action: "studentLogin", roll: "X1", pin: "1111" });
 ok(call(noAi, { action: "submitScenario", token: x.token, qid: "b3", answer: "3000 students, 80% present, 60% visit canteen, 1.5 purchases each, 75% UPI share gives about 1,770 transactions." }).submission.status === "pending", "no API key → submission waits for faculty");
 
+
+// ---- demo data ----
+const demo = makeContext();
+const msg = demo.seedDemo();
+ok(/Demo ready: 12 students/.test(msg), "seedDemo creates 12 demo students: " + msg);
+const df = call(demo, { action: "facultyLogin", username: "demo.faculty1", password: "DemoFaculty@1" });
+ok(df.ok && df.role === "faculty", "demo faculty can log in");
+const ds = call(demo, { action: "studentLogin", roll: "DEMO012", pin: "1234" });
+ok(ds.ok && !ds.first && ds.state && Object.keys(ds.state.solved).length > 0, "demo student logs in with PIN 1234 and has progress (" + (ds.state ? Object.keys(ds.state.solved).length : 0) + " solved)");
+const dov = call(demo, { action: "overview", token: df.token });
+ok(dov.rows.length === 12 && dov.rows.every(r => r.activated) && dov.rows.some(r => r.xp > 500) && dov.rows.some(r => r.scenarioAvg > 0), "overview shows varied demo progress");
+ok(call(demo, { action: "submissions", token: df.token, status: "pending" }).rows.length === 2, "two demo answers left pending for real AI marking");
+ok(call(demo, { action: "board", token: ds.token }).rows.length === 12, "leaderboard shows demo students");
+ok(demo.seedDemo() && call(demo, { action: "overview", token: df.token }).rows.length === 12, "running seedDemo twice doesn't duplicate students");
+const cm = demo.clearDemo();
+ok(/Removed \d+ demo rows/.test(cm) && call(demo, { action: "facultyLogin", username: "omkar", password: "ChangeMe@123" }).ok && !call(demo, { action: "facultyLogin", username: "demo.faculty1", password: "DemoFaculty@1" }).ok, "clearDemo removes demo data but keeps the admin: " + cm);
+const adm3 = call(demo, { action: "facultyLogin", username: "omkar", password: "ChangeMe@123" });
+ok(call(demo, { action: "overview", token: adm3.token }).rows.length === 0, "no demo students remain");
+
 console.log(fails ? fails + " FAILED" : "ALL PASSED");
 process.exit(fails ? 1 : 0);

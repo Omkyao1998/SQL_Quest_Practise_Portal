@@ -22,7 +22,16 @@ You need: a Google account, and (for AI marking) a free Gemini API key.
 
 1. In the toolbar's function dropdown, choose **setup**, then click **▶ Run**.
 2. Google asks for permission: **Review permissions → choose your account → Advanced → Go to project (unsafe) → Allow**. ("Unsafe" only means Google hasn't reviewed your own script.)
-3. When it finishes, your Sheet has 5 new tabs: **Students, Faculty, Submissions, CustomMCQ, Log**. A 5-minute timer is also created to mark any answers that were queued.
+3. When it finishes, your Sheet has 5 tabs: **Students, Faculty, Submissions, CustomMCQ, Log** (already-existing tabs are kept). A 5-minute timer is also created to mark any answers that were queued.
+
+## Step 2b (optional): Load demo data for testing
+
+In the same function dropdown choose **seedDemo → ▶ Run**. It adds:
+- 12 demo students **DEMO001 … DEMO012** (batches 2027-A and 2027-B), all with **PIN 1234**, with realistic practice progress so the dashboards, analytics and leaderboard have data
+- 2 demo faculty: **demo.faculty1 / DemoFaculty@1** and **demo.faculty2 / DemoFaculty@2**
+- some marked scenario answers to review, plus 2 left "waiting for AI" so you can watch real Gemini marking
+
+When you're done testing, run **clearDemo** to remove all of it (your own admin account stays).
 
 ## Step 3: Add the Gemini API key for AI marking (5 min)
 
@@ -80,6 +89,8 @@ The Google Sheet is the raw data. You can sort or filter it, but don't rename th
 Paste the new `Code.gs`, then **Deploy → Manage deployments → ✏ Edit → Version: New version → Deploy**. The URL stays the same.
 
 ## Troubleshooting
+
+- **"Who has access" doesn't offer "Anyone"** (common on college Google Workspace accounts, where admins allow only "Anyone within <college>"): students' browsers then can't reach the backend. Ask your Workspace admin to allow external access for Apps Script web apps, or create the Sheet and script with a personal Gmail account instead. Nothing else changes.
 
 - **Answers stay "Waiting for AI"**: check that `GEMINI_API_KEY` is set. Busy periods (many students submitting together) are queued and retried every 5 minutes. If a brand-new key keeps failing with quota errors, Google may require a billing account on that Google Cloud project before the free tier works, so check AI Studio's usage page.
 - **"Please log in again"**: tokens last 14 days; just log in again.
