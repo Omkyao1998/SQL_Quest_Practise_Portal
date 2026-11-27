@@ -11,10 +11,11 @@ function makeContext(opts = {}) {
   Sheet.prototype = {
     appendRow(a) { this.rows.push(a.slice()); },
     setFrozenRows() {},
-    getDataRange() { const s = this; return { getValues: () => s.rows.map(r => r.slice()) }; },
+    getDataRange() { const s = this; s.fullReads = (s.fullReads || 0) + 1; return { getValues: () => s.rows.map(r => r.slice()) }; },
     deleteRow(r) { this.rows.splice(r - 1, 1); },
     getLastColumn() { return this.rows.length ? Math.max(...this.rows.map(r => r.length)) : 0; },
-    getRange(r, c, nr, nc) { const s = this; return { setValues(v) { for (let i = 0; i < v.length; i++) { const row = s.rows[r - 1 + i] || (s.rows[r - 1 + i] = []); for (let j = 0; j < v[i].length; j++) row[c - 1 + j] = v[i][j]; } } }; },
+    getLastRow() { return this.rows.length; },
+    getRange(r, c, nr, nc) { const s = this; return { getValues() { const out = []; for (let i = 0; i < (nr || 1); i++) { const row = s.rows[r - 1 + i] || []; const o = []; for (let j = 0; j < (nc || 1); j++) o.push(row[c - 1 + j] === undefined ? "" : row[c - 1 + j]); out.push(o); } return out; }, setValues(v) { for (let i = 0; i < v.length; i++) { const row = s.rows[r - 1 + i] || (s.rows[r - 1 + i] = []); for (let j = 0; j < v[i].length; j++) row[c - 1 + j] = v[i][j]; } } }; },
   };
   const ss = { getSheetByName: n => sheets[n] || null, insertSheet: n => (sheets[n] = new Sheet(n)) };
   const blob = (bytes, type) => ({ bytes: Buffer.from(bytes), getBytes() { return this.bytes; }, getDataAsString() { return this.bytes.toString("utf8"); } });
@@ -23,7 +24,7 @@ function makeContext(opts = {}) {
     console, JSON, Math, Date, String, Number, Object, Array, Error, encodeURIComponent, Boolean,
     SpreadsheetApp: { getActiveSpreadsheet: () => ss },
     PropertiesService: { getScriptProperties: () => ({ getProperty: k => props[k] || null, setProperty: (k, v) => { props[k] = v; } }) },
-    CacheService: { getScriptCache: () => ({ get: k => cache[k] || null, put: (k, v) => { cache[k] = v; } }) },
+    CacheService: { getScriptCache: () => ({ get: k => (cache[k] && cache[k].exp > Date.now() ? cache[k].v : null), put: (k, v, sec) => { cache[k] = { v, exp: Date.now() + (sec || 600) * 1000 }; } }) },
     LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
     ScriptApp: { getProjectTriggers: () => [], newTrigger: () => ({ timeBased: () => ({ everyMinutes: () => ({ create() {} }) }) }) },
     ContentService: { MimeType: { JSON: "json" }, createTextOutput: s => ({ content: s, setMimeType() { return this; }, getContent() { return this.content; } }) },

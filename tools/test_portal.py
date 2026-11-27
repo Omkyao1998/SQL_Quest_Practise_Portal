@@ -29,7 +29,7 @@ async def main():
         await pg.goto(url); await pg.wait_for_selector("#wl-student")
         check("Faculty / Admin" in await pg.inner_text("main"), "welcome page shows student and faculty/admin buttons")
         await pg.click("#wl-faculty"); await pg.wait_for_selector(".loginbox h2")
-        check("isn't switched on" in await pg.inner_text("main"), "faculty button explains setup when no backend")
+        t = await pg.inner_text("main"); check("Logins aren't connected yet" in t and await pg.locator("#lg-user").count() == 1 and await pg.locator("main a[href^='https']").count() == 1, "faculty button shows a login page with a clear 'not connected' note, not a jump to GitHub")
         await pg.goto(url + "#/welcome"); await pg.click("#wl-student")
         await pg.fill("#pf-name", "Test Bot"); await pg.click("#pf-save"); await pg.wait_for_selector(".hero")
         await pg.wait_for_function("document.querySelector('#engine').className==='ok'", timeout=40000)

@@ -142,5 +142,20 @@ C.__sheets.Faculty.rows = [C.__sheets.Faculty.rows[0], ["boss", "Boss", "pub:x",
 C.setup();
 ok(!C.__sheets.Faculty.rows.some(r => r[0] === "omkar"), "setup doesn't create SETUP_ADMIN when an admin already exists");
 
+// ---- class-size load: saves must not read whole sheets ----
+const L = makeContext();
+const la = call(L, { action: "facultyLogin", username: "omkar", password: "ChangeMe@123" });
+call(L, { action: "rosterAdd", token: la.token, rows: Array.from({ length: 300 }, (_, i) => ({ roll: "L" + i, name: "Student " + i, batch: i % 2 ? "A" : "B" })) });
+const bigState = { solved: {}, note: "x".repeat(20000) };
+const lt = call(L, { action: "studentLogin", roll: "L150", pin: "1111" }).token;
+const st0 = L.__sheets.Students.fullReads || 0, lg0 = L.__sheets.Log.fullReads || 0, t0 = Date.now();
+for (let k = 0; k < 20; k++) call(L, { action: "saveState", token: lt, state: bigState, summary: { xp: k }, event: { type: "solve", qid: k } });
+ok((L.__sheets.Students.fullReads || 0) === st0 && (L.__sheets.Log.fullReads || 0) === lg0, "20 saves read one row each, never the whole Students or Log sheet");
+ok(L.__sheets.Students.rows.find(r => r[0] === "L150")[7] === 19 && L.__sheets.Log.rows.length > 20, "single-row save writes the right row and logs events");
+const b1 = call(L, { action: "board", token: lt }), r0 = L.__sheets.Students.fullReads;
+call(L, { action: "board", token: lt });
+ok(b1.rows.length === 1 && L.__sheets.Students.fullReads === r0, "leaderboard served from a 30-second cache");
+call(L, { action: "studentLogin", roll: "L7", pin: "2222" });
+ok(call(L, { action: "board", token: lt }).rows.length === 2, "cache refreshes when a new student joins");
 console.log(fails ? fails + " FAILED" : "ALL PASSED");
 process.exit(fails ? 1 : 0);

@@ -57,7 +57,7 @@ const ACTIONS = {
       let first = false;
       if (!r.pin_hash) {
         if (!/^\d{4,6}$/.test(pin)) throw new Error("First login: choose a 4 to 6 digit PIN");
-        t.update(r, { pin_hash: hash_("pin:" + roll + ":" + pin), last_active: new Date() }); first = true;
+        t.update(r, { pin_hash: hash_("pin:" + roll + ":" + pin), last_active: new Date() }); first = true; bumpBoard_();
       } else if (r.pin_hash !== hash_("pin:" + roll + ":" + pin)) {
         throw new Error("Wrong PIN. Forgot it? Ask your faculty to reset it.");
       } else t.update(r, { last_active: new Date() });
@@ -116,10 +116,10 @@ const ACTIONS = {
     const st = JSON.stringify(d.state || {}), sm = d.summary || {};
     if (st.length > 400000) throw new Error("Progress data too large");
     return withLock_(() => {
-      const t = table_("Students"), r = t.find("roll", s.u);
-      if (!r || r.status === "disabled") throw new Error("Your account is not active. Please log in again or contact your faculty.");
+      const r = rowByKey_("Students", s.u);            // reads one row, not the whole sheet: this runs on every save
+      if (!r || r.obj.status === "disabled") throw new Error("Your account is not active. Please log in again or contact your faculty.");
       const n = v => Math.max(0, Math.min(1e6, Number(v) || 0));
-      t.update(r, { state: writeState_(st), qsum: JSON.stringify(d.qsum || {}).slice(0, 45000), last_active: new Date(),
+      r.update({ state: writeState_(st), qsum: JSON.stringify(d.qsum || {}).slice(0, 45000), last_active: new Date(),
         xp: n(sm.xp), level: String(sm.level || "").slice(0, 30), solved: n(sm.solved), easy: n(sm.easy), medium: n(sm.medium), hard: n(sm.hard),
         mcq: n(sm.mcq), streak: n(sm.streak), badges: n(sm.badges), oa_best: n(sm.oaBest), hints: n(sm.hints), revealed: n(sm.revealed), exp_read: n(sm.expRead) });
       if (d.event && d.event.type) log_(s.u, d.event.type, JSON.stringify(d.event).slice(0, 2000));
@@ -129,11 +129,15 @@ const ACTIONS = {
 
   board(d) {
     auth_(d.token);
+    const cache = CacheService.getScriptCache(), ck = "board:" + (cache.get("boardgen") || "0") + ":" + String(d.batch || "").toLowerCase().slice(0, 30), hit = cache.get(ck);
+    if (hit) return JSON.parse(hit);                   // many students open the dashboard at once; 30 s is fresh enough
     const rows = table_("Students").all().filter(r => r.pin_hash && r.status !== "disabled" && (!d.batch || String(r.batch).toLowerCase() === String(d.batch).toLowerCase()));
     const out = rows.map(r => ({ rollTail: String(r.roll).slice(-3), name: r.name, batch: r.batch, xp: +r.xp || 0, level: r.level, solved: +r.solved || 0,
       hard: +r.hard || 0, mcq: +r.mcq || 0, streak: +r.streak || 0, oaBest: +r.oa_best || 0, scenarioAvg: +r.scenario_avg || 0 }));
     out.sort((a, b) => b.xp - a.xp || b.solved - a.solved || String(a.name).localeCompare(String(b.name)));
-    return { ok: true, rows: out.slice(0, 500) };
+    const res = { ok: true, rows: out.slice(0, 500) };
+    try { cache.put(ck, JSON.stringify(res), 30); } catch (e) { }
+    return res;
   },
 
   // ---- scenario questions ----
@@ -234,20 +238,20 @@ const ACTIONS = {
         if (cur) { t.update(cur, { name: clean_(x.name || cur.name, 60), batch: clean_(x.batch || cur.batch, 30) }); updated++; }
         else { t.append({ roll, name: clean_(x.name || roll, 60), batch: clean_(x.batch || "", 30), status: "active", created: new Date() }); added++; }
       });
-      log_(a.u, "admin", "roster upload: " + added + " added, " + updated + " updated");
+      bumpBoard_(); log_(a.u, "admin", "roster upload: " + added + " added, " + updated + " updated");
       return { ok: true, added, updated };
     });
   },
   resetPin(d) {
     const a = auth_(d.token, "faculty");
     const t = table_("Students"), r = t.find("roll", normRoll_(d.roll)); if (!r) throw new Error("Student not found");
-    t.update(r, { pin_hash: "" }); log_(r.roll, "pin_reset", "by " + a.u);
+    t.update(r, { pin_hash: "" }); bumpBoard_(); log_(r.roll, "pin_reset", "by " + a.u);
     return { ok: true };
   },
   setStatus(d) {
     auth_(d.token, "admin");
     const t = table_("Students"), r = t.find("roll", normRoll_(d.roll)); if (!r) throw new Error("Student not found");
-    t.update(r, { status: d.status === "disabled" ? "disabled" : "active" });
+    t.update(r, { status: d.status === "disabled" ? "disabled" : "active" }); bumpBoard_();
     return { ok: true };
   },
   // ---- admin panel ----
@@ -276,7 +280,7 @@ const ACTIONS = {
       const t = table_("Students"), r = t.find("roll", normRoll_(d.roll)); if (!r) throw new Error("Student not found");
       const name = clean_(String(d.name || "").trim(), 60); if (name.length < 2) throw new Error("Name is too short");
       t.update(r, { name, batch: clean_(String(d.batch || "").trim(), 30) });
-      log_(a.u, "admin", "edited student " + r.roll);
+      bumpBoard_(); log_(a.u, "admin", "edited student " + r.roll);
       return { ok: true };
     });
   },
@@ -291,13 +295,13 @@ const ACTIONS = {
         const set = hit.map(r => String(r.roll));
         const n = t.removeWhere(r => set.indexOf(String(r.roll)) >= 0);
         const sn = table_("Submissions").removeWhere(r => set.indexOf(String(r.roll)) >= 0);
-        log_(a.u, "admin", "deleted students " + set.join(", ") + " (" + sn + " scenario answers)");
+        bumpBoard_(); log_(a.u, "admin", "deleted students " + set.join(", ") + " (" + sn + " scenario answers)");
         return { ok: true, count: n };
       }
       const batch = clean_(String(d.batch || "").trim(), 30);
       if (op === "batch" && !batch) throw new Error("Type the new batch name");
       hit.forEach(r => t.update(r, op === "enable" ? { status: "active" } : op === "disable" ? { status: "disabled" } : op === "resetPin" ? { pin_hash: "" } : { batch }));
-      log_(a.u, "admin", op + " for " + hit.length + " students" + (op === "batch" ? " → " + batch : ""));
+      bumpBoard_(); log_(a.u, "admin", op + " for " + hit.length + " students" + (op === "batch" ? " → " + batch : ""));
       return { ok: true, count: hit.length };
     });
   },
@@ -529,6 +533,7 @@ function seedDemo() {
         oa_best: st.oa.length ? st.oa[0].pct : 0, hints: Object.keys(st.hints).reduce((a, k) => a + st.hints[k], 0), revealed: Object.keys(st.revealed).length, exp_read: Object.keys(st.expRead).length });
       refreshScenarioAvg_(r.roll);
     });
+    bumpBoard_();
     return "Demo ready: " + demo.length + " students (PIN " + DEMO_PIN + "), faculty: " + DEMO_FACULTY.map(d => d.username).join(", ");
   });
 }
@@ -539,6 +544,7 @@ function clearDemo() {
     const isDemo = r => String(r.roll).indexOf("DEMO") === 0;
     const n = table_("Students").removeWhere(isDemo) + table_("Submissions").removeWhere(isDemo) + table_("Log").removeWhere(isDemo)
       + table_("Faculty").removeWhere(r => DEMO_FACULTY.some(d => d.username === r.username));
+    bumpBoard_();
     return "Removed " + n + " demo rows";
   });
 }
@@ -574,6 +580,18 @@ function table_(name) {
   };
 }
 
+function bumpBoard_() { try { CacheService.getScriptCache().put("boardgen", String(Date.now()), 21600); } catch (e) { } }   // roster changed: drop cached leaderboards
+function rowByKey_(name, key) {                // one row by first-column key, reading only column A plus that row
+  const sh = sheet_(SpreadsheetApp.getActiveSpreadsheet(), name), head = SHEETS[name], n = sh.getLastRow();
+  if (n < 2) return null;
+  const col = sh.getRange(2, 1, n - 1, 1).getValues();
+  let row = -1; for (let i = 0; i < col.length; i++) if (String(col[i][0]) === String(key)) { row = i + 2; break; }
+  if (row < 0) return null;
+  const vals = sh.getRange(row, 1, 1, head.length).getValues()[0], obj = {};
+  head.forEach((h, j) => obj[h] = vals[j] === undefined ? "" : vals[j]);
+  return { obj, update: (patch) => { Object.keys(patch).forEach(k => obj[k] = patch[k]); sh.getRange(row, 1, 1, head.length).setValues([head.map(h => obj[h] === undefined ? "" : obj[h])]); } };
+}
+
 function token_(user, role) {
   const payload = Utilities.base64EncodeWebSafe(JSON.stringify({ u: user, r: role, exp: Date.now() + TOKEN_DAYS * 864e5 }));
   return payload + "." + sign_(payload);
@@ -606,7 +624,7 @@ function withLock_(fn) { const l = LockService.getScriptLock(); l.waitLock(20000
 function normRoll_(r) { return String(r || "").trim().toUpperCase().replace(/[^A-Z0-9_\-\/]/g, "").slice(0, 30); }
 function clean_(v, max) { return String(v == null ? "" : v).replace(/^[=+\-@]+/, "").slice(0, max); }   // never let text become a formula
 function safeParse_(s) { try { return s ? JSON.parse(s) : null; } catch (e) { return null; } }
-function log_(roll, type, detail) { table_("Log").append({ ts: new Date(), roll, type, detail: clean_(detail, 2000) }); }
+function log_(roll, type, detail) { sheet_(SpreadsheetApp.getActiveSpreadsheet(), "Log").appendRow([new Date(), roll, clean_(type, 40), clean_(detail, 2000)]); }   // append only; never reads the (growing) log
 function writeState_(str) {             // a Sheet cell holds max 50,000 characters; compress big states
   if (str.length < 45000) return str;
   const gz = Utilities.base64Encode(Utilities.gzip(Utilities.newBlob(str, "application/json")).getBytes());

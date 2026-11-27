@@ -227,7 +227,7 @@ const Api = {
     try {
       const r = await fetch(BACKEND(), { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) });
       j = await r.json();
-    } catch (e) { return { ok: false, offline: true, error: "Can't reach the server. Check your internet connection and try again." }; }
+    } catch (e) { return { ok: false, offline: true, error: navigator.onLine === false ? "You seem to be offline. Check your internet connection and try again." : "Can't reach the class server right now. Try again in a minute; if it keeps happening, tell your faculty or the portal admin." }; }
     if (!j.ok && /log in again|expired/i.test(j.error || "") && !/Login$/.test(action)) { toast("Your session ended. Please log in again.", "bad"); logout(); }
     return j;
   }
@@ -275,10 +275,10 @@ const LB = {
     if (!isStudentOnline()) return Promise.resolve();
     clearTimeout(syncTimer);
     if (event) return this.send(event);
-    return new Promise(res => { syncTimer = setTimeout(() => this.send().then(res), 1200); });
+    return new Promise(res => { syncTimer = setTimeout(() => this.send().then(res), 4000); });   // batch quick answers into one save
   },
   async send(event) {
-    clearTimeout(syncTimer);
+    clearTimeout(syncTimer); syncTimer = null;
     if (!isStudentOnline()) return { ok: true };
     const j = await Api.call("saveState", { state: slimState(), summary: summary(), qsum: qsum(), event: event || null });
     S.pendingSync = !j.ok; save();
@@ -286,6 +286,7 @@ const LB = {
     return j;
   }
 };
+document.addEventListener("visibilitychange", () => { if (document.hidden && syncTimer && isStudentOnline()) LB.send(); });   // save before the tab is hidden or closed
 async function afterLogin() {
   if (!SESSION) return;
   if (SESSION.role === "student") {
@@ -387,7 +388,7 @@ function viewWelcome() {
     <p>Practise the SQL, DBMS, Big Data and interview skills that companies test for <b>Data Analyst, Business Analyst, BI, Data Science and Data Engineering</b> roles, step by step and in a game-like way.</p>
     <div class="row gap wrap mt">${signedIn
       ? `<a class="btn primary big" href="${isAdmin() ? "#/admin" : isFaculty() ? "#/f/overview" : "#/home"}">Go to my dashboard →</a>`
-      : `<button class="btn primary big" id="wl-student">🎓 I'm a Student</button><button class="btn big" id="wl-faculty">👩‍🏫 Faculty / Admin</button>`}</div>
+      : `<button class="btn primary big" id="wl-student">🎓 I'm a Student</button><button class="btn big" id="wl-faculty">👩‍🏫 Faculty / Admin</button>`}</div>${!online && !signedIn ? `<p class="small muted mt">Faculty and admin logins switch on once the class server is connected.</p>` : ""}
   </section>
   <h2>What's inside</h2>
   <div class="grid features">${feats.map(f => `<div class="card feat"><div class="ficon">${f[0]}</div><b>${esc(f[1])}</b><p class="small muted">${esc(f[2])}</p></div>`).join("")}</div>
@@ -405,12 +406,13 @@ function viewWelcome() {
 function viewFacultyOff() {
   document.body.classList.add("loggedout");
   main().innerHTML = `<div class="loginwrap"><div class="card loginbox"><a class="linkbtn small" href="#/welcome">← Back</a>
-    <h2>👩‍🏫 Faculty login isn't switched on yet</h2>
-    <p>Faculty accounts, student logins and AI marking need the class backend: a Google Sheet with a small script, set up once by the portal admin (about 20 minutes).</p>
-    <p><a href="https://github.com/Omkyao1998/SQL_Quest_Practise_Portal/blob/main/docs/BACKEND_SETUP.md" target="_blank" rel="noopener">Open the setup guide ↗</a></p>
-    <p class="small muted">Until then, you can still explore everything students see: go back and choose "I'm a Student".</p></div></div>`;
+    <div class="brand big">SQL <span>Quest</span></div><h2>👩‍🏫 Faculty / Admin login</h2>
+    <div class="notice"><b>Logins aren't connected yet.</b> The portal admin still has to finish the one-time server setup (a Google Sheet with a small script). Until then nobody can log in, but students can practise everything without an account.</div>
+    <label>Username<input id="lg-user" disabled placeholder="Available after setup"></label><label>Password<input type="password" id="lg-pass" disabled></label>
+    <button class="btn primary wide" disabled>Log in</button>
+    <div class="row gap wrap mt"><a class="btn" href="#/welcome">← Back to the start page</a></div>
+    <p class="small muted mt">Are you the portal admin? <a href="https://github.com/Omkyao1998/SQL_Quest_Practise_Portal/blob/main/docs/BACKEND_SETUP.md" target="_blank" rel="noopener">Setup steps (opens GitHub in a new tab)</a></p></div></div>`;
 }
-
 // ---------- navigation ----------
 function renderNav() {
   const stu = [["#/home", "🏠 My Dashboard"], ["#/list", "🧩 SQL Practice (100)"], ["#/mcq", "📘 MCQ Quiz"], ["#/scenario", "✍️ Scenario Questions"], ["#/learn", "📚 Big Data & DE"],
@@ -639,7 +641,7 @@ async function viewFacStudent(roll) {
   const solvedIds = Object.keys(solved).map(Number);
   const mcqC = b => allMcq().filter(m => m.bank === b && st.mcq[m.id]).length;
   $("#fs").innerHTML = `<div class="row between wrap"><h1>${esc(j.profile.name)} <span class="muted small">${esc(j.profile.roll)} · ${esc(j.profile.batch)}</span></h1>
-    <div class="row gap"><button class="btn small" id="fs-pin">Reset PIN</button><button class="btn small warn" id="fs-dis">${j.profile.status === "disabled" ? "Enable account" : "Disable account"}</button></div></div>
+    <div class="row gap"><button class="btn small" id="fs-pin">Reset PIN</button>${isAdmin() ? `<button class="btn small warn" id="fs-dis">${j.profile.status === "disabled" ? "Enable account" : "Disable account"}</button>` : ""}</div></div>
   <div class="stats4"><div class="card"><b>${solvedIds.length}</b><span>SQL solved</span></div><div class="card"><b>${Object.keys(st.mcq).filter(k => st.mcq[k]).length}</b><span>MCQs correct</span></div>
     <div class="card"><b>${j.submissions.length}</b><span>scenario answers</span></div><div class="card"><b>${Object.keys(st.revealed || {}).length}</b><span>solutions seen</span></div><div class="card"><b>${(st.oa || []).length}</b><span>OA attempts</span></div></div>
   <h2>SQL progress by world</h2><div class="grid jd">${WORLDS.map(w => { const qs = QS.filter(q => q.world === w.name), d = qs.filter(q => solved[q.id]).length; return `<div class="card"><b>${esc(w.name)}</b><div class="minibar"><div style="width:${Math.round(100 * d / qs.length)}%"></div></div><span class="small">${d}/${qs.length}</span></div>`; }).join("")}</div>
@@ -650,7 +652,7 @@ async function viewFacStudent(roll) {
     <td>${s && s.query ? `<details><summary class="small">view</summary><pre class="mono small">${esc(s.query)}</pre></details>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="8" class="muted">No attempts yet.</td></tr>`}</tbody></table></div>
   <h2>Scenario answers</h2>${j.submissions.length ? j.submissions.map(r => `<div class="card"><div class="row between wrap"><b>${esc((SBY[r.qid] || {}).title || r.qid)}</b><span>Attempt ${r.attempt} · ${r.finalScore != null ? `<b>${r.finalScore}/10</b>` : r.status}</span></div><p class="small pre">${esc(r.answer)}</p><a class="small" href="#/f/review?id=${r.id}">Review / change mark →</a></div>`).join("") : `<p class="muted">None yet.</p>`}`;
   $("#fs-pin").onclick = async function () { if (this.dataset.c !== "1") { this.dataset.c = "1"; this.textContent = "Click again to confirm"; return; } const r = await Api.call("resetPin", { roll }); toast(r.ok ? "PIN reset. The student sets a new PIN at next login." : esc(r.error), r.ok ? "good" : "bad"); this.textContent = "Reset PIN"; this.dataset.c = ""; };
-  $("#fs-dis").onclick = async () => { const r = await Api.call("setStatus", { roll, status: j.profile.status === "disabled" ? "active" : "disabled" }); if (r.ok) { FAC.rows = null; viewFacStudent(roll); } };
+  if ($("#fs-dis")) $("#fs-dis").onclick = async () => { const r = await Api.call("setStatus", { roll, status: j.profile.status === "disabled" ? "active" : "disabled" }); if (r.ok) { FAC.rows = null; viewFacStudent(roll); } else toast(esc(r.error), "bad"); };
 }
 async function viewFacQuestions() {
   main().innerHTML = `<h1>📈 Question analytics</h1><div id="fq">Loading…</div>`;
